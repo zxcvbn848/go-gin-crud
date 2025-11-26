@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -19,6 +20,9 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
+		// 自動移除 Bearer
+		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
 		// 解析 Token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
