@@ -7,6 +7,6 @@
 - [x] 全套 CRUD
   - [x] User
   - [x] Product
-  - [ ] Posts
+  - [x] Posts
 - [ ] RBAC 權限角色
 - [ ] 服務部署（Docker）
