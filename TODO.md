@@ -6,7 +6,7 @@
 - [x] 分頁搜尋 API
 - [x] 全套 CRUD
   - [x] User
-  - [ ] Product
+  - [x] Product
   - [ ] Posts
 - [ ] RBAC 權限角色
 - [ ] 服務部署（Docker）
