@@ -334,7 +334,7 @@
 			]
 		},
 		{
-			"name": "User (需先登入)",
+			"name": "Users (需先登入)",
 			"item": [
 				{
 					"name": "Create a User",
@@ -439,13 +439,13 @@
 					"response": []
 				},
 				{
-					"name": "Delete a Users",
+					"name": "Delete a User",
 					"request": {
 						"method": "DELETE",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"title\": \"新書名\",\n  \"author\": \"新作者\"\n}",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -459,6 +459,174 @@
 							],
 							"path": [
 								"users",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{access_token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Products (需先登入)",
+			"item": [
+				{
+					"name": "Create a Product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"iPhone 15 Pro\",\n  \"description\": \"最新款 iPhone，配備 A17 Pro 晶片\",\n  \"price\": 35900.00,\n  \"stock\": 50\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/products",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/products?page=1&page_size=10&search=",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "page_size",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a Product",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/products/1",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"products",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update a Product",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"iPhone 15 Pro Max\",\n  \"price\": 39900.00,\n  \"stock\": 45\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/products/1",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"products",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/products/1",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"products",
 								"1"
 							]
 						}

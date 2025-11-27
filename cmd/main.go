@@ -19,11 +19,13 @@ func main() {
 	database.DB.AutoMigrate(&models.User{})
 	database.DB.AutoMigrate(&models.RefreshToken{})
 	database.DB.AutoMigrate(&models.BlacklistToken{})
+	database.DB.AutoMigrate(&models.Product{})
 
 	// 註冊路由
 	routes.RegisterBookRoutes(r)
 	authService := routes.RegisterAuthRoutes(r)
 	routes.RegisterUserRoutes(r, authService)
+	routes.RegisterProductRoutes(r, authService)
 
 	r.Run(":8080")
 }
