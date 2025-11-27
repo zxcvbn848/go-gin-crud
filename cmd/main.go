@@ -22,7 +22,8 @@ func main() {
 
 	// 註冊路由
 	routes.RegisterBookRoutes(r)
-	routes.RegisterAuthRoutes(r)
+	authService := routes.RegisterAuthRoutes(r)
+	routes.RegisterUserRoutes(r, authService)
 
 	r.Run(":8080")
 }

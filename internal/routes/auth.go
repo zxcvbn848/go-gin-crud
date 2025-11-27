@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterAuthRoutes(r *gin.Engine) {
+func RegisterAuthRoutes(r *gin.Engine) service.AuthService {
 	// 初始化依賴
 	userRepo := repository.NewUserRepository()
 	authRepo := repository.NewAuthRepository()
@@ -25,4 +25,6 @@ func RegisterAuthRoutes(r *gin.Engine) {
 	auth.Use(middleware.AuthMiddleware(authService))
 	auth.POST("/logout", authController.Logout)
 	auth.GET("/profile", authController.Profile)
+
+	return authService
 }
