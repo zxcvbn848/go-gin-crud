@@ -22,8 +22,8 @@ func main() {
 	database.DB.AutoMigrate(&models.Product{})
 
 	// 註冊路由
-	routes.RegisterBookRoutes(r)
 	authService := routes.RegisterAuthRoutes(r)
+	routes.RegisterBookRoutes(r, authService)
 	routes.RegisterUserRoutes(r, authService)
 	routes.RegisterProductRoutes(r, authService)
 
