@@ -1,9 +1,9 @@
 package main
 
 import (
-	"go-gin-crud/database"
-	"go-gin-crud/models"
-	"go-gin-crud/routes"
+	"go-gin-crud/internal/database"
+	"go-gin-crud/internal/database/models"
+	"go-gin-crud/internal/routes"
 
 	"github.com/gin-gonic/gin"
 )
