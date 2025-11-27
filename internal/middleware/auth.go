@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"go-gin-crud/internal/service"
 	"net/http"
 	"strings"
 
@@ -10,7 +11,7 @@ import (
 
 var accessKey = []byte("ACCESS_SECRET") // 與 service 中的 accessKey 保持一致
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(authService service.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		// 取得 Header 的 Authorization: Bearer <token>
@@ -23,6 +24,14 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// 自動移除 Bearer
 		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+		// 檢查 token 是否在黑名單中
+		isBlacklisted, err := authService.IsTokenBlacklisted(tokenString)
+		if err != nil || isBlacklisted {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token 已失效"})
+			c.Abort()
+			return
+		}
 
 		// 解析 Token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
