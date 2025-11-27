@@ -22,6 +22,7 @@ func RegisterAuthRoutes(r *gin.Engine) {
 	r.POST("/refresh", authController.Refresh)
 
 	auth := r.Group("/auth")
-	auth.Use(middleware.AuthMiddleware())
+	auth.Use(middleware.AuthMiddleware(authService))
+	auth.POST("/logout", authController.Logout)
 	auth.GET("/profile", authController.Profile)
 }

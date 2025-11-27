@@ -4,6 +4,7 @@ import (
 	"go-gin-crud/internal/dto"
 	"go-gin-crud/internal/service"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -75,6 +76,26 @@ func (ctrl *AuthController) Refresh(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"access_token": token})
+}
+
+func (ctrl *AuthController) Logout(c *gin.Context) {
+	// 從 Header 取得 token
+	tokenString := c.GetHeader("Authorization")
+	if tokenString == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "缺少 Token"})
+		return
+	}
+
+	// 移除 Bearer 前綴
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+	// 將 token 加入黑名單
+	if err := ctrl.authService.Logout(tokenString); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "登出成功"})
 }
 
 func (ctrl *AuthController) Profile(c *gin.Context) {

@@ -18,6 +18,8 @@ type AuthService interface {
 	Register(email, password string) error
 	Login(req dto.LoginRequest) (string, string, error)
 	Refresh(refreshToken string) (string, error)
+	Logout(accessToken string) error
+	IsTokenBlacklisted(token string) (bool, error)
 	GetUserProfile(userID uint) (*models.User, error)
 }
 
@@ -130,6 +132,54 @@ func (s *authService) Refresh(refreshToken string) (string, error) {
 	}
 
 	return newAccessToken, nil
+}
+
+func (s *authService) Logout(accessToken string) error {
+	// 解析 token 獲取過期時間
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
+		return accessKey, nil
+	})
+	if err != nil {
+		return errors.New("token 無效")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return errors.New("token claims 無效")
+	}
+
+	// 獲取 user_id
+	userIDFloat, ok := claims["user_id"].(float64)
+	if !ok {
+		return errors.New("token user_id 無效")
+	}
+	userID := uint(userIDFloat)
+
+	// 獲取過期時間
+	exp, ok := claims["exp"].(float64)
+	if !ok {
+		return errors.New("token 過期時間無效")
+	}
+
+	expiresAt := time.Unix(int64(exp), 0)
+
+	// 將 token 加入黑名單
+	blacklistToken := &models.BlacklistToken{
+		Token:     accessToken,
+		ExpiresAt: expiresAt,
+		CreatedAt: time.Now(),
+	}
+
+	if err := s.authRepo.SaveBlacklistToken(blacklistToken); err != nil {
+		return err
+	}
+
+	// 刪除該用戶的所有 refresh token
+	return s.authRepo.DeleteRefreshTokensByUserID(userID)
+}
+
+func (s *authService) IsTokenBlacklisted(token string) (bool, error) {
+	return s.authRepo.IsTokenBlacklisted(token)
 }
 
 func (s *authService) GetUserProfile(userID uint) (*models.User, error) {
