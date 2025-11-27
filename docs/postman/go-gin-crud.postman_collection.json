@@ -42,12 +42,26 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/books",
+							"raw": "{{host}}/books?page=1&page_size=10&search=",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
 								"books"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "page_size",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								}
 							]
 						}
 					},
@@ -233,6 +247,43 @@
 							"path": [
 								"auth",
 								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/auth/logout",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"logout"
 							]
 						}
 					},
