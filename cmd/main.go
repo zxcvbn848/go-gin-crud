@@ -1,9 +1,9 @@
 package main
 
 import (
-	"go-gin-crud/database"
-	"go-gin-crud/models"
-	"go-gin-crud/routes"
+	"go-gin-crud/internal/database"
+	"go-gin-crud/internal/database/models"
+	"go-gin-crud/internal/routes"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +17,7 @@ func main() {
 	// 自動建表
 	database.DB.AutoMigrate(&models.Book{})
 	database.DB.AutoMigrate(&models.User{})
+	database.DB.AutoMigrate(&models.RefreshToken{})
 
 	// 註冊路由
 	routes.RegisterBookRoutes(r)

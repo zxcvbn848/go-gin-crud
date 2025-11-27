@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"go-gin-crud/database"
-	"go-gin-crud/models"
+	"go-gin-crud/internal/database"
+	"go-gin-crud/internal/database/models"
 
 	"github.com/gin-gonic/gin"
 )
