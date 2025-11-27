@@ -8,5 +8,5 @@
   - [x] User
   - [x] Product
   - [x] Posts
-- [ ] RBAC 權限角色
+- [x] RBAC 權限角色
 - [ ] 服務部署（Docker）

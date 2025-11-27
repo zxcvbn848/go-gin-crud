@@ -20,9 +20,12 @@ func RegisterUserRoutes(r *gin.Engine, authService service.AuthService) {
 	users.Use(middleware.AuthMiddleware(authService))
 
 	// 註冊路由
-	users.POST("", userController.CreateUser)
 	users.GET("", userController.GetUsers)
 	users.GET("/:id", userController.GetUser)
-	users.PUT("/:id", userController.UpdateUser)
-	users.DELETE("/:id", userController.DeleteUser)
+
+	adminUsers := users.Group("")
+	adminUsers.Use(middleware.RoleMiddleware("admin"))
+	adminUsers.POST("", userController.CreateUser)
+	adminUsers.PUT("/:id", userController.UpdateUser)
+	adminUsers.DELETE("/:id", userController.DeleteUser)
 }

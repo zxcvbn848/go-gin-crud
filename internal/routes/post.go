@@ -20,10 +20,13 @@ func RegisterPostRoutes(r *gin.Engine, authService service.AuthService) {
 	posts.Use(middleware.AuthMiddleware(authService))
 
 	// 註冊路由
-	posts.POST("", postController.CreatePost)
 	posts.GET("", postController.GetPosts)
 	posts.GET("/:id", postController.GetPost)
-	posts.PUT("/:id", postController.UpdatePost)
-	posts.DELETE("/:id", postController.DeletePost)
+
+	adminPosts := posts.Group("")
+	adminPosts.Use(middleware.RoleMiddleware("admin"))
+	adminPosts.POST("", postController.CreatePost)
+	adminPosts.PUT("/:id", postController.UpdatePost)
+	adminPosts.DELETE("/:id", postController.DeletePost)
 }
 
