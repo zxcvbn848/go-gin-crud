@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"go-gin-crud/internal/dto"
 	"go-gin-crud/internal/service"
 	"net/http"
 
@@ -22,11 +23,6 @@ type RegisterRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
 func (ctrl *AuthController) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -35,8 +31,8 @@ func (ctrl *AuthController) Register(c *gin.Context) {
 	}
 
 	if err := ctrl.authService.Register(req.Email, req.Password); err != nil {
-		if err.Error() == "Email 已存在" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Email 已存在"})
+		if err.Error() == "email 已存在" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "email 已存在"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "註冊失敗"})
@@ -47,21 +43,38 @@ func (ctrl *AuthController) Register(c *gin.Context) {
 }
 
 func (ctrl *AuthController) Login(c *gin.Context) {
-	var req LoginRequest
+	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "資料格式錯誤"})
 		return
 	}
 
-	token, err := ctrl.authService.Login(req.Email, req.Password)
+	accessToken, refreshToken, err := ctrl.authService.Login(req)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token": token,
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
 	})
+}
+
+func (ctrl *AuthController) Refresh(ctx *gin.Context) {
+	refreshToken := ctx.PostForm("refresh_token")
+	if refreshToken == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "refresh_token 為必填"})
+		return
+	}
+
+	token, err := ctrl.authService.Refresh(refreshToken)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"access_token": token})
 }
 
 func (ctrl *AuthController) Profile(c *gin.Context) {

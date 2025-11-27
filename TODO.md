@@ -1,7 +1,7 @@
 # TODO
 
 [x] 黃金架構（分層：controller/service/repository） 
-[] JWT Refresh Token（雙 token）
+[x] JWT Refresh Token（雙 token）
 [] RBAC 權限角色
 [] Blacklist Token（登出）
 [] RBAC 權限角色

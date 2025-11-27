@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"go-gin-crud/internal/database/models"
+	"go-gin-crud/internal/dto"
 	"go-gin-crud/internal/repository"
 	"time"
 
@@ -10,21 +11,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var jwtKey = []byte("secret_key_123") // 建議改成環境變數
+var accessKey = []byte("ACCESS_SECRET")   // 建議改成環境變數
+var refreshKey = []byte("REFRESH_SECRET") // 建議改成環境變數
 
 type AuthService interface {
 	Register(email, password string) error
-	Login(email, password string) (string, error)
+	Login(req dto.LoginRequest) (string, string, error)
+	Refresh(refreshToken string) (string, error)
 	GetUserProfile(userID uint) (*models.User, error)
 }
 
 type authService struct {
 	userRepo repository.UserRepository
+	authRepo repository.AuthRepository
 }
 
-func NewAuthService(userRepo repository.UserRepository) AuthService {
+func NewAuthService(userRepo repository.UserRepository, authRepo repository.AuthRepository) AuthService {
 	return &authService{
 		userRepo: userRepo,
+		authRepo: authRepo,
 	}
 }
 
@@ -32,7 +37,7 @@ func (s *authService) Register(email, password string) error {
 	// 檢查 Email 是否已存在
 	_, err := s.userRepo.FindByEmail(email)
 	if err == nil {
-		return errors.New("Email 已存在")
+		return errors.New("email 已存在")
 	}
 
 	// 加密密碼
@@ -50,33 +55,83 @@ func (s *authService) Register(email, password string) error {
 	return s.userRepo.Create(user)
 }
 
-func (s *authService) Login(email, password string) (string, error) {
+func (s *authService) Login(req dto.LoginRequest) (string, string, error) {
 	// 查找使用者
-	user, err := s.userRepo.FindByEmail(email)
+	user, err := s.userRepo.FindByEmail(req.Email)
 	if err != nil {
-		return "", errors.New("帳號或密碼錯誤")
+		return "", "", errors.New("使用者不存在")
 	}
 
 	// 檢查密碼
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return "", errors.New("帳號或密碼錯誤")
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		return "", "", errors.New("密碼錯誤")
 	}
 
-	// 生成 JWT
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	// Access Token: 15 分鐘
+	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour * 72).Unix(),
-	})
+		"exp":     time.Now().Add(15 * time.Minute).Unix(),
+	}).SignedString(accessKey)
+	if err != nil {
+		return "", "", err
+	}
 
-	tokenString, err := token.SignedString(jwtKey)
+	// Refresh Token: 7 天
+	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": user.ID,
+		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
+	}).SignedString(refreshKey)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 存 DB
+	if err := s.authRepo.SaveRefreshToken(&models.RefreshToken{
+		UserID:    user.ID,
+		Token:     refreshToken,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+	}); err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
+}
+
+func (s *authService) Refresh(refreshToken string) (string, error) {
+	// 檢查 DB 是否存在
+	saved, err := s.authRepo.FindRefreshToken(refreshToken)
+	if err != nil {
+		return "", errors.New("refresh token 無效")
+	}
+
+	// 檢查是否過期
+	if saved.ExpiresAt.Before(time.Now()) {
+		return "", errors.New("refresh token 已過期")
+	}
+
+	// 驗證 JWT
+	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
+		return refreshKey, nil
+	})
+	if err != nil || !token.Valid {
+		return "", errors.New("refresh token 無效")
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	userID := uint(claims["user_id"].(float64))
+
+	// 產生新的 Access Token
+	newAccessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": userID,
+		"exp":     time.Now().Add(15 * time.Minute).Unix(),
+	}).SignedString(accessKey)
 	if err != nil {
 		return "", err
 	}
 
-	return tokenString, nil
+	return newAccessToken, nil
 }
 
 func (s *authService) GetUserProfile(userID uint) (*models.User, error) {
 	return s.userRepo.FindByID(userID)
 }
-

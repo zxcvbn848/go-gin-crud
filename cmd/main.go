@@ -17,6 +17,7 @@ func main() {
 	// 自動建表
 	database.DB.AutoMigrate(&models.Book{})
 	database.DB.AutoMigrate(&models.User{})
+	database.DB.AutoMigrate(&models.RefreshToken{})
 
 	// 註冊路由
 	routes.RegisterBookRoutes(r)

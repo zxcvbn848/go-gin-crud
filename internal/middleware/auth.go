@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte("secret_key_123")
+var accessKey = []byte("ACCESS_SECRET") // 與 service 中的 accessKey 保持一致
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -26,7 +26,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// 解析 Token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return jwtKey, nil
+			return accessKey, nil
 		})
 
 		if err != nil || !token.Valid {
