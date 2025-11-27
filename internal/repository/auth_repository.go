@@ -10,7 +10,7 @@ import (
 type AuthRepository interface {
 	SaveRefreshToken(rt *models.RefreshToken) error
 	FindRefreshToken(token string) (*models.RefreshToken, error)
-	DeleteRefreshToken(token string) error
+	DeleteRefreshTokensByUserID(userID uint) error
 	SaveBlacklistToken(bt *models.BlacklistToken) error
 	IsTokenBlacklisted(token string) (bool, error)
 }
@@ -38,8 +38,8 @@ func (r *authRepository) FindRefreshToken(token string) (*models.RefreshToken, e
 	return &rt, nil
 }
 
-func (r *authRepository) DeleteRefreshToken(token string) error {
-	return r.db.Where("token = ?", token).Delete(&models.RefreshToken{}).Error
+func (r *authRepository) DeleteRefreshTokensByUserID(userID uint) error {
+	return r.db.Where("user_id = ?", userID).Delete(&models.RefreshToken{}).Error
 }
 
 func (r *authRepository) SaveBlacklistToken(bt *models.BlacklistToken) error {

@@ -148,6 +148,13 @@ func (s *authService) Logout(accessToken string) error {
 		return errors.New("token claims 無效")
 	}
 
+	// 獲取 user_id
+	userIDFloat, ok := claims["user_id"].(float64)
+	if !ok {
+		return errors.New("token user_id 無效")
+	}
+	userID := uint(userIDFloat)
+
 	// 獲取過期時間
 	exp, ok := claims["exp"].(float64)
 	if !ok {
@@ -163,7 +170,12 @@ func (s *authService) Logout(accessToken string) error {
 		CreatedAt: time.Now(),
 	}
 
-	return s.authRepo.SaveBlacklistToken(blacklistToken)
+	if err := s.authRepo.SaveBlacklistToken(blacklistToken); err != nil {
+		return err
+	}
+
+	// 刪除該用戶的所有 refresh token
+	return s.authRepo.DeleteRefreshTokensByUserID(userID)
 }
 
 func (s *authService) IsTokenBlacklisted(token string) (bool, error) {
