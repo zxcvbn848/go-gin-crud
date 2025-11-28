@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"go-gin-crud/internal/database"
 	"go-gin-crud/internal/database/models"
 	"go-gin-crud/internal/routes"
@@ -14,13 +16,18 @@ func main() {
 	// 連線 DB
 	database.Connect()
 
-	// 自動建表
-	database.DB.AutoMigrate(&models.Book{})
-	database.DB.AutoMigrate(&models.User{})
-	database.DB.AutoMigrate(&models.RefreshToken{})
-	database.DB.AutoMigrate(&models.BlacklistToken{})
-	database.DB.AutoMigrate(&models.Product{})
-	database.DB.AutoMigrate(&models.Post{})
+	// 自動遷移資料庫結構
+	if err := database.DB.AutoMigrate(
+		&models.User{},
+		&models.Book{},
+		&models.Product{},
+		&models.Post{},
+		&models.RefreshToken{},
+		&models.BlacklistToken{},
+	); err != nil {
+		log.Fatal("❌ 資料庫遷移失敗: ", err)
+	}
+	log.Println("✅ 資料庫遷移完成")
 
 	// 註冊路由
 	authService := routes.RegisterAuthRoutes(r)

@@ -8,7 +8,7 @@ type Post struct {
 	Content   string    `gorm:"type:text" json:"content"`
 	AuthorID  uint      `gorm:"not null;index" json:"author_id"`
 	Author    User      `gorm:"foreignKey:AuthorID" json:"author,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
 

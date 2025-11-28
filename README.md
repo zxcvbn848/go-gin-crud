@@ -35,9 +35,15 @@ docker compose logs -f mysql
 
 ### 重新構建 Go 應用
 
+**重要：** 如果修改了程式碼，必須重新構建映像才能生效。`docker compose restart` 只會重啟容器，不會載入新的程式碼。
+
 ```bash
+# 重新構建並啟動
 docker compose build app
 docker compose up -d app
+
+# 或使用一行指令
+docker compose up -d --build app
 ```
 
 ## 資料庫資訊
@@ -102,6 +108,45 @@ TZ=Asia/Taipei
 - `TZ`: 時區設定（預設: Asia/Taipei）
 
 **注意：** `.env` 檔案不會被提交到 Git（已在 `.gitignore` 中），請使用 `.env.example` 作為範本。
+
+## 資料庫遷移
+
+### 自動遷移（推薦）
+
+應用程式啟動時會自動執行資料庫遷移（`AutoMigrate()`），這會：
+- 自動建立不存在的表
+- 自動新增缺失的欄位（如 `created_at` 和 `updated_at`）
+
+**重新啟動應用程式即可執行遷移：**
+
+```bash
+# 本地開發
+go run cmd/main.go
+
+# Docker 環境
+docker compose restart app
+```
+
+### 手動執行 SQL（備選）
+
+如果需要手動執行遷移，可以使用 SQL 腳本：
+
+```bash
+# 使用 Docker 執行 SQL
+docker exec -i go_gin_crud_mysql mysql -ugogin -pa3935522 goGinCRUD < migrations/add_timestamps.sql
+```
+
+詳細遷移說明請參考 [docs/MIGRATION.md](./docs/MIGRATION.md)
+
+### 為既有資料設定時間戳
+
+遷移後，可以使用 Seeder 工具為既有記錄設定時間戳（只更新 NULL 的欄位，有值的不更新）：
+
+```bash
+go run cmd/seed/main.go
+```
+
+詳細 Seeder 說明請參考 [docs/SEEDER.md](./docs/SEEDER.md)
 
 ## API 端點
 

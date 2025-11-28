@@ -8,9 +8,9 @@ import (
 )
 
 type ProductService interface {
-	CreateProduct(req dto.CreateProductRequest) (*models.Product, error)
-	GetProductByID(id uint) (*models.Product, error)
-	UpdateProduct(id uint, req dto.UpdateProductRequest) (*models.Product, error)
+	CreateProduct(req dto.CreateProductRequest) (*dto.ProductResponse, error)
+	GetProductByID(id uint) (*dto.ProductResponse, error)
+	UpdateProduct(id uint, req dto.UpdateProductRequest) (*dto.ProductResponse, error)
 	DeleteProduct(id uint) error
 	GetProductsWithPagination(req dto.PaginationRequest) (*dto.PaginationResponse, error)
 }
@@ -25,7 +25,7 @@ func NewProductService(productRepo repository.ProductRepository) ProductService 
 	}
 }
 
-func (s *productService) CreateProduct(req dto.CreateProductRequest) (*models.Product, error) {
+func (s *productService) CreateProduct(req dto.CreateProductRequest) (*dto.ProductResponse, error) {
 	product := &models.Product{
 		Name:        req.Name,
 		Description: req.Description,
@@ -37,14 +37,35 @@ func (s *productService) CreateProduct(req dto.CreateProductRequest) (*models.Pr
 		return nil, err
 	}
 
-	return product, nil
+	return &dto.ProductResponse{
+		ID:          product.ID,
+		Name:        product.Name,
+		Description: product.Description,
+		Price:       product.Price,
+		Stock:       product.Stock,
+		CreatedAt:   product.CreatedAt,
+		UpdatedAt:   product.UpdatedAt,
+	}, nil
 }
 
-func (s *productService) GetProductByID(id uint) (*models.Product, error) {
-	return s.productRepo.FindByID(id)
+func (s *productService) GetProductByID(id uint) (*dto.ProductResponse, error) {
+	product, err := s.productRepo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ProductResponse{
+		ID:          product.ID,
+		Name:        product.Name,
+		Description: product.Description,
+		Price:       product.Price,
+		Stock:       product.Stock,
+		CreatedAt:   product.CreatedAt,
+		UpdatedAt:   product.UpdatedAt,
+	}, nil
 }
 
-func (s *productService) UpdateProduct(id uint, req dto.UpdateProductRequest) (*models.Product, error) {
+func (s *productService) UpdateProduct(id uint, req dto.UpdateProductRequest) (*dto.ProductResponse, error) {
 	product, err := s.productRepo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -67,7 +88,15 @@ func (s *productService) UpdateProduct(id uint, req dto.UpdateProductRequest) (*
 		return nil, err
 	}
 
-	return product, nil
+	return &dto.ProductResponse{
+		ID:          product.ID,
+		Name:        product.Name,
+		Description: product.Description,
+		Price:       product.Price,
+		Stock:       product.Stock,
+		CreatedAt:   product.CreatedAt,
+		UpdatedAt:   product.UpdatedAt,
+	}, nil
 }
 
 func (s *productService) DeleteProduct(id uint) error {
@@ -88,10 +117,24 @@ func (s *productService) GetProductsWithPagination(req dto.PaginationRequest) (*
 		return nil, err
 	}
 
+	// 轉換為 ProductResponse
+	productResponses := make([]dto.ProductResponse, len(products))
+	for i, product := range products {
+		productResponses[i] = dto.ProductResponse{
+			ID:          product.ID,
+			Name:        product.Name,
+			Description: product.Description,
+			Price:       product.Price,
+			Stock:       product.Stock,
+			CreatedAt:   product.CreatedAt,
+			UpdatedAt:   product.UpdatedAt,
+		}
+	}
+
 	totalPages := int(math.Ceil(float64(total) / float64(req.PageSize)))
 
 	return &dto.PaginationResponse{
-		Data:       products,
+		Data:       productResponses,
 		Page:       req.Page,
 		PageSize:   req.PageSize,
 		Total:      total,
