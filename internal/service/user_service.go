@@ -41,9 +41,16 @@ func (s *userService) CreateUser(req dto.CreateUserRequest) (*dto.UserResponse, 
 		return nil, err
 	}
 
+	// 設定 role，如果沒有提供則使用預設值 "user"
+	role := req.Role
+	if role == "" {
+		role = "user"
+	}
+
 	user := &models.User{
 		Email:    req.Email,
 		Password: string(hashed),
+		Role:     role,
 	}
 
 	if err := s.userRepo.Create(user); err != nil {
@@ -51,8 +58,11 @@ func (s *userService) CreateUser(req dto.CreateUserRequest) (*dto.UserResponse, 
 	}
 
 	return &dto.UserResponse{
-		ID:    user.ID,
-		Email: user.Email,
+		ID:        user.ID,
+		Email:     user.Email,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}, nil
 }
 
@@ -63,8 +73,11 @@ func (s *userService) GetUserByID(id uint) (*dto.UserResponse, error) {
 	}
 
 	return &dto.UserResponse{
-		ID:    user.ID,
-		Email: user.Email,
+		ID:        user.ID,
+		Email:     user.Email,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}, nil
 }
 
@@ -97,8 +110,11 @@ func (s *userService) UpdateUser(id uint, req dto.UpdateUserRequest) (*dto.UserR
 	}
 
 	return &dto.UserResponse{
-		ID:    user.ID,
-		Email: user.Email,
+		ID:        user.ID,
+		Email:     user.Email,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}, nil
 }
 
@@ -124,8 +140,11 @@ func (s *userService) GetUsersWithPagination(req dto.PaginationRequest) (*dto.Pa
 	userResponses := make([]dto.UserResponse, len(users))
 	for i, user := range users {
 		userResponses[i] = dto.UserResponse{
-			ID:    user.ID,
-			Email: user.Email,
+			ID:        user.ID,
+			Email:     user.Email,
+			Role:      user.Role,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
 		}
 	}
 

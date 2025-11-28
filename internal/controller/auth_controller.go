@@ -123,9 +123,14 @@ func (ctrl *AuthController) Profile(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "你是合法使用者",
-		"user_id": user.ID,
-		"email":   user.Email,
-	})
+	// 轉換為 UserResponse 以包含時間欄位
+	userResponse := dto.UserResponse{
+		ID:        user.ID,
+		Email:     user.Email,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	c.JSON(http.StatusOK, userResponse)
 }

@@ -1,5 +1,7 @@
 package dto
 
+import "time"
+
 type CreateBookRequest struct {
 	Title  string `json:"title" binding:"required"`
 	Author string `json:"author" binding:"required"`
@@ -8,6 +10,14 @@ type CreateBookRequest struct {
 type UpdateBookRequest struct {
 	Title  string `json:"title"`
 	Author string `json:"author"`
+}
+
+type BookResponse struct {
+	ID        uint      `json:"id"`
+	Title     string    `json:"title"`
+	Author    string    `json:"author"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type PaginationRequest struct {

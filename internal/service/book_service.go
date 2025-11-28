@@ -8,9 +8,9 @@ import (
 )
 
 type BookService interface {
-	CreateBook(req dto.CreateBookRequest) (*models.Book, error)
-	GetBookByID(id uint) (*models.Book, error)
-	UpdateBook(id uint, req dto.UpdateBookRequest) (*models.Book, error)
+	CreateBook(req dto.CreateBookRequest) (*dto.BookResponse, error)
+	GetBookByID(id uint) (*dto.BookResponse, error)
+	UpdateBook(id uint, req dto.UpdateBookRequest) (*dto.BookResponse, error)
 	DeleteBook(id uint) error
 	GetBooksWithPagination(req dto.PaginationRequest) (*dto.PaginationResponse, error)
 }
@@ -25,7 +25,7 @@ func NewBookService(bookRepo repository.BookRepository) BookService {
 	}
 }
 
-func (s *bookService) CreateBook(req dto.CreateBookRequest) (*models.Book, error) {
+func (s *bookService) CreateBook(req dto.CreateBookRequest) (*dto.BookResponse, error) {
 	book := &models.Book{
 		Title:  req.Title,
 		Author: req.Author,
@@ -35,14 +35,31 @@ func (s *bookService) CreateBook(req dto.CreateBookRequest) (*models.Book, error
 		return nil, err
 	}
 
-	return book, nil
+	return &dto.BookResponse{
+		ID:        book.ID,
+		Title:     book.Title,
+		Author:    book.Author,
+		CreatedAt: book.CreatedAt,
+		UpdatedAt: book.UpdatedAt,
+	}, nil
 }
 
-func (s *bookService) GetBookByID(id uint) (*models.Book, error) {
-	return s.bookRepo.FindByID(id)
+func (s *bookService) GetBookByID(id uint) (*dto.BookResponse, error) {
+	book, err := s.bookRepo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.BookResponse{
+		ID:        book.ID,
+		Title:     book.Title,
+		Author:    book.Author,
+		CreatedAt: book.CreatedAt,
+		UpdatedAt: book.UpdatedAt,
+	}, nil
 }
 
-func (s *bookService) UpdateBook(id uint, req dto.UpdateBookRequest) (*models.Book, error) {
+func (s *bookService) UpdateBook(id uint, req dto.UpdateBookRequest) (*dto.BookResponse, error) {
 	book, err := s.bookRepo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -59,7 +76,13 @@ func (s *bookService) UpdateBook(id uint, req dto.UpdateBookRequest) (*models.Bo
 		return nil, err
 	}
 
-	return book, nil
+	return &dto.BookResponse{
+		ID:        book.ID,
+		Title:     book.Title,
+		Author:    book.Author,
+		CreatedAt: book.CreatedAt,
+		UpdatedAt: book.UpdatedAt,
+	}, nil
 }
 
 func (s *bookService) DeleteBook(id uint) error {
@@ -80,14 +103,25 @@ func (s *bookService) GetBooksWithPagination(req dto.PaginationRequest) (*dto.Pa
 		return nil, err
 	}
 
+	// 轉換為 BookResponse
+	bookResponses := make([]dto.BookResponse, len(books))
+	for i, book := range books {
+		bookResponses[i] = dto.BookResponse{
+			ID:        book.ID,
+			Title:     book.Title,
+			Author:    book.Author,
+			CreatedAt: book.CreatedAt,
+			UpdatedAt: book.UpdatedAt,
+		}
+	}
+
 	totalPages := int(math.Ceil(float64(total) / float64(req.PageSize)))
 
 	return &dto.PaginationResponse{
-		Data:       books,
+		Data:       bookResponses,
 		Page:       req.Page,
 		PageSize:   req.PageSize,
 		Total:      total,
 		TotalPages: totalPages,
 	}, nil
 }
-

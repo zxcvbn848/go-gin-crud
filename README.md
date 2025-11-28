@@ -35,9 +35,15 @@ docker compose logs -f mysql
 
 ### 重新構建 Go 應用
 
+**重要：** 如果修改了程式碼，必須重新構建映像才能生效。`docker compose restart` 只會重啟容器，不會載入新的程式碼。
+
 ```bash
+# 重新構建並啟動
 docker compose build app
 docker compose up -d app
+
+# 或使用一行指令
+docker compose up -d --build app
 ```
 
 ## 資料庫資訊

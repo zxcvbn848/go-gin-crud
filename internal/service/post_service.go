@@ -6,13 +6,12 @@ import (
 	"go-gin-crud/internal/dto"
 	"go-gin-crud/internal/repository"
 	"math"
-	"time"
 )
 
 type PostService interface {
-	CreatePost(authorID uint, req dto.CreatePostRequest) (*models.Post, error)
-	GetPostByID(id uint) (*models.Post, error)
-	UpdatePost(id uint, authorID uint, role string, req dto.UpdatePostRequest) (*models.Post, error)
+	CreatePost(authorID uint, req dto.CreatePostRequest) (*dto.PostResponse, error)
+	GetPostByID(id uint) (*dto.PostResponse, error)
+	UpdatePost(id uint, authorID uint, role string, req dto.UpdatePostRequest) (*dto.PostResponse, error)
 	DeletePost(id uint, authorID uint, role string) error
 	GetPostsWithPagination(req dto.PaginationRequest) (*dto.PaginationResponse, error)
 }
@@ -27,7 +26,32 @@ func NewPostService(postRepo repository.PostRepository) PostService {
 	}
 }
 
-func (s *postService) CreatePost(authorID uint, req dto.CreatePostRequest) (*models.Post, error) {
+// toPostResponse 將 models.Post 轉換為 dto.PostResponse
+func toPostResponse(post *models.Post) *dto.PostResponse {
+	response := &dto.PostResponse{
+		ID:        post.ID,
+		Title:     post.Title,
+		Content:   post.Content,
+		AuthorID:  post.AuthorID,
+		CreatedAt: post.CreatedAt,
+		UpdatedAt: post.UpdatedAt,
+	}
+
+	// 如果有 Author 關聯，轉換為 UserResponse
+	if post.Author.ID != 0 {
+		response.Author = &dto.UserResponse{
+			ID:        post.Author.ID,
+			Email:     post.Author.Email,
+			Role:      post.Author.Role,
+			CreatedAt: post.Author.CreatedAt,
+			UpdatedAt: post.Author.UpdatedAt,
+		}
+	}
+
+	return response
+}
+
+func (s *postService) CreatePost(authorID uint, req dto.CreatePostRequest) (*dto.PostResponse, error) {
 	post := &models.Post{
 		Title:    req.Title,
 		Content:  req.Content,
@@ -39,14 +63,24 @@ func (s *postService) CreatePost(authorID uint, req dto.CreatePostRequest) (*mod
 	}
 
 	// 重新載入以獲取關聯的 Author
-	return s.postRepo.FindByID(post.ID)
+	postWithAuthor, err := s.postRepo.FindByID(post.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return toPostResponse(postWithAuthor), nil
 }
 
-func (s *postService) GetPostByID(id uint) (*models.Post, error) {
-	return s.postRepo.FindByID(id)
+func (s *postService) GetPostByID(id uint) (*dto.PostResponse, error) {
+	post, err := s.postRepo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return toPostResponse(post), nil
 }
 
-func (s *postService) UpdatePost(id uint, authorID uint, role string, req dto.UpdatePostRequest) (*models.Post, error) {
+func (s *postService) UpdatePost(id uint, authorID uint, role string, req dto.UpdatePostRequest) (*dto.PostResponse, error) {
 	post, err := s.postRepo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -64,13 +98,17 @@ func (s *postService) UpdatePost(id uint, authorID uint, role string, req dto.Up
 		post.Content = req.Content
 	}
 
-	post.UpdatedAt = time.Now()
-
 	if err := s.postRepo.Update(post); err != nil {
 		return nil, err
 	}
 
-	return s.postRepo.FindByID(id)
+	// 重新載入以獲取關聯的 Author
+	updatedPost, err := s.postRepo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return toPostResponse(updatedPost), nil
 }
 
 func (s *postService) DeletePost(id uint, authorID uint, role string) error {
@@ -101,10 +139,16 @@ func (s *postService) GetPostsWithPagination(req dto.PaginationRequest) (*dto.Pa
 		return nil, err
 	}
 
+	// 轉換為 PostResponse
+	postResponses := make([]dto.PostResponse, len(posts))
+	for i, post := range posts {
+		postResponses[i] = *toPostResponse(&post)
+	}
+
 	totalPages := int(math.Ceil(float64(total) / float64(req.PageSize)))
 
 	return &dto.PaginationResponse{
-		Data:       posts,
+		Data:       postResponses,
 		Page:       req.Page,
 		PageSize:   req.PageSize,
 		Total:      total,

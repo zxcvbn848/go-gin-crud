@@ -8,7 +8,6 @@ type Product struct {
 	Description string    `json:"description"`
 	Price       float64   `gorm:"not null" json:"price"`
 	Stock       int       `gorm:"default:0" json:"stock"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   time.Time `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
-

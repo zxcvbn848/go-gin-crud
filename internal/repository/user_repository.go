@@ -27,6 +27,7 @@ func NewUserRepository() UserRepository {
 }
 
 func (r *userRepository) Create(user *models.User) error {
+	// GORM 會自動處理 CreatedAt 和 UpdatedAt（透過 autoCreateTime 和 autoUpdateTime 標籤）
 	return r.db.Create(user).Error
 }
 
