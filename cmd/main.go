@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"go-gin-crud/internal/config"
 	"go-gin-crud/internal/database"
 	"go-gin-crud/internal/database/models"
 	"go-gin-crud/internal/routes"
@@ -12,6 +13,9 @@ import (
 
 func main() {
 	r := gin.Default()
+
+	// 載入配置（包含 JWT Secrets）
+	config.Load()
 
 	// 連線 DB
 	database.Connect()

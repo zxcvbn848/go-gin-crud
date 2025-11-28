@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"go-gin-crud/internal/config"
 	"go-gin-crud/internal/database/models"
 	"go-gin-crud/internal/dto"
 	"go-gin-crud/internal/repository"
@@ -10,9 +11,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var accessKey = []byte("ACCESS_SECRET")   // 建議改成環境變數
-var refreshKey = []byte("REFRESH_SECRET") // 建議改成環境變數
 
 type AuthService interface {
 	Register(email, password string) error
@@ -75,7 +73,7 @@ func (s *authService) Login(req dto.LoginRequest) (string, string, error) {
 		"user_id": user.ID,
 		"role":    user.Role,
 		"exp":     time.Now().Add(15 * time.Minute).Unix(),
-	}).SignedString(accessKey)
+	}).SignedString(config.AccessSecret)
 	if err != nil {
 		return "", "", err
 	}
@@ -85,7 +83,7 @@ func (s *authService) Login(req dto.LoginRequest) (string, string, error) {
 		"user_id": user.ID,
 		"role":    user.Role,
 		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
-	}).SignedString(refreshKey)
+	}).SignedString(config.RefreshSecret)
 	if err != nil {
 		return "", "", err
 	}
@@ -116,7 +114,7 @@ func (s *authService) Refresh(refreshToken string) (string, error) {
 
 	// 驗證 JWT
 	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
-		return refreshKey, nil
+		return config.RefreshSecret, nil
 	})
 	if err != nil || !token.Valid {
 		return "", errors.New("refresh token 無效")
@@ -136,7 +134,7 @@ func (s *authService) Refresh(refreshToken string) (string, error) {
 		"user_id": user.ID,
 		"role":    user.Role,
 		"exp":     time.Now().Add(15 * time.Minute).Unix(),
-	}).SignedString(accessKey)
+	}).SignedString(config.AccessSecret)
 	if err != nil {
 		return "", err
 	}
@@ -147,7 +145,7 @@ func (s *authService) Refresh(refreshToken string) (string, error) {
 func (s *authService) Logout(accessToken string) error {
 	// 解析 token 獲取過期時間
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
-		return accessKey, nil
+		return config.AccessSecret, nil
 	})
 	if err != nil {
 		return errors.New("token 無效")

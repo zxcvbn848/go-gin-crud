@@ -95,6 +95,8 @@ TZ=Asia/Taipei
 - `DB_USER`: 資料庫用戶（預設: gogin）
 - `DB_PASSWORD`: 資料庫密碼（預設: a3935522）
 - `DB_NAME`: 資料庫名稱（預設: goGinCRUD）
+- `ACCESS_SECRET`: JWT Access Token 密鑰（預設: ACCESS_SECRET，**生產環境請務必修改**）
+- `REFRESH_SECRET`: JWT Refresh Token 密鑰（預設: REFRESH_SECRET，**生產環境請務必修改**）
 
 **MySQL Docker 容器使用的環境變數：**
 
