@@ -1,11 +1,10 @@
 package main
 
 import (
-	"log"
-
 	"go-gin-crud/internal/config"
 	"go-gin-crud/internal/database"
 	"go-gin-crud/internal/database/models"
+	"go-gin-crud/internal/logger"
 	"go-gin-crud/internal/routes"
 
 	"github.com/gin-gonic/gin"
@@ -29,9 +28,9 @@ func main() {
 		&models.RefreshToken{},
 		&models.BlacklistToken{},
 	); err != nil {
-		log.Fatal("❌ 資料庫遷移失敗: ", err)
+		logger.Log.WithError(err).Fatal("資料庫遷移失敗")
 	}
-	log.Println("✅ 資料庫遷移完成")
+	logger.Log.Info("資料庫遷移完成")
 
 	// 註冊路由
 	routes.RegisterHealthRoutes(r)

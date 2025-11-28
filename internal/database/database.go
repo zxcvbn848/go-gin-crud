@@ -1,9 +1,10 @@
 package database
 
 import (
-	"log"
 	"os"
 	"time"
+
+	"go-gin-crud/internal/logger"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
@@ -33,10 +34,10 @@ func Connect() {
 	})
 
 	if err != nil {
-		log.Fatal("❌ 無法連線到資料庫: ", err)
+		logger.Log.WithError(err).Fatal("無法連線到資料庫")
 	}
 
-	log.Println("✅ 成功連上資料庫")
+	logger.Log.Info("成功連上資料庫")
 }
 
 func getEnv(key, defaultValue string) string {

@@ -1,9 +1,8 @@
 package main
 
 import (
-	"log"
-
 	"go-gin-crud/internal/database"
+	"go-gin-crud/internal/logger"
 )
 
 func main() {
@@ -14,10 +13,10 @@ func main() {
 	seeder := database.NewSeeder()
 
 	// 只更新 NULL 的時間戳，有值的不更新
-	log.Println("📝 執行模式: 只更新 NULL 的時間戳（有值的不更新）")
+	logger.Log.Info("執行模式: 只更新 NULL 的時間戳（有值的不更新）")
 	if err := seeder.SeedTimestamps(); err != nil {
-		log.Fatalf("❌ Seeder 執行失敗: %v", err)
+		logger.Log.WithError(err).Fatal("Seeder 執行失敗")
 	}
 
-	log.Println("🎉 Seeder 執行完成")
+	logger.Log.Info("Seeder 執行完成")
 }

@@ -97,6 +97,7 @@ TZ=Asia/Taipei
 - `DB_NAME`: 資料庫名稱（預設: goGinCRUD）
 - `ACCESS_SECRET`: JWT Access Token 密鑰（預設: ACCESS_SECRET，**生產環境請務必修改**）
 - `REFRESH_SECRET`: JWT Refresh Token 密鑰（預設: REFRESH_SECRET，**生產環境請務必修改**）
+- `LOG_LEVEL`: Logrus 日誌層級（可選，預設: `info`，可設定為 `debug/info/warn/error`）
 
 **MySQL Docker 容器使用的環境變數：**
 
@@ -110,6 +111,19 @@ TZ=Asia/Taipei
 - `TZ`: 時區設定（預設: Asia/Taipei）
 
 **注意：** `.env` 檔案不會被提交到 Git（已在 `.gitignore` 中），請使用 `.env.example` 作為範本。
+
+## 日誌（Logging）
+
+專案使用 [Logrus](https://github.com/sirupsen/logrus) 作為結構化日誌系統，預設輸出為 JSON 格式（RFC3339 時間戳）。可透過 `LOG_LEVEL` 環境變數調整輸出層級，例如：
+
+```bash
+LOG_LEVEL=debug
+go run cmd/main.go
+```
+
+預設情況下 log 會寫到標準輸出（terminal / Docker 容器的 console）。若服務跑在 Docker，可用 `docker logs go_gin_crud_app` 觀看。若要改成寫檔，只需在 `internal/logger/logger.go` 中調整 `Log.SetOutput(...)` 的設定。
+
+所有應用程式與 Seeder log 都會透過 Logrus 輸出，方便後續串接 log aggregation 工具。
 
 ## 資料庫遷移
 
@@ -138,8 +152,6 @@ docker compose restart app
 docker exec -i go_gin_crud_mysql mysql -ugogin -pa3935522 goGinCRUD < migrations/add_timestamps.sql
 ```
 
-詳細遷移說明請參考 [docs/MIGRATION.md](./docs/MIGRATION.md)
-
 ### 為既有資料設定時間戳
 
 遷移後，可以使用 Seeder 工具為既有記錄設定時間戳（只更新 NULL 的欄位，有值的不更新）：
@@ -147,8 +159,6 @@ docker exec -i go_gin_crud_mysql mysql -ugogin -pa3935522 goGinCRUD < migrations
 ```bash
 go run cmd/seed/main.go
 ```
-
-詳細 Seeder 說明請參考 [docs/SEEDER.md](./docs/SEEDER.md)
 
 ## API 端點
 
