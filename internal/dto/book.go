@@ -3,13 +3,13 @@ package dto
 import "time"
 
 type CreateBookRequest struct {
-	Title  string `json:"title" binding:"required"`
-	Author string `json:"author" binding:"required"`
+	Title  string `json:"title" binding:"required,min=1,max=255"`
+	Author string `json:"author" binding:"required,min=1,max=255"`
 }
 
 type UpdateBookRequest struct {
-	Title  string `json:"title"`
-	Author string `json:"author"`
+	Title  string `json:"title" binding:"omitempty,min=1,max=255"`
+	Author string `json:"author" binding:"omitempty,min=1,max=255"`
 }
 
 type BookResponse struct {
@@ -28,9 +28,8 @@ type PaginationRequest struct {
 
 type PaginationResponse struct {
 	Data       interface{} `json:"data"`
-	Page       int          `json:"page"`
-	PageSize   int          `json:"page_size"`
-	Total      int64        `json:"total"`
-	TotalPages int          `json:"total_pages"`
+	Page       int         `json:"page"`
+	PageSize   int         `json:"page_size"`
+	Total      int64       `json:"total"`
+	TotalPages int         `json:"total_pages"`
 }
-

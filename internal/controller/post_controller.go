@@ -3,6 +3,7 @@ package controller
 import (
 	"go-gin-crud/internal/dto"
 	"go-gin-crud/internal/service"
+	"go-gin-crud/internal/validator"
 	"net/http"
 	"strconv"
 
@@ -40,7 +41,7 @@ func (ctrl *PostController) CreatePost(c *gin.Context) {
 
 	var req dto.CreatePostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "資料格式錯誤"})
+		validator.HandleValidationError(c, err)
 		return
 	}
 
@@ -122,7 +123,7 @@ func (ctrl *PostController) UpdatePost(c *gin.Context) {
 
 	var req dto.UpdatePostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "資料格式錯誤"})
+		validator.HandleValidationError(c, err)
 		return
 	}
 

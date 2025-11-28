@@ -3,15 +3,15 @@ package dto
 import "time"
 
 type CreateProductRequest struct {
-	Name        string  `json:"name" binding:"required"`
-	Description string  `json:"description"`
+	Name        string  `json:"name" binding:"required,min=1,max=255"`
+	Description string  `json:"description" binding:"omitempty,max=1000"`
 	Price       float64 `json:"price" binding:"required,min=0"`
 	Stock       int     `json:"stock" binding:"min=0"`
 }
 
 type UpdateProductRequest struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
+	Name        string  `json:"name" binding:"omitempty,min=1,max=255"`
+	Description string  `json:"description" binding:"omitempty,max=1000"`
 	Price       float64 `json:"price" binding:"omitempty,min=0"`
 	Stock       *int    `json:"stock" binding:"omitempty,min=0"`
 }

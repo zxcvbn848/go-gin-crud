@@ -3,6 +3,7 @@ package controller
 import (
 	"go-gin-crud/internal/dto"
 	"go-gin-crud/internal/service"
+	"go-gin-crud/internal/validator"
 	"net/http"
 	"strings"
 
@@ -20,14 +21,14 @@ func NewAuthController(authService service.AuthService) *AuthController {
 }
 
 type RegisterRequest struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required,email,max=255"`
+	Password string `json:"password" binding:"required,min=6,max=100"`
 }
 
 func (ctrl *AuthController) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "資料格式錯誤"})
+		validator.HandleValidationError(c, err)
 		return
 	}
 
@@ -46,7 +47,7 @@ func (ctrl *AuthController) Register(c *gin.Context) {
 func (ctrl *AuthController) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "資料格式錯誤"})
+		validator.HandleValidationError(c, err)
 		return
 	}
 
