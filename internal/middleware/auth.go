@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"go-gin-crud/internal/config"
 	"go-gin-crud/internal/service"
 	"net/http"
 	"strings"
@@ -8,8 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
-
-var accessKey = []byte("ACCESS_SECRET") // 與 service 中的 accessKey 保持一致
 
 func AuthMiddleware(authService service.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -35,7 +34,7 @@ func AuthMiddleware(authService service.AuthService) gin.HandlerFunc {
 
 		// 解析 Token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return accessKey, nil
+			return config.AccessSecret, nil
 		})
 
 		if err != nil || !token.Valid {
