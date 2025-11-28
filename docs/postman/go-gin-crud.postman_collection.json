@@ -251,7 +251,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"title\": \"Gin is an excellent framework\",\n  \"author\": \"andy wang\"\n}",
+							"raw": "{\n  \"title\": \"Netflix\",\n  \"author\": \"andy wang\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -419,7 +419,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}",
+							"raw": "{\n  \"email\": \"admin004@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"admin\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -912,6 +912,38 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "Health Check",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/health",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

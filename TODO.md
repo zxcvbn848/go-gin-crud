@@ -16,8 +16,9 @@
 ## 高優先級 🔥
 - [x] JWT Secret 從環境變數讀取（目前硬編碼）
 - [x] 輸入驗證（使用 validator 套件）
+- [x] API 測試
 - [ ] 結構化日誌系統（logrus 或 zap）
-- [ ] 健康檢查端點（/health）
+- [x] 健康檢查端點（/health）
 - [ ] 使用者密碼修改功能
 
 ## 中優先級 📋
@@ -26,6 +27,9 @@
 - [ ] 軟刪除（Soft Delete）
 - [ ] 操作日誌記錄（Audit Log）
 - [ ] Email 驗證（註冊確認信）
+- [ ] 瞭解 Goroutine + channel
+- [ ] 知道 context.Context 用法
+- [ ] 寫一個簡單的併發 demo（面試常考）
 
 ## 進階功能 🚀
 - [ ] Redis 快取整合
