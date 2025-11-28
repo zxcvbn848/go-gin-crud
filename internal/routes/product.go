@@ -20,10 +20,13 @@ func RegisterProductRoutes(r *gin.Engine, authService service.AuthService) {
 	products.Use(middleware.AuthMiddleware(authService))
 
 	// 註冊路由
-	products.POST("", productController.CreateProduct)
 	products.GET("", productController.GetProducts)
 	products.GET("/:id", productController.GetProduct)
-	products.PUT("/:id", productController.UpdateProduct)
-	products.DELETE("/:id", productController.DeleteProduct)
+
+	adminProducts := products.Group("")
+	adminProducts.Use(middleware.RoleMiddleware("admin"))
+	adminProducts.POST("", productController.CreateProduct)
+	adminProducts.PUT("/:id", productController.UpdateProduct)
+	adminProducts.DELETE("/:id", productController.DeleteProduct)
 }
 

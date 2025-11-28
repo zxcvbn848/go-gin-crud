@@ -53,9 +53,7 @@ func (r *bookRepository) FindAllWithPagination(page, pageSize int, search string
 	query := r.db.Model(&models.Book{})
 
 	// 搜尋功能
-	if search != "" {
-		query = query.Where("title LIKE ? OR author LIKE ?", "%"+search+"%", "%"+search+"%")
-	}
+	query = WhereLikeOr(query, search, "title", "author")
 
 	// 計算總數
 	if err := query.Count(&total).Error; err != nil {

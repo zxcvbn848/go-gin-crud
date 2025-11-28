@@ -52,6 +52,7 @@ func (s *authService) Register(email, password string) error {
 	user := &models.User{
 		Email:    email,
 		Password: string(hashed),
+		Role:     "user",
 	}
 
 	return s.userRepo.Create(user)
@@ -72,6 +73,7 @@ func (s *authService) Login(req dto.LoginRequest) (string, string, error) {
 	// Access Token: 15 分鐘
 	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
+		"role":    user.Role,
 		"exp":     time.Now().Add(15 * time.Minute).Unix(),
 	}).SignedString(accessKey)
 	if err != nil {
@@ -81,6 +83,7 @@ func (s *authService) Login(req dto.LoginRequest) (string, string, error) {
 	// Refresh Token: 7 天
 	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
+		"role":    user.Role,
 		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
 	}).SignedString(refreshKey)
 	if err != nil {
@@ -122,9 +125,16 @@ func (s *authService) Refresh(refreshToken string) (string, error) {
 	claims := token.Claims.(jwt.MapClaims)
 	userID := uint(claims["user_id"].(float64))
 
+	// 取得使用者以取得最新角色
+	user, err := s.userRepo.FindByID(userID)
+	if err != nil {
+		return "", errors.New("找不到使用者")
+	}
+
 	// 產生新的 Access Token
 	newAccessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": userID,
+		"user_id": user.ID,
+		"role":    user.Role,
 		"exp":     time.Now().Add(15 * time.Minute).Unix(),
 	}).SignedString(accessKey)
 	if err != nil {

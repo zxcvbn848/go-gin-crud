@@ -53,9 +53,7 @@ func (r *productRepository) FindAllWithPagination(page, pageSize int, search str
 	query := r.db.Model(&models.Product{})
 
 	// 搜尋功能（搜尋 name 或 description）
-	if search != "" {
-		query = query.Where("name LIKE ? OR description LIKE ?", "%"+search+"%", "%"+search+"%")
-	}
+	query = WhereLikeOr(query, search, "name", "description")
 
 	// 計算總數
 	if err := query.Count(&total).Error; err != nil {

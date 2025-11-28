@@ -12,8 +12,8 @@ import (
 type PostService interface {
 	CreatePost(authorID uint, req dto.CreatePostRequest) (*models.Post, error)
 	GetPostByID(id uint) (*models.Post, error)
-	UpdatePost(id uint, authorID uint, req dto.UpdatePostRequest) (*models.Post, error)
-	DeletePost(id uint, authorID uint) error
+	UpdatePost(id uint, authorID uint, role string, req dto.UpdatePostRequest) (*models.Post, error)
+	DeletePost(id uint, authorID uint, role string) error
 	GetPostsWithPagination(req dto.PaginationRequest) (*dto.PaginationResponse, error)
 }
 
@@ -46,14 +46,14 @@ func (s *postService) GetPostByID(id uint) (*models.Post, error) {
 	return s.postRepo.FindByID(id)
 }
 
-func (s *postService) UpdatePost(id uint, authorID uint, req dto.UpdatePostRequest) (*models.Post, error) {
+func (s *postService) UpdatePost(id uint, authorID uint, role string, req dto.UpdatePostRequest) (*models.Post, error) {
 	post, err := s.postRepo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	// 檢查是否為作者本人
-	if post.AuthorID != authorID {
+	// 檢查是否為作者本人或管理員
+	if role != "admin" && post.AuthorID != authorID {
 		return nil, errors.New("無權限修改此文章")
 	}
 
@@ -73,14 +73,14 @@ func (s *postService) UpdatePost(id uint, authorID uint, req dto.UpdatePostReque
 	return s.postRepo.FindByID(id)
 }
 
-func (s *postService) DeletePost(id uint, authorID uint) error {
+func (s *postService) DeletePost(id uint, authorID uint, role string) error {
 	post, err := s.postRepo.FindByID(id)
 	if err != nil {
 		return err
 	}
 
-	// 檢查是否為作者本人
-	if post.AuthorID != authorID {
+	// 檢查是否為作者本人或管理員
+	if role != "admin" && post.AuthorID != authorID {
 		return errors.New("無權限刪除此文章")
 	}
 

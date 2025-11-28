@@ -96,6 +96,12 @@ func (ctrl *PostController) UpdatePost(c *gin.Context) {
 		return
 	}
 
+	roleValue, roleExists := c.Get("role")
+	if !roleExists {
+		c.JSON(http.StatusForbidden, gin.H{"error": "缺少角色資訊"})
+		return
+	}
+
 	var userIDUint uint
 	switch v := userID.(type) {
 	case float64:
@@ -120,7 +126,13 @@ func (ctrl *PostController) UpdatePost(c *gin.Context) {
 		return
 	}
 
-	post, err := ctrl.postService.UpdatePost(uint(id), userIDUint, req)
+	role, ok := roleValue.(string)
+	if !ok {
+		c.JSON(http.StatusForbidden, gin.H{"error": "角色資訊格式錯誤"})
+		return
+	}
+
+	post, err := ctrl.postService.UpdatePost(uint(id), userIDUint, role, req)
 	if err != nil {
 		if err.Error() == "無權限修改此文章" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "無權限修改此文章"})
@@ -138,6 +150,12 @@ func (ctrl *PostController) DeletePost(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "無法取得使用者資訊"})
+		return
+	}
+
+	roleValue, roleExists := c.Get("role")
+	if !roleExists {
+		c.JSON(http.StatusForbidden, gin.H{"error": "缺少角色資訊"})
 		return
 	}
 
@@ -159,7 +177,13 @@ func (ctrl *PostController) DeletePost(c *gin.Context) {
 		return
 	}
 
-	if err := ctrl.postService.DeletePost(uint(id), userIDUint); err != nil {
+	role, ok := roleValue.(string)
+	if !ok {
+		c.JSON(http.StatusForbidden, gin.H{"error": "角色資訊格式錯誤"})
+		return
+	}
+
+	if err := ctrl.postService.DeletePost(uint(id), userIDUint, role); err != nil {
 		if err.Error() == "無權限刪除此文章" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "無權限刪除此文章"})
 			return

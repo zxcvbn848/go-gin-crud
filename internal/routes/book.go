@@ -20,9 +20,12 @@ func RegisterBookRoutes(r *gin.Engine, authService service.AuthService) {
 	books.Use(middleware.AuthMiddleware(authService))
 
 	// 註冊路由
-	books.POST("", bookController.CreateBook)
 	books.GET("", bookController.GetBooks)
 	books.GET("/:id", bookController.GetBook)
-	books.PUT("/:id", bookController.UpdateBook)
-	books.DELETE("/:id", bookController.DeleteBook)
+
+	adminBooks := books.Group("")
+	adminBooks.Use(middleware.RoleMiddleware("admin"))
+	adminBooks.POST("", bookController.CreateBook)
+	adminBooks.PUT("/:id", bookController.UpdateBook)
+	adminBooks.DELETE("/:id", bookController.DeleteBook)
 }
