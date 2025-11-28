@@ -20,11 +20,13 @@
 - [x] 結構化日誌系統（logrus 或 zap）
 - [x] 健康檢查端點（/health）
 - [x] 使用者密碼修改功能
+- [] 部署到正式站
+- [] 開發簡易的前端頁面
 
 ## 中優先級 📋
 - [ ] Rate Limiting（API 限流）
 - [ ] 檔案上傳功能（圖片）
-- [ ] 軟刪除（Soft Delete）
+- [x] 軟刪除（Soft Delete）
 - [ ] 操作日誌記錄（Audit Log）
 - [ ] Email 驗證（註冊確認信）
 - [ ] 瞭解 Goroutine + channel
