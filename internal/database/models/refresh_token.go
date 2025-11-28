@@ -3,8 +3,10 @@ package models
 import "time"
 
 type RefreshToken struct {
-	ID        uint   `gorm:"primaryKey"`
-	UserID    uint   `gorm:"index"`
-	Token     string `gorm:"type:varchar(500);uniqueIndex"`
+	ID        uint      `gorm:"primaryKey"`
+	UserID    uint      `gorm:"index"`
+	Token     string    `gorm:"type:varchar(500);uniqueIndex"`
 	ExpiresAt time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

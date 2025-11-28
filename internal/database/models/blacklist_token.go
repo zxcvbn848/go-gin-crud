@@ -7,4 +7,5 @@ type BlacklistToken struct {
 	Token     string    `gorm:"type:varchar(500);uniqueIndex"`
 	ExpiresAt time.Time `gorm:"index"`
 	CreatedAt time.Time
+	UpdatedAt time.Time
 }
