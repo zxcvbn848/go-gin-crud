@@ -3,6 +3,7 @@ package controller
 import (
 	"go-gin-crud/internal/dto"
 	"go-gin-crud/internal/service"
+	"go-gin-crud/internal/validator"
 	"net/http"
 	"strconv"
 
@@ -22,7 +23,7 @@ func NewBookController(bookService service.BookService) *BookController {
 func (ctrl *BookController) CreateBook(c *gin.Context) {
 	var req dto.CreateBookRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "資料格式錯誤"})
+		validator.HandleValidationError(c, err)
 		return
 	}
 
@@ -80,7 +81,7 @@ func (ctrl *BookController) UpdateBook(c *gin.Context) {
 
 	var req dto.UpdateBookRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "資料格式錯誤"})
+		validator.HandleValidationError(c, err)
 		return
 	}
 

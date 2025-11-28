@@ -3,14 +3,14 @@ package dto
 import "time"
 
 type CreateUserRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
+	Email    string `json:"email" binding:"required,email,max=255"`
+	Password string `json:"password" binding:"required,min=6,max=100"`
 	Role     string `json:"role" binding:"omitempty,oneof=user admin"`
 }
 
 type UpdateUserRequest struct {
-	Email    string `json:"email" binding:"omitempty,email"`
-	Password string `json:"password" binding:"omitempty,min=6"`
+	Email    string `json:"email" binding:"omitempty,email,max=255"`
+	Password string `json:"password" binding:"omitempty,min=6,max=100"`
 }
 
 type UserResponse struct {
