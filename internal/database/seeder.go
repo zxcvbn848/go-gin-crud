@@ -1,10 +1,10 @@
 package database
 
 import (
-	"log"
 	"time"
 
 	"go-gin-crud/internal/database/models"
+	"go-gin-crud/internal/logger"
 
 	"gorm.io/gorm"
 )
@@ -27,11 +27,11 @@ func (s *Seeder) updateTimestampField(model interface{}, tableName, fieldName st
 		Where(fieldName+" IS NULL").
 		Update(fieldName, now)
 	if result.Error != nil {
-		log.Printf("❌ 更新 %s.%s 失敗: %v", tableName, fieldName, result.Error)
+		logger.Log.WithError(result.Error).Errorf("更新 %s.%s 失敗", tableName, fieldName)
 		return result.Error
 	}
 	if result.RowsAffected > 0 {
-		log.Printf("✅ 更新 %s.%s: %d 筆記錄", tableName, fieldName, result.RowsAffected)
+		logger.Log.Infof("更新 %s.%s: %d 筆記錄", tableName, fieldName, result.RowsAffected)
 	}
 	return nil
 }
@@ -40,7 +40,7 @@ func (s *Seeder) updateTimestampField(model interface{}, tableName, fieldName st
 // 只更新 NULL 的欄位，有值的欄位保持不變
 func (s *Seeder) SeedTimestamps() error {
 	now := time.Now()
-	log.Println("🔄 開始更新既有資料的時間戳（只更新 NULL 欄位）...")
+	logger.Log.Info("開始更新既有資料的時間戳（只更新 NULL 欄位）...")
 
 	// 更新 Users 表
 	if err := s.updateTimestampField(&models.User{}, "Users", "created_at", now); err != nil {
@@ -84,6 +84,6 @@ func (s *Seeder) SeedTimestamps() error {
 		return err
 	}
 
-	log.Println("✅ 時間戳更新完成")
+	logger.Log.Info("時間戳更新完成")
 	return nil
 }

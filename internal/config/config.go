@@ -1,8 +1,9 @@
 package config
 
 import (
-	"log"
 	"os"
+
+	"go-gin-crud/internal/logger"
 
 	"github.com/joho/godotenv"
 )
@@ -23,16 +24,16 @@ func Load() {
 
 	// 檢查是否使用預設值（安全性警告）
 	if accessSecret == "ACCESS_SECRET" {
-		log.Println("⚠️  警告: 使用預設的 ACCESS_SECRET，建議在 .env 檔案中設定自訂值")
+		logger.Log.Warn("使用預設的 ACCESS_SECRET，建議在 .env 檔案中設定自訂值")
 	}
 	if refreshSecret == "REFRESH_SECRET" {
-		log.Println("⚠️  警告: 使用預設的 REFRESH_SECRET，建議在 .env 檔案中設定自訂值")
+		logger.Log.Warn("使用預設的 REFRESH_SECRET，建議在 .env 檔案中設定自訂值")
 	}
 
 	AccessSecret = []byte(accessSecret)
 	RefreshSecret = []byte(refreshSecret)
 
-	log.Println("✅ JWT 配置載入完成")
+	logger.Log.Info("JWT 配置載入完成")
 }
 
 func getEnv(key, defaultValue string) string {
