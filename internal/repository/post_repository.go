@@ -53,9 +53,7 @@ func (r *postRepository) FindAllWithPagination(page, pageSize int, search string
 	query := r.db.Model(&models.Post{}).Preload("Author")
 
 	// 搜尋功能（搜尋 title 或 content）
-	if search != "" {
-		query = query.Where("title LIKE ? OR content LIKE ?", "%"+search+"%", "%"+search+"%")
-	}
+	query = WhereLikeOr(query, search, "title", "content")
 
 	// 計算總數
 	if err := query.Count(&total).Error; err != nil {
@@ -70,4 +68,3 @@ func (r *postRepository) FindAllWithPagination(page, pageSize int, search string
 
 	return posts, total, nil
 }
-

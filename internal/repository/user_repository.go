@@ -63,9 +63,7 @@ func (r *userRepository) FindAllWithPagination(page, pageSize int, search string
 	query := r.db.Model(&models.User{})
 
 	// 搜尋功能（只搜尋 email）
-	if search != "" {
-		query = query.Where("email LIKE ?", "%"+search+"%")
-	}
+	query = WhereLike(query, "email", search)
 
 	// 計算總數
 	if err := query.Count(&total).Error; err != nil {
