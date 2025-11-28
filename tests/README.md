@@ -46,11 +46,12 @@ go test ./tests -v -run TestCreateBook
 
 ## 測試覆蓋範圍
 
-### 認證 API (`api_auth_test.go`) - 4 個測試
+### 認證 API (`api_auth_test.go`) - 5 個測試
 - ✅ 用戶註冊 (`TestRegister`) - 測試成功註冊、重複註冊、無效 email、密碼太短
 - ✅ 用戶登入 (`TestLogin`) - 測試成功登入、錯誤密碼、不存在的用戶
 - ✅ 取得用戶資料 (`TestProfile`) - 測試成功取得、無 token、無效 token
 - ✅ 用戶登出 (`TestLogout`) - 測試成功登出、登出後無法使用 token
+- ✅ 修改密碼 (`TestChangePassword`) - 測試成功修改、錯誤當前密碼、新密碼驗證、登入驗證
 
 ### 書籍 API (`api_book_test.go`) - 5 個測試
 - ✅ 創建書籍 (`TestCreateBook`) - 測試成功創建、缺少欄位、無 token、非管理員

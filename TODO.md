@@ -17,9 +17,9 @@
 - [x] JWT Secret 從環境變數讀取（目前硬編碼）
 - [x] 輸入驗證（使用 validator 套件）
 - [x] API 測試
-- [ ] 結構化日誌系統（logrus 或 zap）
+- [x] 結構化日誌系統（logrus 或 zap）
 - [x] 健康檢查端點（/health）
-- [ ] 使用者密碼修改功能
+- [x] 使用者密碼修改功能
 
 ## 中優先級 📋
 - [ ] Rate Limiting（API 限流）

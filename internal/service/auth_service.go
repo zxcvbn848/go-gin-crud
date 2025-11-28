@@ -12,6 +12,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var ErrInvalidCurrentPassword = errors.New("目前密碼不正確")
+
 type AuthService interface {
 	Register(email, password string) error
 	Login(req dto.LoginRequest) (string, string, error)
@@ -19,6 +21,7 @@ type AuthService interface {
 	Logout(accessToken string) error
 	IsTokenBlacklisted(token string) (bool, error)
 	GetUserProfile(userID uint) (*models.User, error)
+	ChangePassword(userID uint, req dto.ChangePasswordRequest) error
 }
 
 type authService struct {
@@ -192,4 +195,25 @@ func (s *authService) IsTokenBlacklisted(token string) (bool, error) {
 
 func (s *authService) GetUserProfile(userID uint) (*models.User, error) {
 	return s.userRepo.FindByID(userID)
+}
+
+func (s *authService) ChangePassword(userID uint, req dto.ChangePasswordRequest) error {
+	user, err := s.userRepo.FindByID(userID)
+	if err != nil {
+		return err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.CurrentPassword)); err != nil {
+		return ErrInvalidCurrentPassword
+	}
+
+	hashed, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), 14)
+	if err != nil {
+		return err
+	}
+
+	user.Password = string(hashed)
+	user.UpdatedAt = time.Now()
+
+	return s.userRepo.Update(user)
 }

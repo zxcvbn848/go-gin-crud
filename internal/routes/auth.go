@@ -25,6 +25,7 @@ func RegisterAuthRoutes(r *gin.Engine) service.AuthService {
 	auth.Use(middleware.AuthMiddleware(authService))
 	auth.POST("/logout", authController.Logout)
 	auth.GET("/profile", authController.Profile)
+	auth.POST("/change-password", authController.ChangePassword)
 
 	return authService
 }

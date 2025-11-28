@@ -17,9 +17,9 @@ func TestRegister(t *testing.T) {
 		"password": "password123",
 	}
 	w := makeRequest("POST", "/register", req, "")
-	
+
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var response map[string]string
 	json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "註冊成功", response["message"])
@@ -60,9 +60,9 @@ func TestLogin(t *testing.T) {
 		"password": "password123",
 	}
 	w := makeRequest("POST", "/login", loginReq, "")
-	
+
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var response map[string]string
 	json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NotEmpty(t, response["access_token"])
@@ -125,3 +125,51 @@ func TestLogout(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
+// TestChangePassword 測試修改密碼
+func TestChangePassword(t *testing.T) {
+	token := registerTestUser(t, "changepw@example.com", "password123")
+
+	// 測試成功修改密碼
+	changeReq := map[string]string{
+		"current_password": "password123",
+		"new_password":     "newpassword456",
+	}
+	w := makeRequest("POST", "/auth/change-password", changeReq, token)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response map[string]string
+	json.Unmarshal(w.Body.Bytes(), &response)
+	assert.Equal(t, "密碼已更新", response["message"])
+
+	// 使用新密碼登入
+	loginReq := map[string]string{
+		"email":    "changepw@example.com",
+		"password": "newpassword456",
+	}
+	w = makeRequest("POST", "/login", loginReq, "")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// 使用舊密碼登入應失敗
+	oldPasswordReq := map[string]string{
+		"email":    "changepw@example.com",
+		"password": "password123",
+	}
+	w = makeRequest("POST", "/login", oldPasswordReq, "")
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	// 測試目前密碼錯誤
+	wrongCurrentReq := map[string]string{
+		"current_password": "wrongpassword",
+		"new_password":     "anotherpass789",
+	}
+	w = makeRequest("POST", "/auth/change-password", wrongCurrentReq, token)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	// 測試新密碼太短
+	shortNewReq := map[string]string{
+		"current_password": "newpassword456",
+		"new_password":     "123",
+	}
+	w = makeRequest("POST", "/auth/change-password", shortNewReq, token)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
