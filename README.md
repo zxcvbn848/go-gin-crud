@@ -138,8 +138,6 @@ docker compose restart app
 docker exec -i go_gin_crud_mysql mysql -ugogin -pa3935522 goGinCRUD < migrations/add_timestamps.sql
 ```
 
-詳細遷移說明請參考 [docs/MIGRATION.md](./docs/MIGRATION.md)
-
 ### 為既有資料設定時間戳
 
 遷移後，可以使用 Seeder 工具為既有記錄設定時間戳（只更新 NULL 的欄位，有值的不更新）：
@@ -147,8 +145,6 @@ docker exec -i go_gin_crud_mysql mysql -ugogin -pa3935522 goGinCRUD < migrations
 ```bash
 go run cmd/seed/main.go
 ```
-
-詳細 Seeder 說明請參考 [docs/SEEDER.md](./docs/SEEDER.md)
 
 ## API 端點
 
