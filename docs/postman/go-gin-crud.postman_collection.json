@@ -37,7 +37,7 @@
 					"response": []
 				},
 				{
-					"name": "Login",
+					"name": "Login - Admin",
 					"event": [
 						{
 							"listen": "test",
@@ -79,7 +79,49 @@
 					"response": []
 				},
 				{
-					"name": "Auth Profile",
+					"name": "Login - User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"console.log(json)",
+									"pm.environment.set(\"refresh_token\", json.refresh_token);",
+									"pm.environment.set(\"access_token\", json.access_token);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"newUser@example.com\",\n  \"password\": \"password1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/login",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Auth Profile（需先登入）",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -119,7 +161,7 @@
 					"response": []
 				},
 				{
-					"name": "Logout",
+					"name": "Logout（需先登入）",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -156,7 +198,7 @@
 					"response": []
 				},
 				{
-					"name": "Refresh Token",
+					"name": "Refresh Token（需先登入）",
 					"event": [
 						{
 							"listen": "test",
@@ -203,13 +245,13 @@
 			"name": "Books (需先登入)",
 			"item": [
 				{
-					"name": "Create a Book",
+					"name": "Create a Book（需為 Admin）",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"title\": \"Go 語言聖經\",\n  \"author\": \"Someone\"\n}",
+							"raw": "{\n  \"title\": \"Gin is an excellent framework\",\n  \"author\": \"andy wang\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -278,7 +320,7 @@
 					"response": []
 				},
 				{
-					"name": "Update a Book",
+					"name": "Update a Book（需為 Admin）",
 					"request": {
 						"method": "PUT",
 						"header": [],
@@ -305,7 +347,7 @@
 					"response": []
 				},
 				{
-					"name": "Delete a Book",
+					"name": "Delete a Book（需為 Admin）",
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -371,7 +413,7 @@
 			"name": "Users (需先登入)",
 			"item": [
 				{
-					"name": "Create a User",
+					"name": "Create a User（需為 Admin）",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -397,7 +439,7 @@
 					"response": []
 				},
 				{
-					"name": "Get Users",
+					"name": "Get Users（需為 Admin）",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -428,7 +470,7 @@
 					"response": []
 				},
 				{
-					"name": "Get a User",
+					"name": "Get a User（需為 Admin）",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -446,7 +488,7 @@
 					"response": []
 				},
 				{
-					"name": "Update a User",
+					"name": "Update a User（需為 Admin）",
 					"request": {
 						"method": "PUT",
 						"header": [],
@@ -473,7 +515,7 @@
 					"response": []
 				},
 				{
-					"name": "Delete a User",
+					"name": "Delete a User（需為 Admin）",
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -539,7 +581,7 @@
 			"name": "Products (需先登入)",
 			"item": [
 				{
-					"name": "Create a Product",
+					"name": "Create a Product（需為 Admin）",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -614,7 +656,7 @@
 					"response": []
 				},
 				{
-					"name": "Update a Product",
+					"name": "Update a Product（需為 Admin）",
 					"request": {
 						"method": "PUT",
 						"header": [],
@@ -641,7 +683,7 @@
 					"response": []
 				},
 				{
-					"name": "Delete a Product",
+					"name": "Delete a Product（需為 Admin）",
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -707,7 +749,7 @@
 			"name": "Posts (需先登入)",
 			"item": [
 				{
-					"name": "Create a Post",
+					"name": "Create a Post（需為 Admin）",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -782,7 +824,7 @@
 					"response": []
 				},
 				{
-					"name": "Update a Post",
+					"name": "Update a Post（需為 Admin）",
 					"request": {
 						"method": "PUT",
 						"header": [],
@@ -809,7 +851,7 @@
 					"response": []
 				},
 				{
-					"name": "Delete a Post",
+					"name": "Delete a Post（需為 Admin）",
 					"request": {
 						"method": "DELETE",
 						"header": [],
