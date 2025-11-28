@@ -155,4 +155,4 @@ go run cmd/seed/main.go
 應用啟動後可訪問：
 
 - API 端點: `http://localhost:8080`
-- 健康檢查: `http://localhost:8080/health` (如果有的話)
+- 健康檢查: `http://localhost:8080/health`

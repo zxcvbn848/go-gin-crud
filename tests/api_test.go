@@ -66,6 +66,7 @@ func setupTestRouter() *gin.Engine {
 	r := gin.New()
 
 	// 註冊路由
+	routes.RegisterHealthRoutes(r)
 	testAuthService = routes.RegisterAuthRoutes(r)
 	routes.RegisterBookRoutes(r, testAuthService)
 	routes.RegisterUserRoutes(r, testAuthService)

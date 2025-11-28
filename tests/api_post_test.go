@@ -183,4 +183,3 @@ func TestDeletePost(t *testing.T) {
 	w = makeRequest("DELETE", "/posts/"+fmt.Sprintf("%d", postID2), nil, userToken)
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
-

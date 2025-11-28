@@ -34,6 +34,7 @@ func main() {
 	log.Println("✅ 資料庫遷移完成")
 
 	// 註冊路由
+	routes.RegisterHealthRoutes(r)
 	authService := routes.RegisterAuthRoutes(r)
 	routes.RegisterBookRoutes(r, authService)
 	routes.RegisterUserRoutes(r, authService)

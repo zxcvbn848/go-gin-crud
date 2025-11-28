@@ -12,6 +12,7 @@
 - `api_user_test.go` - 用戶相關 API 測試
 - `api_product_test.go` - 產品相關 API 測試
 - `api_post_test.go` - 文章相關 API 測試
+- `api_health_test.go` - 健康檢查 API 測試
 
 ## 運行測試
 
@@ -78,6 +79,9 @@ go test ./tests -v -run TestCreateBook
 - ✅ 取得單一文章 (`TestGetPost`) - 測試成功取得、不存在 ID、一般用戶可取得
 - ✅ 更新文章 (`TestUpdatePost`) - 測試管理員可更新、非管理員無法更新別人的文章
 - ✅ 刪除文章 (`TestDeletePost`) - 測試管理員可刪除、非管理員無法刪除別人的文章
+
+### 健康檢查 API (`api_health_test.go`) - 1 個測試
+- ✅ 服務健康檢查 (`TestHealthEndpoint`) - 測試成功回傳 `status: ok`
 
 ## 測試統計
 
