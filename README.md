@@ -121,7 +121,13 @@ LOG_LEVEL=debug
 go run cmd/main.go
 ```
 
-預設情況下 log 會寫到標準輸出（terminal / Docker 容器的 console）。若服務跑在 Docker，可用 `docker logs go_gin_crud_app` 觀看。若要改成寫檔，只需在 `internal/logger/logger.go` 中調整 `Log.SetOutput(...)` 的設定。
+預設情況下 log 會寫到標準輸出（terminal / Docker 容器的 console）。若服務跑在 Docker，可用以下指令觀看：
+
+```bash
+docker logs go_gin_crud_app
+```
+
+若要改成寫檔，只需在 `internal/logger/logger.go` 中調整 `Log.SetOutput(...)` 的設定。
 
 所有應用程式與 Seeder log 都會透過 Logrus 輸出，方便後續串接 log aggregation 工具。
 
@@ -166,3 +172,19 @@ go run cmd/seed/main.go
 
 - API 端點: `http://localhost:8080`
 - 健康檢查: `http://localhost:8080/health`
+
+### 密碼修改
+
+已登入的使用者可呼叫 `POST /auth/change-password` 變更密碼，需提供目前密碼與新的密碼：
+
+```bash
+curl -X POST http://localhost:8080/auth/change-password \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "current_password": "oldPassword123",
+    "new_password": "newPassword456"
+  }'
+```
+
+若當前密碼驗證失敗將回傳 400；新密碼須符合長度限制（至少 6 碼）。

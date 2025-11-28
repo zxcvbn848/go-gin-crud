@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"go-gin-crud/internal/dto"
 	"go-gin-crud/internal/service"
 	"go-gin-crud/internal/validator"
@@ -134,4 +135,40 @@ func (ctrl *AuthController) Profile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, userResponse)
+}
+
+func (ctrl *AuthController) ChangePassword(c *gin.Context) {
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "無法取得使用者資訊"})
+		return
+	}
+
+	var userID uint
+	switch v := userIDVal.(type) {
+	case float64:
+		userID = uint(v)
+	case uint:
+		userID = v
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "使用者 ID 格式錯誤"})
+		return
+	}
+
+	var req dto.ChangePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validator.HandleValidationError(c, err)
+		return
+	}
+
+	if err := ctrl.authService.ChangePassword(userID, req); err != nil {
+		if errors.Is(err, service.ErrInvalidCurrentPassword) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "目前密碼不正確"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "修改失敗"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "密碼已更新"})
 }
