@@ -173,6 +173,8 @@ go run cmd/seed/main.go
 - API 端點: `http://localhost:8080`
 - 健康檢查: `http://localhost:8080/health`
 
+> **Soft Delete**：User / Book / Product / Post 的刪除操作皆採用軟刪除（Soft Delete），資料將保留在資料庫中並標記 `deleted_at`，查詢與登入會自動忽略已刪除紀錄。
+
 ### 密碼修改
 
 已登入的使用者可呼叫 `POST /auth/change-password` 變更密碼，需提供目前密碼與新的密碼：
