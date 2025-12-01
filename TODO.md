@@ -32,9 +32,9 @@
 - [x] 軟刪除（Soft Delete）
 - [ ] 操作日誌記錄（Audit Log）
 - [ ] Email 驗證（註冊確認信）
-- [ ] 瞭解 Goroutine + channel
-- [ ] 知道 context.Context 用法
-- [ ] 寫一個簡單的併發 demo（面試常考）
+- [x] 瞭解 Goroutine + channel
+- [x] 知道 context.Context 用法
+- [x] 寫一個簡單的併發 demo（面試常考）
 
 ## 進階功能 🚀
 
