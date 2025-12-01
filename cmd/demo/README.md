@@ -22,6 +22,124 @@ go run cmd/demo/main.go 1 2 3    # 運行 demo1, demo2, demo3
 go run cmd/demo/main.go 1-3      # 運行 demo1 到 demo3
 ```
 
+## Demo 4: 使用 Context 傳遞值
+
+### 為什麼要用 Context 傳值？
+
+在 Go 的併發編程中，Context 傳值是一個重要的模式，用於在請求鏈中傳遞請求範圍的數據。
+
+#### 1. 為什麼不能直接用 string 作為 key？
+
+**錯誤示範：**
+```go
+// ❌ 不推薦：使用 string 作為 key
+ctx := context.WithValue(context.Background(), "userID", "12345")
+```
+
+**問題：**
+- 不同包可能使用相同的 string key，導致 key 衝突
+- 無法保證類型安全
+- 容易造成數據覆蓋或讀取錯誤
+
+**正確示範：**
+```go
+// ✅ 推薦：使用自定義類型作為 key
+type contextKey string
+
+const (
+    userIDKey contextKey = "userID"
+)
+
+ctx := context.WithValue(context.Background(), userIDKey, "12345")
+```
+
+**優點：**
+- 類型安全：編譯時就能發現錯誤
+- 避免衝突：不同包定義的 contextKey 類型不同，不會衝突
+- 代碼清晰：明確表示這是 context 的 key
+
+#### 2. 為什麼要用 Context 傳值而不是函數參數？
+
+**場景對比：**
+
+| 方式 | 函數參數 | Context 傳值 |
+|:----|:--------|:------------|
+| 適用場景 | 簡單的函數調用 | 跨多層函數、goroutine 傳遞 |
+| 參數數量 | 參數列表會很長 | 不需要修改函數簽名 |
+| 中間層處理 | 需要每層都傳遞 | 自動傳遞，中間層不需要關心 |
+| 併發安全 | 需要額外處理 | 每個請求獨立的 context |
+| 使用場景 | 簡單調用鏈 | HTTP 請求、RPC 調用、日誌追蹤 |
+
+**實際應用場景：**
+
+1. **HTTP 請求追蹤**
+   ```go
+   // 在 middleware 中設置
+   ctx := context.WithValue(r.Context(), requestIDKey, generateRequestID())
+   
+   // 在任意深度的函數中獲取
+   requestID := ctx.Value(requestIDKey).(string)
+   ```
+
+2. **用戶身份信息**
+   ```go
+   // 認證後設置用戶信息
+   ctx := context.WithValue(ctx, userIDKey, user.ID)
+   
+   // 在業務邏輯中直接使用，不需要每層都傳 userID
+   userID := ctx.Value(userIDKey).(string)
+   ```
+
+3. **日誌追蹤**
+   ```go
+   // 設置追蹤 ID
+   ctx := context.WithValue(ctx, traceIDKey, traceID)
+   
+   // 所有日誌自動包含追蹤 ID
+   logger.WithContext(ctx).Info("處理請求")
+   ```
+
+#### 3. Context 傳值的限制和注意事項
+
+**限制：**
+- Context 不是數據庫，不應該存儲大量數據
+- 只適合存儲請求範圍的數據（request-scoped data）
+- 數據應該是不可變的（immutable）
+
+**最佳實踐：**
+- ✅ 存儲：用戶 ID、請求 ID、追蹤 ID、認證信息
+- ❌ 不要存儲：大量數據、可變對象、業務邏輯狀態
+
+**類型斷言安全：**
+```go
+// 安全的類型斷言
+if userID, ok := ctx.Value(userIDKey).(string); ok {
+    // 使用 userID
+} else {
+    // 處理 key 不存在的情況
+}
+```
+
+### 實現示例
+
+```go
+// 定義 context key 類型
+type contextKey string
+
+const (
+    userIDKey    contextKey = "userID"
+    requestIDKey contextKey = "requestID"
+)
+
+// 設置值
+ctx := context.WithValue(context.Background(), userIDKey, "12345")
+ctx = context.WithValue(ctx, requestIDKey, "req-abc-123")
+
+// 獲取值
+userID := ctx.Value(userIDKey).(string)
+requestID := ctx.Value(requestIDKey).(string)
+```
+
 ## Demo 5: 優雅關閉 vs 普通關閉
 
 ### 關鍵區別對比
