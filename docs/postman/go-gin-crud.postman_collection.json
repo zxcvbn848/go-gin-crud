@@ -967,6 +967,210 @@
 			]
 		},
 		{
+			"name": "Counters",
+			"item": [
+				{
+					"name": "Get Counter Value",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/counters",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"counters"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Increment Counter Value",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/counters/increment",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"counters",
+								"increment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Decrement Counter Value",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/counters/decrement",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"counters",
+								"decrement"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Counter Value",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"value\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/counters/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"counters",
+								"set"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Counter Value",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/counters/reset",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"counters",
+								"reset"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Counter Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/counters/info?type=mutex",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"counters",
+								"info"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "mutex",
+									"description": "mutex,atomic"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Compare Counter Performance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/counters/performance?iterations=100000000",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"counters",
+								"performance"
+							],
+							"query": [
+								{
+									"key": "iterations",
+									"value": "100000000"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{access_token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
 			"name": "Health Check",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true

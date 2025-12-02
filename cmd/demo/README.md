@@ -206,3 +206,8 @@ cancel()
 wg.Wait()
 ```
 
+---
+
+## 相關資源
+
+高併發情境題和面試問題請參考：[`cmd/concurrency/README.md`](../concurrency/README.md)
