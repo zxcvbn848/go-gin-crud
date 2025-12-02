@@ -40,6 +40,7 @@ func main() {
 	routes.RegisterProductRoutes(r, authService)
 	routes.RegisterPostRoutes(r, authService)
 	routes.RegisterCounterRoutes(r)
+	routes.RegisterAccountRoutes(r)
 
 	r.Run(":8080")
 }
