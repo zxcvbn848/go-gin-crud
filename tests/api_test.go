@@ -72,6 +72,9 @@ func setupTestRouter() *gin.Engine {
 	routes.RegisterUserRoutes(r, testAuthService)
 	routes.RegisterProductRoutes(r, testAuthService)
 	routes.RegisterPostRoutes(r, testAuthService)
+	routes.RegisterCounterRoutes(r)
+	routes.RegisterAccountRoutes(r)
+	routes.RegisterTaskExecutorRoutes(r)
 
 	testRouter = r
 
