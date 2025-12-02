@@ -163,10 +163,11 @@ func (ctrl *AccountController) ExecuteRandomBatchTransactions(c *gin.Context) {
 	}
 
 	// 生成隨機操作：-1 (取款), 0 (查詢), 1-2 (存款)
-	rand.Seed(time.Now().UnixNano())
+	// 使用本地隨機數生成器（Go 1.20+ 推薦方式）
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	operations := make([]int, count)
 	for i := 0; i < count; i++ {
-		operations[i] = rand.Intn(4) - 1 // -1, 0, 1, 2
+		operations[i] = r.Intn(4) - 1 // -1, 0, 1, 2
 	}
 
 	// 檢查是否使用延遲版本

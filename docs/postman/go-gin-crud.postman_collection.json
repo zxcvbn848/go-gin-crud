@@ -1171,6 +1171,345 @@
 			]
 		},
 		{
+			"name": "Account Balance",
+			"item": [
+				{
+					"name": "Get Account Balance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/accounts/balance",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"accounts",
+								"balance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deposit Account Balance",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/accounts/deposit",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"accounts",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Withdraw Account Balance",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/accounts/withdraw",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"accounts",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Account Balance",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"balance\": 1000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/accounts/balance",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"accounts",
+								"balance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Account Balance",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/accounts/reset",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"accounts",
+								"reset"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Batch Transactions",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operations\": [\n        1,\n        -1,\n        0,\n        2,\n        -1,\n        0\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/accounts/batch?count=10",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"accounts",
+								"batch"
+							],
+							"query": [
+								{
+									"key": "count",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Random Batch Transactions",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/accounts/batch/random?count=10&delay=true",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"accounts",
+								"batch",
+								"random"
+							],
+							"query": [
+								{
+									"key": "count",
+									"value": "10"
+								},
+								{
+									"key": "delay",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{access_token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "Execute a Task",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"task\": {\n      \"id\": \"task-1\",\n      \"duration\": 2500,\n      \"description\": \"测试任务\"\n    },\n    \"timeout\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/tasks/execute",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tasks",
+								"execute"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Execute And Retry a Task",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"task\": {\n      \"id\": \"task-2\",\n      \"duration\": 2500,\n      \"description\": \"带重试的任务\"\n    },\n    \"timeout\": 2,\n    \"max_retry\": 3,\n    \"retry_delay\": 500\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/tasks/execute/retry",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tasks",
+								"execute",
+								"retry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Execute Batch Tasks",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tasks\": [\n      {\"id\": \"task-1\", \"duration\": 1000},\n      {\"id\": \"task-2\", \"duration\": 2000},\n      {\"id\": \"task-3\", \"duration\": 5500}\n    ],\n    \"timeout\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/tasks/batch",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tasks",
+								"batch"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{access_token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
 			"name": "Health Check",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
