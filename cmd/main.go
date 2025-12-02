@@ -41,6 +41,7 @@ func main() {
 	routes.RegisterPostRoutes(r, authService)
 	routes.RegisterCounterRoutes(r)
 	routes.RegisterAccountRoutes(r)
+	routes.RegisterTaskExecutorRoutes(r)
 
 	r.Run(":8080")
 }
