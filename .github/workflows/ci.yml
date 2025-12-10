@@ -34,7 +34,7 @@ jobs:
     - name: 設置 Go 環境
       uses: actions/setup-go@v5
       with:
-        go-version: '1.25.4'
+        go-version: '1.25.0'
         cache: true
 
     - name: 運行測試
@@ -70,7 +70,7 @@ jobs:
     - name: 設置 Go 環境
       uses: actions/setup-go@v5
       with:
-        go-version: '1.25.4'
+        go-version: '1.25.0'
         cache: true
 
     - name: 構建應用
@@ -96,7 +96,7 @@ jobs:
     - name: 設置 Go 環境
       uses: actions/setup-go@v5
       with:
-        go-version: '1.25.4'
+        go-version: '1.25.0'
         cache: true
 
     - name: 安裝 golangci-lint
