@@ -128,6 +128,7 @@ func TestLogout(t *testing.T) {
 // TestChangePassword 測試修改密碼
 func TestChangePassword(t *testing.T) {
 	token := registerTestUser(t, "changepw@example.com", "password123")
+	assert.NotEmpty(t, token, "應該能獲取 token")
 
 	// 測試成功修改密碼
 	changeReq := map[string]string{
@@ -135,10 +136,11 @@ func TestChangePassword(t *testing.T) {
 		"new_password":     "newpassword456",
 	}
 	w := makeRequest("POST", "/auth/change-password", changeReq, token)
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code, "修改密碼應該成功")
 
 	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err, "應該能解析響應")
 	assert.Equal(t, "密碼已更新", response["message"])
 
 	// 使用新密碼登入
@@ -147,7 +149,7 @@ func TestChangePassword(t *testing.T) {
 		"password": "newpassword456",
 	}
 	w = makeRequest("POST", "/login", loginReq, "")
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code, "使用新密碼登入應該成功")
 
 	// 使用舊密碼登入應失敗
 	oldPasswordReq := map[string]string{
@@ -155,7 +157,7 @@ func TestChangePassword(t *testing.T) {
 		"password": "password123",
 	}
 	w = makeRequest("POST", "/login", oldPasswordReq, "")
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, http.StatusUnauthorized, w.Code, "使用舊密碼登入應該失敗")
 
 	// 測試目前密碼錯誤
 	wrongCurrentReq := map[string]string{
@@ -163,7 +165,7 @@ func TestChangePassword(t *testing.T) {
 		"new_password":     "anotherpass789",
 	}
 	w = makeRequest("POST", "/auth/change-password", wrongCurrentReq, token)
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code, "目前密碼錯誤應該返回 BadRequest")
 
 	// 測試新密碼太短
 	shortNewReq := map[string]string{
@@ -171,5 +173,5 @@ func TestChangePassword(t *testing.T) {
 		"new_password":     "123",
 	}
 	w = makeRequest("POST", "/auth/change-password", shortNewReq, token)
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code, "新密碼太短應該返回 BadRequest")
 }

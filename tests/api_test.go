@@ -16,7 +16,6 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -124,22 +123,41 @@ func registerTestUser(t *testing.T, email, password string) string {
 		"password": password,
 	}
 	w := makeRequest("POST", "/register", req, "")
-	assert.Equal(t, http.StatusOK, w.Code)
+	if w.Code != http.StatusOK {
+		t.Fatalf("註冊失敗: %d, body: %s", w.Code, w.Body.String())
+	}
 
 	// 在登入前，先刪除該用戶的舊 refresh tokens（避免 UNIQUE 約束錯誤）
 	var user models.User
-	testDB.Where("email = ?", email).First(&user)
+	if err := testDB.Where("email = ?", email).First(&user).Error; err != nil {
+		// 如果用戶不存在，這是正常的（新註冊的用戶）
+		if err != gorm.ErrRecordNotFound {
+			t.Fatalf("查詢用戶失敗: %v", err)
+		}
+	}
 	if user.ID != 0 {
-		testDB.Where("user_id = ?", user.ID).Delete(&models.RefreshToken{})
+		if err := testDB.Where("user_id = ?", user.ID).Delete(&models.RefreshToken{}).Error; err != nil {
+			t.Fatalf("刪除 refresh tokens 失敗: %v", err)
+		}
 	}
 
 	// 登入獲取 token
 	w = makeRequest("POST", "/login", req, "")
-	assert.Equal(t, http.StatusOK, w.Code)
+	if w.Code != http.StatusOK {
+		t.Fatalf("登入失敗: %d, body: %s", w.Code, w.Body.String())
+	}
 
 	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
-	return response["access_token"]
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("解析登入響應失敗: %v", err)
+	}
+	
+	token := response["access_token"]
+	if token == "" {
+		t.Fatal("access_token 為空")
+	}
+	
+	return token
 }
 
 func registerTestAdmin(t *testing.T) string {
