@@ -34,8 +34,16 @@ func setupTestDB() *gorm.DB {
 		panic("無法連線測試資料庫: " + err.Error())
 	}
 
+	// 設置連接池參數（避免連接超時）
+	sqlDB, err := db.DB()
+	if err == nil {
+		sqlDB.SetMaxOpenConns(1)      // SQLite 內存數據庫只需要一個連接
+		sqlDB.SetMaxIdleConns(1)
+		sqlDB.SetConnMaxLifetime(0)  // 不限制連接生命週期
+	}
+
 	// 自動遷移
-	db.AutoMigrate(
+	err = db.AutoMigrate(
 		&models.User{},
 		&models.Book{},
 		&models.Product{},
@@ -43,6 +51,9 @@ func setupTestDB() *gorm.DB {
 		&models.RefreshToken{},
 		&models.BlacklistToken{},
 	)
+	if err != nil {
+		panic("資料庫遷移失敗: " + err.Error())
+	}
 
 	return db
 }
@@ -166,8 +177,9 @@ func TestMain(m *testing.M) {
 	
 	// 清理
 	if testDB != nil {
-		sqlDB, _ := testDB.DB()
-		if sqlDB != nil {
+		sqlDB, err := testDB.DB()
+		if err == nil && sqlDB != nil {
+			// 關閉所有連接
 			sqlDB.Close()
 		}
 	}

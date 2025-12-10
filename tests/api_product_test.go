@@ -67,7 +67,10 @@ func TestGetProducts(t *testing.T) {
 			"price":       float64(10.0 * float64(i)),
 			"stock":       i * 10,
 		}
-		makeRequest("POST", "/products", req, adminToken)
+		w := makeRequest("POST", "/products", req, adminToken)
+		if w.Code != http.StatusOK {
+			t.Fatalf("創建產品失敗: %d", w.Code)
+		}
 	}
 
 	// 測試取得列表
@@ -75,7 +78,8 @@ func TestGetProducts(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
 	assert.NotNil(t, response["data"])
 
 	// 測試分頁

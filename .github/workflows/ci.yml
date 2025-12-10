@@ -10,22 +10,7 @@ jobs:
   test:
     name: 運行測試
     runs-on: ubuntu-latest
-    
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: test_password
-          MYSQL_DATABASE: test_db
-          MYSQL_USER: test_user
-          MYSQL_PASSWORD: test_password
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+    timeout-minutes: 10
 
     steps:
     - name: 檢出代碼
@@ -39,15 +24,10 @@ jobs:
 
     - name: 運行測試
       env:
-        DB_HOST: 127.0.0.1
-        DB_PORT: 3306
-        DB_USER: test_user
-        DB_PASSWORD: test_password
-        DB_NAME: test_db
         ACCESS_SECRET: test_access_secret_key_for_testing_only
         REFRESH_SECRET: test_refresh_secret_key_for_testing_only
       run: |
-        go test -v -race -coverprofile=coverage.out ./tests/...
+        go test -v -timeout=5m -race -coverprofile=coverage.out ./tests/...
         go tool cover -html=coverage.out -o coverage.html
 
     - name: 上傳測試覆蓋率
