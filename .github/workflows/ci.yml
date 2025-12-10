@@ -26,8 +26,10 @@ jobs:
       env:
         ACCESS_SECRET: test_access_secret_key_for_testing_only
         REFRESH_SECRET: test_refresh_secret_key_for_testing_only
+        GOFLAGS: -count=1  # 禁用測試緩存，確保每次都是全新運行
       run: |
-        go test -v -timeout=5m -race -coverprofile=coverage.out ./tests/...
+        # 設置測試超時並運行測試
+        go test -v -timeout=3m -race -coverprofile=coverage.out ./tests/...
         go tool cover -html=coverage.out -o coverage.html
 
     - name: 上傳測試覆蓋率

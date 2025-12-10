@@ -36,10 +36,18 @@ func setupTestDB() *gorm.DB {
 
 	// 設置連接池參數（避免連接超時）
 	sqlDB, err := db.DB()
-	if err == nil {
-		sqlDB.SetMaxOpenConns(1)      // SQLite 內存數據庫只需要一個連接
-		sqlDB.SetMaxIdleConns(1)
-		sqlDB.SetConnMaxLifetime(0)  // 不限制連接生命週期
+	if err != nil {
+		panic("無法取得資料庫連接: " + err.Error())
+	}
+	
+	// SQLite 內存數據庫連接池設置
+	sqlDB.SetMaxOpenConns(1)      // SQLite 內存數據庫只需要一個連接
+	sqlDB.SetMaxIdleConns(1)
+	sqlDB.SetConnMaxLifetime(0)   // 不限制連接生命週期
+	
+	// 測試連接是否可用
+	if err := sqlDB.Ping(); err != nil {
+		panic("無法 ping 資料庫: " + err.Error())
 	}
 
 	// 自動遷移
@@ -189,6 +197,15 @@ func TestMain(m *testing.M) {
 
 // setupTestDBForTest 為每個測試設置獨立的資料庫
 func setupTestDBForTest() {
+	// 關閉舊的資料庫連接（如果存在）
+	if testDB != nil {
+		sqlDB, err := testDB.DB()
+		if err == nil && sqlDB != nil {
+			sqlDB.Close()
+		}
+	}
+	
+	// 創建新的資料庫連接
 	testDB = setupTestDB()
 	database.DB = testDB
 }
