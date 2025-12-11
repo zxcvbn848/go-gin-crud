@@ -38,12 +38,12 @@ func setupTestDB() *gorm.DB {
 	if err != nil {
 		panic("無法取得資料庫連接: " + err.Error())
 	}
-	
+
 	// SQLite 內存數據庫連接池設置
-	sqlDB.SetMaxOpenConns(1)      // SQLite 內存數據庫只需要一個連接
+	sqlDB.SetMaxOpenConns(1) // SQLite 內存數據庫只需要一個連接
 	sqlDB.SetMaxIdleConns(1)
-	sqlDB.SetConnMaxLifetime(0)   // 不限制連接生命週期
-	
+	sqlDB.SetConnMaxLifetime(0) // 不限制連接生命週期
+
 	// 測試連接是否可用
 	if err := sqlDB.Ping(); err != nil {
 		panic("無法 ping 資料庫: " + err.Error())
@@ -151,12 +151,12 @@ func registerTestUser(t *testing.T, email, password string) string {
 	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Fatalf("解析登入響應失敗: %v", err)
 	}
-	
+
 	token := response["access_token"]
 	if token == "" {
 		t.Fatal("access_token 為空")
 	}
-	
+
 	return token
 }
 
@@ -165,7 +165,7 @@ func registerTestAdmin(t *testing.T) string {
 	userRepo := repository.NewUserRepository()
 	authRepo := repository.NewAuthRepository()
 	authService := service.NewAuthService(userRepo, authRepo)
-	
+
 	// 創建測試管理員
 	err := authService.Register("admin@test.com", "password123")
 	if err != nil && err.Error() != "email 已存在" {
@@ -197,10 +197,10 @@ func registerTestAdmin(t *testing.T) string {
 func TestMain(m *testing.M) {
 	// 設置測試環境
 	setupTestRouter()
-	
+
 	// 執行測試
 	code := m.Run()
-	
+
 	// 清理
 	if testDB != nil {
 		sqlDB, err := testDB.DB()
@@ -209,7 +209,7 @@ func TestMain(m *testing.M) {
 			sqlDB.Close()
 		}
 	}
-	
+
 	os.Exit(code)
 }
 
@@ -222,9 +222,8 @@ func setupTestDBForTest() {
 			sqlDB.Close()
 		}
 	}
-	
+
 	// 創建新的資料庫連接
 	testDB = setupTestDB()
 	database.DB = testDB
 }
-
