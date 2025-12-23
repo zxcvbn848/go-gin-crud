@@ -81,9 +81,9 @@ ctx := context.WithValue(context.Background(), userIDKey, "12345")
    requestID := ctx.Value(requestIDKey).(string)
    ```
 
-2. **用戶身份信息**
+2. **用戶身份資訊**
    ```go
-   // 認證後設置用戶信息
+   // 認證後設置用戶資訊
    ctx := context.WithValue(ctx, userIDKey, user.ID)
    
    // 在業務邏輯中直接使用，不需要每層都傳 userID
@@ -107,7 +107,7 @@ ctx := context.WithValue(context.Background(), userIDKey, "12345")
 - 數據應該是不可變的（immutable）
 
 **最佳實踐：**
-- ✅ 存儲：用戶 ID、請求 ID、追蹤 ID、認證信息
+- ✅ 存儲：用戶 ID、請求 ID、追蹤 ID、認證資訊
 - ❌ 不要存儲：大量數據、可變對象、業務邏輯狀態
 
 **類型斷言安全：**

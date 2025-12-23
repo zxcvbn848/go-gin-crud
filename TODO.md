@@ -25,7 +25,7 @@
 
 ## 中優先級 📋
 
-- [ ] Rate Limiting（API 限流）
+- [x] Rate Limiting（API 限流）
 - [ ] 檔案上傳功能（圖片）
 - [x] 軟刪除（Soft Delete）
 - [ ] 操作日誌記錄（Audit Log）

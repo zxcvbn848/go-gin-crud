@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 )
 
-// CounterService 計數器服務接口
+// CounterService 計數器服務介面
 type CounterService interface {
 	// GetValue 獲取當前計數值
 	GetValue() int64
@@ -129,7 +129,7 @@ func (c *atomicCounter) Reset() int64 {
 
 // ==================== 輔助函數 ====================
 
-// GetCounterServiceInfo 獲取計數器服務信息
+// GetCounterServiceInfo 獲取計數器服務資訊
 func GetCounterServiceInfo(counterType CounterServiceType) dto.CounterServiceInfo {
 	return dto.CounterServiceInfo{
 		Type:        string(counterType),

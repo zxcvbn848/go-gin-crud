@@ -54,8 +54,8 @@ func runSelectedDemos(args []string) {
 	executed := make(map[int]bool)
 
 	for _, arg := range args {
-		// 支持多個參數，例如: go run main.go 1 2 3
-		// 也支持範圍，例如: go run main.go 1-3
+		// 支援多個參數，例如: go run main.go 1 2 3
+		// 也支援範圍，例如: go run main.go 1-3
 		if strings.Contains(arg, "-") {
 			// 處理範圍參數，例如 "1-3"
 			parts := strings.Split(arg, "-")

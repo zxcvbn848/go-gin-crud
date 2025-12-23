@@ -27,7 +27,7 @@ func RegisterCounterRoutes(r *gin.Engine) {
 		// 重置計數器
 		api.POST("/reset", counterController.Reset)
 
-		// 獲取服務信息
+		// 獲取服務資訊
 		api.GET("/info", counterController.GetInfo)
 
 		// 性能比較
