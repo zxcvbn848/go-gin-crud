@@ -42,6 +42,7 @@ func main() {
 	routes.RegisterCounterRoutes(r)
 	routes.RegisterAccountRoutes(r)
 	routes.RegisterTaskExecutorRoutes(r)
+	routes.RegisterRateLimiterRoutes(r)
 
 	r.Run(":8080")
 }
