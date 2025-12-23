@@ -139,8 +139,8 @@ func (ctrl *CounterController) Reset(c *gin.Context) {
 	})
 }
 
-// GetInfo 獲取計數器服務信息
-// @Summary 獲取計數器服務信息
+// GetInfo 獲取計數器服務資訊
+// @Summary 獲取計數器服務資訊
 // @Description 獲取計數器服務的類型和描述
 // @Tags counter
 // @Param type query string false "計數器類型 (mutex/atomic)" default(mutex)

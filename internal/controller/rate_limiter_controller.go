@@ -212,4 +212,3 @@ func (ctrl *RateLimiterController) TestAllow(c *gin.Context) {
 
 	c.JSON(http.StatusOK, status)
 }
-

@@ -20,7 +20,7 @@ type CounterSetRequest struct {
 	Value int64 `json:"value" binding:"required"`
 }
 
-// CounterServiceInfo 計數器服務信息
+// CounterServiceInfo 計數器服務資訊
 type CounterServiceInfo struct {
 	Type        string `json:"type"`
 	Description string `json:"description"`

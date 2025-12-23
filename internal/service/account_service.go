@@ -13,7 +13,7 @@ var (
 	ErrInvalidAmount       = errors.New("金額無效")
 )
 
-// AccountService 帳戶服務接口
+// AccountService 帳戶服務介面
 type AccountService interface {
 	// GetBalance 獲取餘額
 	GetBalance() int64

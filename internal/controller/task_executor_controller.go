@@ -24,7 +24,7 @@ func NewTaskExecutorController(taskExecutorService service.TaskExecutorService) 
 
 // ExecuteTask 執行單個任務
 // @Summary 執行單個任務（帶超時）
-// @Description 執行一個任務，支持超時控制和資源清理
+// @Description 執行一個任務，支援超時控制和資源清理
 // @Tags task-executor
 // @Param request body dto.ExecuteTaskRequest true "任務請求"
 // @Success 200 {object} dto.ExecuteTaskResponse
@@ -43,7 +43,7 @@ func (ctrl *TaskExecutorController) ExecuteTask(c *gin.Context) {
 	// 執行任務
 	result, err := ctrl.taskExecutorService.ExecuteTask(ctx, req.Task, timeout)
 	if err != nil {
-		// 即使失敗也返回結果（包含錯誤信息）
+		// 即使失敗也返回結果（包含錯誤資訊）
 		if result != nil {
 			c.JSON(http.StatusOK, dto.ExecuteTaskResponse{
 				TaskID:      result.ID,
@@ -71,7 +71,7 @@ func (ctrl *TaskExecutorController) ExecuteTask(c *gin.Context) {
 
 // ExecuteTaskWithRetry 執行任務（帶重試）
 // @Summary 執行任務（帶重試機制）
-// @Description 執行任務，支持超時、重試和資源清理
+// @Description 執行任務，支援超時、重試和資源清理
 // @Tags task-executor
 // @Param request body dto.ExecuteTaskRequest true "任務請求（包含重試參數）"
 // @Success 200 {object} dto.ExecuteTaskResponse
@@ -119,7 +119,7 @@ func (ctrl *TaskExecutorController) ExecuteTaskWithRetry(c *gin.Context) {
 
 // BatchExecuteTasks 批量執行任務
 // @Summary 批量執行任務（並發）
-// @Description 並發執行多個任務，支持整體超時控制
+// @Description 並發執行多個任務，支援整體超時控制
 // @Tags task-executor
 // @Param request body dto.BatchExecuteRequest true "批量任務請求"
 // @Success 200 {object} dto.BatchExecuteResponse
