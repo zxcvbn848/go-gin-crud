@@ -43,6 +43,7 @@ func main() {
 	routes.RegisterAccountRoutes(r)
 	routes.RegisterTaskExecutorRoutes(r)
 	routes.RegisterRateLimiterRoutes(r)
+	routes.RegisterWorkerPoolRoutes(r)
 
 	r.Run(":8080")
 }
