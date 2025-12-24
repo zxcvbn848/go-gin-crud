@@ -39,12 +39,12 @@ type slidingWindowLimiter struct {
 
 // limiterEntry 限流器條目
 type limiterEntry struct {
-	mu          sync.Mutex
-	key         string
-	limit       int
-	window      time.Duration
-	requests    []time.Time // 請求時間戳佇列
-	lastAccess  time.Time
+	mu         sync.Mutex
+	key        string
+	limit      int
+	window     time.Duration
+	requests   []time.Time // 請求時間戳佇列
+	lastAccess time.Time
 	// 統計
 	totalRequests   int64
 	allowedRequests int64
@@ -277,4 +277,3 @@ func (rl *slidingWindowLimiter) cleanupExpiredRequests(entry *limiterEntry, now 
 
 	entry.requests = validRequests
 }
-
