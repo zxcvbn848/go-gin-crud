@@ -7,6 +7,8 @@ import (
 	"go-gin-crud/internal/logger"
 	"go-gin-crud/internal/routes"
 
+	_ "go-gin-crud/docs" // swagger docs
+
 	"github.com/gin-gonic/gin"
 )
 
