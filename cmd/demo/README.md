@@ -9,18 +9,34 @@
 - **Demo 3**: Worker Pool 模式（結合 Goroutine + Channel + Context）
 - **Demo 4**: 使用 Context 傳遞值
 - **Demo 5**: 優雅關閉（Graceful Shutdown）
+- **Demo 6**: 避免緩存擊穿（Cache Penetration）
 
 ## 運行方式
 
+**重要：** 必須運行整個包，不能只運行 `main.go` 文件！
+
 ```bash
-# 運行所有 demo
-go run cmd/demo/main.go
+# 運行所有 demo（推薦方式）
+go run ./cmd/demo
+
+# 或者使用通配符運行所有文件
+go run cmd/demo/*.go
 
 # 運行指定的 demo
-go run cmd/demo/main.go 1        # 只運行 demo1
-go run cmd/demo/main.go 1 2 3    # 運行 demo1, demo2, demo3
-go run cmd/demo/main.go 1-3      # 運行 demo1 到 demo3
+go run ./cmd/demo 1        # 只運行 demo1
+go run ./cmd/demo 1 2 3    # 運行 demo1, demo2, demo3
+go run ./cmd/demo 1-3      # 運行 demo1 到 demo3
+go run ./cmd/demo 6        # 只運行 demo6
+
+# ❌ 錯誤方式（會出現 undefined 錯誤）
+# go run cmd/demo/main.go 6
 ```
+
+**為什麼？**
+- 使用 `go run cmd/demo/main.go` 時，Go 只編譯 `main.go` 文件
+- 不會自動包含同目錄下的其他文件（demo1.go, demo2.go 等）
+- 因此會出現 `undefined: demo1` 等錯誤
+- 使用 `go run ./cmd/demo` 會編譯整個包的所有文件
 
 ## Demo 4: 使用 Context 傳遞值
 
@@ -204,6 +220,104 @@ cancel()
 
 // 5. 等待所有 goroutine 完成
 wg.Wait()
+```
+
+---
+
+## Demo 6: 避免緩存擊穿（Cache Penetration）
+
+### 什麼是緩存擊穿？
+
+緩存擊穿是指當熱點數據的緩存過期時，大量併發請求同時穿透緩存直接查詢數據庫，導致數據庫壓力過大。
+
+### 問題場景
+
+**無保護的情況：**
+- 緩存過期
+- 10 個併發請求同時發現緩存未命中
+- 10 個請求同時查詢數據庫
+- 數據庫壓力暴增
+
+### 解決方案
+
+使用 `sync.Once` 確保只有第一個請求去查詢數據庫，其他請求等待第一個查詢結果。
+
+**核心技術：**
+1. **`sync.Once`**: 確保查詢操作只執行一次
+2. **Channel**: 用於傳遞查詢結果給等待的 goroutine
+3. **Context**: 控制查詢超時
+4. **錯誤處理**: 處理查詢失敗的情況
+
+### 實現要點
+
+```go
+// 1. 使用 sync.Once 確保只查詢一次
+once := &sync.Once{}
+resultChan := make(chan queryResult, 1)
+
+once.Do(func() {
+    // 只有第一個 goroutine 會執行這裡
+    value, err := queryDB(key)
+    resultChan <- queryResult{value: value, err: err}
+})
+
+// 2. 所有 goroutine 等待結果
+result := <-resultChan
+```
+
+### Demo 6 包含三個場景
+
+1. **場景 1**: 緩存擊穿問題演示（無保護）
+   - 展示問題：10 個請求同時查詢數據庫
+   - 結果：數據庫被查詢 10 次，壓力暴增
+
+2. **場景 2**: 使用 `sync.Once` 解決方案
+   - 展示解決：只有 1 個請求查詢數據庫，其他等待結果
+   - 結果：數據庫只被查詢 1 次，壓力減少 90%
+
+3. **場景 3**: 帶超時和錯誤處理
+   - 正常查詢
+   - 查詢失敗處理
+   - 超時處理
+
+### 為什麼兩個場景的耗時差不多？
+
+**重要理解：** 避免緩存擊穿的主要目的不是減少總耗時，而是**減少數據庫壓力**！
+
+#### 場景 1（無保護）：
+- 10 個 goroutine **併發**執行
+- 每個都查詢數據庫（500ms）
+- 總耗時：約 500ms（因為併發，取最慢的那個）
+- 數據庫壓力：**10 次查詢**
+
+#### 場景 2（有保護）：
+- 10 個 goroutine **併發**執行
+- 只有第一個查詢數據庫（500ms）
+- 其他 9 個等待第一個的結果
+- 總耗時：約 500ms（等待第一個查詢完成）
+- 數據庫壓力：**1 次查詢**
+
+#### 關鍵差異：
+
+| 指標 | 場景 1（無保護） | 場景 2（有保護） | 差異 |
+|------|-----------------|----------------|------|
+| 總耗時 | ~500ms | ~500ms | 相同 |
+| 數據庫查詢次數 | 10 次 | 1 次 | **減少 90%** |
+| 數據庫 CPU 使用 | 10 倍 | 1 倍 | **減少 90%** |
+| 數據庫連接數 | 10 個 | 1 個 | **減少 90%** |
+| 數據庫內存使用 | 10 倍 | 1 倍 | **減少 90%** |
+
+**結論：** 雖然總耗時差不多，但在高併發場景下，避免緩存擊穿可以：
+- ✅ 保護數據庫不被壓垮
+- ✅ 減少數據庫資源消耗
+- ✅ 提高系統穩定性
+- ✅ 避免數據庫連接池耗盡
+
+### 運行 Demo 6
+
+```bash
+# 只運行 demo6
+go run cmd/demo/main.go 6
 ```
 
 ---
