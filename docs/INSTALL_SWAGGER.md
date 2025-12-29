@@ -67,4 +67,3 @@ swag version
 go list -m github.com/swaggo/files
 go list -m github.com/swaggo/gin-swagger
 ```
-

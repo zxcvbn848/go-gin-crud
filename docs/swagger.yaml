@@ -97,6 +97,31 @@ definitions:
           $ref: '#/definitions/go-gin-crud_internal_dto.TransactionResponse'
         type: array
     type: object
+  go-gin-crud_internal_dto.BookResponse:
+    properties:
+      author:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  go-gin-crud_internal_dto.ChangePasswordRequest:
+    properties:
+      current_password:
+        minLength: 6
+        type: string
+      new_password:
+        minLength: 6
+        type: string
+    required:
+    - current_password
+    - new_password
+    type: object
   go-gin-crud_internal_dto.CounterDecrementRequest:
     properties:
       amount:
@@ -131,6 +156,70 @@ definitions:
         type: integer
     required:
     - value
+    type: object
+  go-gin-crud_internal_dto.CreateBookRequest:
+    properties:
+      author:
+        maxLength: 255
+        minLength: 1
+        type: string
+      title:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - author
+    - title
+    type: object
+  go-gin-crud_internal_dto.CreatePostRequest:
+    properties:
+      content:
+        minLength: 1
+        type: string
+      title:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  go-gin-crud_internal_dto.CreateProductRequest:
+    properties:
+      description:
+        maxLength: 1000
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      price:
+        minimum: 0
+        type: number
+      stock:
+        minimum: 0
+        type: integer
+    required:
+    - name
+    - price
+    type: object
+  go-gin-crud_internal_dto.CreateUserRequest:
+    properties:
+      email:
+        maxLength: 255
+        type: string
+      password:
+        maxLength: 100
+        minLength: 6
+        type: string
+      role:
+        enum:
+        - user
+        - admin
+        type: string
+    required:
+    - email
+    - password
     type: object
   go-gin-crud_internal_dto.CreateWorkerPoolRequest:
     properties:
@@ -190,6 +279,63 @@ definitions:
       status:
         type: string
       task_id:
+        type: string
+    type: object
+  go-gin-crud_internal_dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 1
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  go-gin-crud_internal_dto.PaginationResponse:
+    properties:
+      data: {}
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  go-gin-crud_internal_dto.PostResponse:
+    properties:
+      author:
+        $ref: '#/definitions/go-gin-crud_internal_dto.UserResponse'
+      author_id:
+        type: integer
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  go-gin-crud_internal_dto.ProductResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      stock:
+        type: integer
+      updated_at:
         type: string
     type: object
   go-gin-crud_internal_dto.RateLimiterConfig:
@@ -380,6 +526,66 @@ definitions:
       success:
         type: boolean
     type: object
+  go-gin-crud_internal_dto.UpdateBookRequest:
+    properties:
+      author:
+        maxLength: 255
+        minLength: 1
+        type: string
+      title:
+        maxLength: 255
+        minLength: 1
+        type: string
+    type: object
+  go-gin-crud_internal_dto.UpdatePostRequest:
+    properties:
+      content:
+        minLength: 1
+        type: string
+      title:
+        maxLength: 255
+        minLength: 1
+        type: string
+    type: object
+  go-gin-crud_internal_dto.UpdateProductRequest:
+    properties:
+      description:
+        maxLength: 1000
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+      price:
+        minimum: 0
+        type: number
+      stock:
+        minimum: 0
+        type: integer
+    type: object
+  go-gin-crud_internal_dto.UpdateUserRequest:
+    properties:
+      email:
+        maxLength: 255
+        type: string
+      password:
+        maxLength: 100
+        minLength: 6
+        type: string
+    type: object
+  go-gin-crud_internal_dto.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+      updated_at:
+        type: string
+    type: object
   go-gin-crud_internal_dto.WithdrawRequest:
     properties:
       amount:
@@ -445,6 +651,19 @@ definitions:
       worker_count:
         description: Worker 數量
         type: integer
+    type: object
+  internal_controller.RegisterRequest:
+    properties:
+      email:
+        maxLength: 255
+        type: string
+      password:
+        maxLength: 100
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
     type: object
 host: localhost:8080
 info:
@@ -994,6 +1213,780 @@ paths:
       summary: 提交任務
       tags:
       - worker-pool
+  /auth/change-password:
+    post:
+      description: 修改當前登入用戶的密碼
+      parameters:
+      - description: 密碼修改資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/go-gin-crud_internal_dto.ChangePasswordRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 修改密碼
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      description: 將 access token 加入黑名單，使其失效
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 用戶登出
+      tags:
+      - auth
+  /auth/profile:
+    get:
+      description: 獲取當前登入用戶的詳細資訊
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.UserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 獲取用戶資料
+      tags:
+      - auth
+  /books:
+    get:
+      description: 獲取書籍列表，支援分頁和搜尋（需要認證）
+      parameters:
+      - default: 1
+        description: 頁碼
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每頁數量
+        in: query
+        name: page_size
+        type: integer
+      - description: 搜尋關鍵字
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.PaginationResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 獲取書籍列表
+      tags:
+      - book
+    post:
+      description: 創建一本新書籍（需要管理員權限）
+      parameters:
+      - description: 書籍資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/go-gin-crud_internal_dto.CreateBookRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.BookResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 創建書籍
+      tags:
+      - book
+  /books/{id}:
+    delete:
+      description: 刪除指定書籍（需要管理員權限）
+      parameters:
+      - description: 書籍 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 刪除書籍
+      tags:
+      - book
+    get:
+      description: 根據 ID 獲取書籍詳細資訊（需要認證）
+      parameters:
+      - description: 書籍 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.BookResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 獲取單一書籍
+      tags:
+      - book
+    put:
+      description: 更新指定書籍的資訊（需要管理員權限）
+      parameters:
+      - description: 書籍 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/go-gin-crud_internal_dto.UpdateBookRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.BookResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 更新書籍
+      tags:
+      - book
+  /health:
+    get:
+      description: 檢查服務是否正常運行
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: 健康檢查
+      tags:
+      - health
+  /login:
+    post:
+      description: 使用 email 和密碼登入，獲取 access token 和 refresh token
+      parameters:
+      - description: 登入資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/go-gin-crud_internal_dto.LoginRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: 用戶登入
+      tags:
+      - auth
+  /posts:
+    get:
+      description: 獲取文章列表，支援分頁和搜尋（需要認證）
+      parameters:
+      - default: 1
+        description: 頁碼
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每頁數量
+        in: query
+        name: page_size
+        type: integer
+      - description: 搜尋關鍵字
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.PaginationResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 獲取文章列表
+      tags:
+      - post
+    post:
+      description: 創建一篇新文章（需要管理員權限）
+      parameters:
+      - description: 文章資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/go-gin-crud_internal_dto.CreatePostRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.PostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 創建文章
+      tags:
+      - post
+  /posts/{id}:
+    delete:
+      description: 刪除指定文章（管理員可刪除任何文章，一般用戶只能刪除自己的文章）
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 刪除文章
+      tags:
+      - post
+    get:
+      description: 根據 ID 獲取文章詳細資訊（需要認證）
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.PostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 獲取單一文章
+      tags:
+      - post
+    put:
+      description: 更新指定文章的資訊（管理員可更新任何文章，一般用戶只能更新自己的文章）
+      parameters:
+      - description: 文章 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/go-gin-crud_internal_dto.UpdatePostRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.PostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 更新文章
+      tags:
+      - post
+  /products:
+    get:
+      description: 獲取產品列表，支援分頁和搜尋（需要認證）
+      parameters:
+      - default: 1
+        description: 頁碼
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每頁數量
+        in: query
+        name: page_size
+        type: integer
+      - description: 搜尋關鍵字
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.PaginationResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 獲取產品列表
+      tags:
+      - product
+    post:
+      description: 創建一個新產品（需要管理員權限）
+      parameters:
+      - description: 產品資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/go-gin-crud_internal_dto.CreateProductRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.ProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 創建產品
+      tags:
+      - product
+  /products/{id}:
+    delete:
+      description: 刪除指定產品（需要管理員權限）
+      parameters:
+      - description: 產品 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 刪除產品
+      tags:
+      - product
+    get:
+      description: 根據 ID 獲取產品詳細資訊（需要認證）
+      parameters:
+      - description: 產品 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.ProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 獲取單一產品
+      tags:
+      - product
+    put:
+      description: 更新指定產品的資訊（需要管理員權限）
+      parameters:
+      - description: 產品 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/go-gin-crud_internal_dto.UpdateProductRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.ProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 更新產品
+      tags:
+      - product
+  /refresh:
+    post:
+      description: 使用 refresh token 獲取新的 access token
+      parameters:
+      - description: Refresh Token
+        in: formData
+        name: refresh_token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: 刷新 Access Token
+      tags:
+      - auth
+  /register:
+    post:
+      description: 註冊一個新用戶帳號
+      parameters:
+      - description: 註冊資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controller.RegisterRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: 用戶註冊
+      tags:
+      - auth
+  /users:
+    get:
+      description: 獲取用戶列表，支援分頁和搜尋（需要管理員權限）
+      parameters:
+      - default: 1
+        description: 頁碼
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每頁數量
+        in: query
+        name: page_size
+        type: integer
+      - description: 搜尋關鍵字
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.PaginationResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 獲取用戶列表
+      tags:
+      - user
+    post:
+      description: 創建一個新用戶（需要管理員權限）
+      parameters:
+      - description: 用戶資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/go-gin-crud_internal_dto.CreateUserRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 創建用戶
+      tags:
+      - user
+  /users/{id}:
+    delete:
+      description: 刪除指定用戶（需要管理員權限）
+      parameters:
+      - description: 用戶 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 刪除用戶
+      tags:
+      - user
+    get:
+      description: 根據 ID 獲取用戶詳細資訊（需要管理員權限）
+      parameters:
+      - description: 用戶 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 獲取單一用戶
+      tags:
+      - user
+    put:
+      description: 更新指定用戶的資訊（需要管理員權限）
+      parameters:
+      - description: 用戶 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新資訊
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/go-gin-crud_internal_dto.UpdateUserRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-gin-crud_internal_dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      security:
+      - BearerAuth: []
+      summary: 更新用戶
+      tags:
+      - user
 securityDefinitions:
   BearerAuth:
     description: 請在值前加上 "Bearer " 前綴，例如：Bearer {token}

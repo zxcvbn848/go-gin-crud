@@ -287,4 +287,3 @@ func (ctrl *WorkerPoolController) BatchSubmitTasks(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
-

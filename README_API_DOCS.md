@@ -120,4 +120,3 @@ func (ctrl *ProductController) GetProducts(c *gin.Context) {
 ## 詳細文檔
 
 更多詳細資訊請參考：`docs/SWAGGER_SETUP.md`
-

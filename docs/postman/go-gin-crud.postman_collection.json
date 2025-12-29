@@ -1453,7 +1453,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"tasks\": [\n      {\"id\": \"task-1\", \"duration\": 1000},\n      {\"id\": \"task-2\", \"duration\": 2000},\n      {\"id\": \"task-3\", \"duration\": 5500}\n    ],\n    \"timeout\": 5\n}",
+							"raw": "{\n    \"tasks\": [\n      {\"id\": \"task-1\", \"duration\": 1000},\n      {\"id\": \"task-2\", \"duration\": 2000},\n      {\"id\": \"task-3\", \"duration\": 5100}\n    ],\n    \"timeout\": 5\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1506,6 +1506,216 @@
 							""
 						]
 					}
+				}
+			]
+		},
+		{
+			"name": "Rate Limiter",
+			"item": [
+				{
+					"name": "Test",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"key\": \"test-key\",\n    \"limit\": 10,\n    \"window\": \"10s\",\n    \"requests\": 10,\n    \"concurrent\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/rate-limiter/test",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"rate-limiter",
+								"test"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Worker Pool",
+			"item": [
+				{
+					"name": "Create Worker Pool",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pool_id\": \"my-pool\",\n    \"worker_count\": 5,\n    \"queue_size\": 100\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/worker-pool/create",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"worker-pool",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Task",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pool_id\": \"my-pool\",\n    \"task_id\": \"task-1\",\n    \"type\": \"process_data\",\n    \"data\": {\n        \"key\": \"value\"\n    },\n    \"timeout\": 30,\n    \"priority\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/worker-pool/submit",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"worker-pool",
+								"submit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task Result",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/worker-pool/result?pool_id=my-pool&task_id=task-1",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"worker-pool",
+								"result"
+							],
+							"query": [
+								{
+									"key": "pool_id",
+									"value": "my-pool"
+								},
+								{
+									"key": "task_id",
+									"value": "task-1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Worker Pool Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/worker-pool/status?pool_id=my-pool",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"worker-pool",
+								"status"
+							],
+							"query": [
+								{
+									"key": "pool_id",
+									"value": "my-pool"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Batch Submit Task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pool_id\": \"my-pool\",\n    \"tasks\": [\n        {\n            \"task_id\": \"task-1\",\n            \"type\": \"process\",\n            \"data\": {\n                \"id\": 1\n            }\n        },\n        {\n            \"task_id\": \"task-2\",\n            \"type\": \"process\",\n            \"data\": {\n                \"id\": 2\n            }\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/worker-pool/batch-submit",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"worker-pool",
+								"batch-submit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Shutdown Worker Pool",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/api/worker-pool/shutdown?pool_id=my-pool&timeout=30",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"worker-pool",
+								"shutdown"
+							],
+							"query": [
+								{
+									"key": "pool_id",
+									"value": "my-pool"
+								},
+								{
+									"key": "timeout",
+									"value": "30"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},

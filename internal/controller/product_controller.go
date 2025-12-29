@@ -20,6 +20,16 @@ func NewProductController(productService service.ProductService) *ProductControl
 	}
 }
 
+// CreateProduct 創建產品
+// @Summary 創建產品
+// @Description 創建一個新產品（需要管理員權限）
+// @Tags product
+// @Security BearerAuth
+// @Param request body dto.CreateProductRequest true "產品資訊"
+// @Success 200 {object} dto.ProductResponse
+// @Failure 400 {object} gin.H
+// @Failure 403 {object} gin.H
+// @Router /products [post]
 func (ctrl *ProductController) CreateProduct(c *gin.Context) {
 	var req dto.CreateProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -36,6 +46,17 @@ func (ctrl *ProductController) CreateProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, product)
 }
 
+// GetProducts 獲取產品列表
+// @Summary 獲取產品列表
+// @Description 獲取產品列表，支援分頁和搜尋（需要認證）
+// @Tags product
+// @Security BearerAuth
+// @Param page query int false "頁碼" default(1)
+// @Param page_size query int false "每頁數量" default(10)
+// @Param search query string false "搜尋關鍵字"
+// @Success 200 {object} dto.PaginationResponse
+// @Failure 401 {object} gin.H
+// @Router /products [get]
 func (ctrl *ProductController) GetProducts(c *gin.Context) {
 	var req dto.PaginationRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -54,6 +75,17 @@ func (ctrl *ProductController) GetProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// GetProduct 獲取單一產品
+// @Summary 獲取單一產品
+// @Description 根據 ID 獲取產品詳細資訊（需要認證）
+// @Tags product
+// @Security BearerAuth
+// @Param id path int true "產品 ID"
+// @Success 200 {object} dto.ProductResponse
+// @Failure 400 {object} gin.H
+// @Failure 401 {object} gin.H
+// @Failure 404 {object} gin.H
+// @Router /products/{id} [get]
 func (ctrl *ProductController) GetProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -71,6 +103,18 @@ func (ctrl *ProductController) GetProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, product)
 }
 
+// UpdateProduct 更新產品
+// @Summary 更新產品
+// @Description 更新指定產品的資訊（需要管理員權限）
+// @Tags product
+// @Security BearerAuth
+// @Param id path int true "產品 ID"
+// @Param request body dto.UpdateProductRequest true "更新資訊"
+// @Success 200 {object} dto.ProductResponse
+// @Failure 400 {object} gin.H
+// @Failure 403 {object} gin.H
+// @Failure 404 {object} gin.H
+// @Router /products/{id} [put]
 func (ctrl *ProductController) UpdateProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -94,6 +138,17 @@ func (ctrl *ProductController) UpdateProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, product)
 }
 
+// DeleteProduct 刪除產品
+// @Summary 刪除產品
+// @Description 刪除指定產品（需要管理員權限）
+// @Tags product
+// @Security BearerAuth
+// @Param id path int true "產品 ID"
+// @Success 200 {object} gin.H
+// @Failure 400 {object} gin.H
+// @Failure 403 {object} gin.H
+// @Failure 404 {object} gin.H
+// @Router /products/{id} [delete]
 func (ctrl *ProductController) DeleteProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -109,4 +164,3 @@ func (ctrl *ProductController) DeleteProduct(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "刪除成功"})
 }
-
