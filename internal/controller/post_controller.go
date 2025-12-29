@@ -20,6 +20,17 @@ func NewPostController(postService service.PostService) *PostController {
 	}
 }
 
+// CreatePost 創建文章
+// @Summary 創建文章
+// @Description 創建一篇新文章（需要管理員權限）
+// @Tags post
+// @Security BearerAuth
+// @Param request body dto.CreatePostRequest true "文章資訊"
+// @Success 200 {object} dto.PostResponse
+// @Failure 400 {object} gin.H
+// @Failure 401 {object} gin.H
+// @Failure 403 {object} gin.H
+// @Router /posts [post]
 func (ctrl *PostController) CreatePost(c *gin.Context) {
 	// 從 middleware 取得 user_id
 	userID, exists := c.Get("user_id")
@@ -54,6 +65,17 @@ func (ctrl *PostController) CreatePost(c *gin.Context) {
 	c.JSON(http.StatusOK, post)
 }
 
+// GetPosts 獲取文章列表
+// @Summary 獲取文章列表
+// @Description 獲取文章列表，支援分頁和搜尋（需要認證）
+// @Tags post
+// @Security BearerAuth
+// @Param page query int false "頁碼" default(1)
+// @Param page_size query int false "每頁數量" default(10)
+// @Param search query string false "搜尋關鍵字"
+// @Success 200 {object} dto.PaginationResponse
+// @Failure 401 {object} gin.H
+// @Router /posts [get]
 func (ctrl *PostController) GetPosts(c *gin.Context) {
 	var req dto.PaginationRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -72,6 +94,17 @@ func (ctrl *PostController) GetPosts(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// GetPost 獲取單一文章
+// @Summary 獲取單一文章
+// @Description 根據 ID 獲取文章詳細資訊（需要認證）
+// @Tags post
+// @Security BearerAuth
+// @Param id path int true "文章 ID"
+// @Success 200 {object} dto.PostResponse
+// @Failure 400 {object} gin.H
+// @Failure 401 {object} gin.H
+// @Failure 404 {object} gin.H
+// @Router /posts/{id} [get]
 func (ctrl *PostController) GetPost(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -89,6 +122,19 @@ func (ctrl *PostController) GetPost(c *gin.Context) {
 	c.JSON(http.StatusOK, post)
 }
 
+// UpdatePost 更新文章
+// @Summary 更新文章
+// @Description 更新指定文章的資訊（管理員可更新任何文章，一般用戶只能更新自己的文章）
+// @Tags post
+// @Security BearerAuth
+// @Param id path int true "文章 ID"
+// @Param request body dto.UpdatePostRequest true "更新資訊"
+// @Success 200 {object} dto.PostResponse
+// @Failure 400 {object} gin.H
+// @Failure 401 {object} gin.H
+// @Failure 403 {object} gin.H
+// @Failure 404 {object} gin.H
+// @Router /posts/{id} [put]
 func (ctrl *PostController) UpdatePost(c *gin.Context) {
 	// 從 middleware 取得 user_id
 	userID, exists := c.Get("user_id")
@@ -146,6 +192,18 @@ func (ctrl *PostController) UpdatePost(c *gin.Context) {
 	c.JSON(http.StatusOK, post)
 }
 
+// DeletePost 刪除文章
+// @Summary 刪除文章
+// @Description 刪除指定文章（管理員可刪除任何文章，一般用戶只能刪除自己的文章）
+// @Tags post
+// @Security BearerAuth
+// @Param id path int true "文章 ID"
+// @Success 200 {object} gin.H
+// @Failure 400 {object} gin.H
+// @Failure 401 {object} gin.H
+// @Failure 403 {object} gin.H
+// @Failure 404 {object} gin.H
+// @Router /posts/{id} [delete]
 func (ctrl *PostController) DeletePost(c *gin.Context) {
 	// 從 middleware 取得 user_id
 	userID, exists := c.Get("user_id")
@@ -195,4 +253,3 @@ func (ctrl *PostController) DeletePost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "刪除成功"})
 }
-

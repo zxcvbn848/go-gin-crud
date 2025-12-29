@@ -37,4 +37,3 @@ func RegisterWorkerPoolRoutes(r *gin.Engine) {
 		api.POST("/shutdown", workerPoolController.Shutdown)
 	}
 }
-

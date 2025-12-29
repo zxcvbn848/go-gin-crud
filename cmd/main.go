@@ -7,9 +7,30 @@ import (
 	"go-gin-crud/internal/logger"
 	"go-gin-crud/internal/routes"
 
+	_ "go-gin-crud/docs" // swagger docs
+
 	"github.com/gin-gonic/gin"
 )
 
+// @title           Go Gin CRUD API
+// @version         1.0
+// @description     這是一個使用 Gin 框架構建的 CRUD API 服務，包含用戶管理、書籍管理、產品管理、文章管理、認證、限流器、工作池等功能。
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.example.com/support
+// @contact.email  support@example.com
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description 請在值前加上 "Bearer " 前綴，例如：Bearer {token}
 func main() {
 	r := gin.Default()
 

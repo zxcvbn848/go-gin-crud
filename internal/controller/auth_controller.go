@@ -26,6 +26,14 @@ type RegisterRequest struct {
 	Password string `json:"password" binding:"required,min=6,max=100"`
 }
 
+// Register 用戶註冊
+// @Summary 用戶註冊
+// @Description 註冊一個新用戶帳號
+// @Tags auth
+// @Param request body RegisterRequest true "註冊資訊"
+// @Success 200 {object} gin.H
+// @Failure 400 {object} gin.H
+// @Router /register [post]
 func (ctrl *AuthController) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -45,6 +53,14 @@ func (ctrl *AuthController) Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "註冊成功"})
 }
 
+// Login 用戶登入
+// @Summary 用戶登入
+// @Description 使用 email 和密碼登入，獲取 access token 和 refresh token
+// @Tags auth
+// @Param request body dto.LoginRequest true "登入資訊"
+// @Success 200 {object} gin.H
+// @Failure 401 {object} gin.H
+// @Router /login [post]
 func (ctrl *AuthController) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -64,6 +80,14 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 	})
 }
 
+// Refresh 刷新 Access Token
+// @Summary 刷新 Access Token
+// @Description 使用 refresh token 獲取新的 access token
+// @Tags auth
+// @Param refresh_token formData string true "Refresh Token"
+// @Success 200 {object} gin.H
+// @Failure 401 {object} gin.H
+// @Router /refresh [post]
 func (ctrl *AuthController) Refresh(ctx *gin.Context) {
 	refreshToken := ctx.PostForm("refresh_token")
 	if refreshToken == "" {
@@ -80,6 +104,14 @@ func (ctrl *AuthController) Refresh(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"access_token": token})
 }
 
+// Logout 用戶登出
+// @Summary 用戶登出
+// @Description 將 access token 加入黑名單，使其失效
+// @Tags auth
+// @Security BearerAuth
+// @Success 200 {object} gin.H
+// @Failure 400 {object} gin.H
+// @Router /auth/logout [post]
 func (ctrl *AuthController) Logout(c *gin.Context) {
 	// 從 Header 取得 token
 	tokenString := c.GetHeader("Authorization")
@@ -100,6 +132,14 @@ func (ctrl *AuthController) Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "登出成功"})
 }
 
+// Profile 獲取用戶資料
+// @Summary 獲取用戶資料
+// @Description 獲取當前登入用戶的詳細資訊
+// @Tags auth
+// @Security BearerAuth
+// @Success 200 {object} dto.UserResponse
+// @Failure 401 {object} gin.H
+// @Router /auth/profile [get]
 func (ctrl *AuthController) Profile(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
@@ -137,6 +177,16 @@ func (ctrl *AuthController) Profile(c *gin.Context) {
 	c.JSON(http.StatusOK, userResponse)
 }
 
+// ChangePassword 修改密碼
+// @Summary 修改密碼
+// @Description 修改當前登入用戶的密碼
+// @Tags auth
+// @Security BearerAuth
+// @Param request body dto.ChangePasswordRequest true "密碼修改資訊"
+// @Success 200 {object} gin.H
+// @Failure 400 {object} gin.H
+// @Failure 401 {object} gin.H
+// @Router /auth/change-password [post]
 func (ctrl *AuthController) ChangePassword(c *gin.Context) {
 	userIDVal, exists := c.Get("user_id")
 	if !exists {
