@@ -10,6 +10,7 @@
 - **Demo 4**: 使用 Context 傳遞值
 - **Demo 5**: 優雅關閉（Graceful Shutdown）
 - **Demo 6**: 避免緩存擊穿（Cache Penetration）
+- **Demo 7**: 連接池管理（Connection Pool）
 
 ## 運行方式
 
@@ -317,7 +318,76 @@ result := <-resultChan
 
 ```bash
 # 只運行 demo6
-go run cmd/demo/main.go 6
+go run ./cmd/demo 6
+```
+
+---
+
+## Demo 7: 連接池管理（Connection Pool）
+
+### 什麼是連接池？
+
+連接池是一種資源管理技術，用於複用昂貴的資源（如數據庫連接、HTTP 連接等），避免頻繁建立和關閉連接，從而提高系統性能。
+
+### 問題場景
+
+**無連接池的情況：**
+- 每個請求都需要建立新連接
+- 請求結束後立即關閉連接
+- 頻繁建立/關閉連接導致性能下降
+
+### 解決方案
+
+使用 Channel 作為連接池，複用連接資源。
+
+**核心技術：**
+1. **Channel**: 作為連接池存儲連接
+2. **Context**: 控制連接獲取超時
+3. **WaitGroup**: 等待連接歸還
+4. **優雅關閉**: 確保所有連接正確關閉
+
+### 實現要點
+
+```go
+// 1. 使用 Channel 作為連接池
+pool := make(chan Connection, maxSize)
+
+// 2. 獲取連接（帶超時）
+select {
+case conn := <-pool:
+    // 從池中獲取連接
+case <-ctx.Done():
+    // 超時，創建新連接
+}
+
+// 3. 歸還連接
+select {
+case pool <- conn:
+    // 成功歸還
+default:
+    // 池已滿，關閉連接
+}
+```
+
+### Demo 7 包含三個場景
+
+1. **場景 1**: 無連接池問題演示
+   - 展示問題：頻繁建立/關閉連接
+
+2. **場景 2**: 使用連接池
+   - 展示解決：連接複用，性能提升
+
+3. **場景 3**: 連接池超時和優雅關閉
+   - 正常使用
+   - 超時處理
+   - 優雅關閉
+   - 關閉後處理
+
+### 運行 Demo 7
+
+```bash
+# 只運行 demo7
+go run ./cmd/demo 7
 ```
 
 ---
