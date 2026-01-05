@@ -2,12 +2,12 @@
 
 ## ✅ 已實現的場景
 
-### 1. **限流控制（Rate Limiting）** ✅
+### **限流控制（Rate Limiting）** ✅
 - **實現位置**: `internal/service/rate_limiter_service.go`
 - **Demo**: 無（已在主項目中實現）
 - **狀態**: 完整實現，包含滑動時間窗口算法
 
-### 2. **連接池管理（Connection Pool）** ✅
+### **連接池管理（Connection Pool）** ✅
 **場景描述：**
 - 數據庫連接有限，需要複用連接
 - HTTP 客戶端連接池
@@ -26,26 +26,17 @@
 **實現位置**: `cmd/demo/demo7.go`
 **狀態**: 完整實現，包含三個場景演示
 
-### 3. **任務隊列處理（Task Queue / Worker Pool）** ✅
+### **任務隊列處理（Task Queue / Worker Pool）** ✅
 - **實現位置**: 
   - `internal/service/worker_pool_service.go` (主項目)
   - `cmd/demo/demo3.go` (Demo)
 - **狀態**: 完整實現
 
-### 4. **快取更新（Cache Update / 緩存擊穿）** ✅
+### **快取更新（Cache Update / 緩存擊穿）** ✅
 - **實現位置**: `cmd/demo/demo6.go`
 - **狀態**: 完整實現，包含三個場景演示
 
-### 8. **計數器/統計（Counter/Statistics）** ✅
-- **實現位置**: `internal/service/counter_service.go`
-- **Demo**: 無（已在主項目中實現）
-- **狀態**: 完整實現，包含 Mutex 和 Atomic 兩種實現方式
-
----
-
-## ❌ 未實現的場景
-
-### 5. **批量處理（Batch Processing）** ❌
+### **批量處理（Batch Processing）** ✅
 **場景描述：**
 - 大量小任務需要批量處理
 - 例如：批量發送通知、批量更新數據
@@ -61,11 +52,19 @@
 - `time.Ticker` 定時觸發
 - Context 控制關閉
 
-**建議實現位置**: `cmd/demo/demo8.go`
+**實現位置**: `cmd/demo/demo8.go`
+**狀態**: 完整實現，包含四個場景演示
+
+### **計數器/統計（Counter/Statistics）** ✅
+- **實現位置**: `internal/service/counter_service.go`
+- **Demo**: 無（已在主項目中實現）
+- **狀態**: 完整實現，包含 Mutex 和 Atomic 兩種實現方式
 
 ---
 
-### 6. **並行查詢聚合（Parallel Query Aggregation）** ❌
+## ❌ 未實現的場景
+
+### **並行查詢聚合（Parallel Query Aggregation）** ❌
 **場景描述：**
 - 需要從多個數據源查詢數據
 - 然後聚合結果
@@ -86,7 +85,7 @@
 
 ---
 
-### 7. **訂閱發布模式（Pub/Sub）** ❌
+### **訂閱發布模式（Pub/Sub）** ❌
 **場景描述：**
 - 多個訂閱者監聽同一事件
 - 事件發生時通知所有訂閱者
@@ -106,7 +105,7 @@
 
 ---
 
-### 9. **資源競爭控制（Resource Contention）** ❌
+### **資源競爭控制（Resource Contention）** ❌
 **場景描述：**
 - 多個 goroutine 競爭同一資源
 - 需要保證互斥訪問
@@ -126,7 +125,7 @@
 
 ---
 
-### 10. **優雅降級（Graceful Degradation）** ❌
+### **優雅降級（Graceful Degradation）** ❌
 **場景描述：**
 - 系統負載過高時自動降級
 - 例如：關閉非核心功能、返回緩存數據
@@ -178,14 +177,13 @@
 
 ## 總結
 
-### 已實現：5/10 場景 + 5/5 面試問題 ✅
+### 已實現：6/10 場景 + 5/5 面試問題 ✅
 - ✅ 限流控制
 - ✅ 任務隊列處理（Worker Pool）
 - ✅ 快取更新（緩存擊穿）
 - ✅ 計數器/統計
 
-### 未實現：5/10 場景 + 0/5 面試問題
-- ❌ 批量處理
+### 未實現：4/10 場景 + 0/5 面試問題
 - ❌ 並行查詢聚合
 - ❌ 訂閱發布模式
 - ❌ 資源競爭控制
@@ -194,7 +192,7 @@
 
 ### 建議優先實現順序
 
-1. **批量處理** (demo8) - 實用性高
+1. **其他場景** - 根據需求選擇
 3. **並行查詢聚合** (demo9) - 面試常考
 4. **訂閱發布模式** (demo10) - 設計模式
 5. **資源競爭控制** (demo11) - 基礎概念
