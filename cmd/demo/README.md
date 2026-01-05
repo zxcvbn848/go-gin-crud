@@ -11,6 +11,7 @@
 - **Demo 5**: 優雅關閉（Graceful Shutdown）
 - **Demo 6**: 避免緩存擊穿（Cache Penetration）
 - **Demo 7**: 連接池管理（Connection Pool）
+- **Demo 8**: 批量處理（Batch Processing）
 
 ## 運行方式
 
@@ -388,6 +389,74 @@ default:
 ```bash
 # 只運行 demo7
 go run ./cmd/demo 7
+```
+
+---
+
+## Demo 8: 批量處理（Batch Processing）
+
+### 什麼是批量處理？
+
+批量處理是一種優化技術，將多個小任務累積起來，達到一定數量或時間後再一次性處理，從而減少處理開銷，提高系統效率。
+
+### 問題場景
+
+**無批量處理的情況：**
+- 每個任務都立即處理
+- 頻繁的處理開銷（如數據庫連接、網絡請求）
+- 系統資源浪費
+
+### 解決方案
+
+使用 Channel 累積任務，通過數量或時間觸發批量處理。
+
+**核心技術：**
+1. **Channel**: 累積任務
+2. **time.Ticker**: 定時觸發批量處理
+3. **Context**: 控制關閉
+4. **Mutex**: 保護共享狀態
+
+### 實現要點
+
+```go
+// 1. 基於數量的批量處理
+if len(batch) >= batchSize {
+    processBatch()
+}
+
+// 2. 基於時間的批量處理
+ticker := time.NewTicker(interval)
+case <-ticker.C:
+    processBatch()
+
+// 3. 混合觸發（數量 + 時間）
+if len(batch) >= batchSize || <-ticker.C {
+    processBatch()
+}
+```
+
+### Demo 8 包含四個場景
+
+1. **場景 1**: 無批量處理問題演示
+   - 展示問題：逐個處理，效率低
+
+2. **場景 2**: 基於數量的批量處理
+   - 達到指定數量後觸發處理
+   - 適合高頻任務場景
+
+3. **場景 3**: 基於時間的批量處理
+   - 定時觸發批量處理
+   - 適合低頻但需要及時處理的場景
+
+4. **場景 4**: 混合觸發（數量 + 時間）
+   - 達到數量或時間任一條件即觸發
+   - 兼顧效率和及時性
+
+### 運行 Demo 8
+
+```bash
+# 只運行 demo8
+go run ./cmd/demo 8
 ```
 
 ---

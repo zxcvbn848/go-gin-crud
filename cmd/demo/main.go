@@ -39,6 +39,7 @@ func runAllDemos() {
 	demo5()
 	demo6()
 	demo7()
+	demo8()
 }
 
 // runSelectedDemos 根據參數執行指定的 demo
@@ -52,6 +53,7 @@ func runSelectedDemos(args []string) {
 		5: demo5,
 		6: demo6,
 		7: demo7,
+		8: demo8,
 	}
 
 	// 記錄已執行的 demo，避免重複執行
@@ -91,7 +93,7 @@ func runSelectedDemos(args []string) {
 				executed[num] = true
 			}
 		} else {
-			fmt.Printf("警告: Demo %d 不存在（可用的 Demo: 1-7）\n", num)
+			fmt.Printf("警告: Demo %d 不存在（可用的 Demo: 1-8）\n", num)
 		}
 	}
 }
