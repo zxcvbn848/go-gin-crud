@@ -12,6 +12,7 @@
 - **Demo 6**: 避免緩存擊穿（Cache Penetration）
 - **Demo 7**: 連接池管理（Connection Pool）
 - **Demo 8**: 批量處理（Batch Processing）
+- **Demo 9**: 並行查詢聚合（Parallel Query Aggregation）
 
 ## 運行方式
 
@@ -457,6 +458,99 @@ if len(batch) >= batchSize || <-ticker.C {
 ```bash
 # 只運行 demo8
 go run ./cmd/demo 8
+```
+
+---
+
+## Demo 9: 並行查詢聚合（Parallel Query Aggregation）
+
+### 什麼是並行查詢聚合？
+
+並行查詢聚合是一種優化技術，當需要從多個數據源獲取數據時，使用多個 goroutine 並行查詢，然後將結果聚合在一起，從而大幅縮短總查詢時間。
+
+### 問題場景
+
+**串行查詢的問題：**
+- 從多個 API 獲取數據
+- 每個查詢都要等待前一個完成
+- 總耗時 = 所有查詢時間的總和
+- 效率低，用戶等待時間長
+
+### 解決方案
+
+使用多個 goroutine 並行查詢，然後聚合結果。
+
+**核心技術：**
+1. **Goroutine**: 並行執行查詢
+2. **Channel**: 收集查詢結果
+3. **Context**: 統一超時控制
+4. **WaitGroup**: 等待所有查詢完成
+5. **錯誤處理**: 處理部分失敗的情況
+
+### 實現要點
+
+```go
+// 1. 使用 Channel 收集結果
+resultChan := make(chan QueryResult, len(dataSources))
+var wg sync.WaitGroup
+
+// 2. 啟動多個 goroutine 並行查詢
+for _, source := range dataSources {
+    wg.Add(1)
+    go func(src string) {
+        defer wg.Done()
+        data, err := queryDataSource(src)
+        resultChan <- QueryResult{Source: src, Data: data, Error: err}
+    }(source)
+}
+
+// 3. 等待所有查詢完成
+go func() {
+    wg.Wait()
+    close(resultChan)
+}()
+
+// 4. 收集並聚合結果
+for result := range resultChan {
+    if result.Error == nil {
+        results[result.Source] = result.Data
+    }
+}
+```
+
+### Demo 9 包含四個場景
+
+1. **場景 1**: 串行查詢問題演示
+   - 展示問題：逐個查詢，耗時長
+   - 總耗時 = 所有查詢時間的總和
+
+2. **場景 2**: 並行查詢基本實現
+   - 展示解決：並行查詢，大幅縮短總耗時
+   - 總耗時 ≈ 最慢的查詢時間
+
+3. **場景 3**: 並行查詢 + 超時控制
+   - 使用 Context 設置超時
+   - 處理慢響應的數據源
+   - 確保查詢不會無限等待
+
+4. **場景 4**: 並行查詢 + 部分失敗處理
+   - 處理部分數據源失敗的情況
+   - 聚合可用數據
+   - 返回成功和失敗的統計信息
+
+### 性能對比
+
+| 指標 | 串行查詢 | 並行查詢 | 提升 |
+|------|---------|---------|------|
+| 總耗時 | 5 × 200ms = 1000ms | ~200ms | **5 倍** |
+| 用戶體驗 | 等待時間長 | 快速響應 | ✅ |
+| 資源利用 | 低 | 高 | ✅ |
+
+### 運行 Demo 9
+
+```bash
+# 只運行 demo9
+go run ./cmd/demo 9
 ```
 
 ---
