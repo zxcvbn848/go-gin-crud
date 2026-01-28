@@ -41,21 +41,23 @@ func runAllDemos() {
 	demo7()
 	demo8()
 	demo9()
+	demo10()
 }
 
 // runSelectedDemos 根據參數執行指定的 demo
 func runSelectedDemos(args []string) {
 	// 創建 demo 映射表
 	demoMap := map[int]func(){
-		1: demo1,
-		2: demo2,
-		3: demo3,
-		4: demo4,
-		5: demo5,
-		6: demo6,
-		7: demo7,
-		8: demo8,
-		9: demo9,
+		1:  demo1,
+		2:  demo2,
+		3:  demo3,
+		4:  demo4,
+		5:  demo5,
+		6:  demo6,
+		7:  demo7,
+		8:  demo8,
+		9:  demo9,
+		10: demo10,
 	}
 
 	// 記錄已執行的 demo，避免重複執行
@@ -95,7 +97,7 @@ func runSelectedDemos(args []string) {
 				executed[num] = true
 			}
 		} else {
-			fmt.Printf("警告: Demo %d 不存在（可用的 Demo: 1-9）\n", num)
+			fmt.Printf("警告: Demo %d 不存在（可用的 Demo: 1-10）\n", num)
 		}
 	}
 }

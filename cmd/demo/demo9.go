@@ -356,4 +356,3 @@ func parallelQueryWithPartialFailure() {
 	fmt.Printf("  [部分失敗] 🎯 聚合結果: 即使部分數據源失敗，也能返回可用數據\n")
 	fmt.Printf("  [部分失敗] 📦 聚合數據: %v\n", aggregatedResult)
 }
-
