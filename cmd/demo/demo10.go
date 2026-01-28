@@ -319,12 +319,12 @@ func subscriberOfflineHandling() {
 
 	// 訂閱者信息
 	type SubscriberInfo struct {
-		ID        string
-		Channel   chan Event
-		LastSeen  time.Time
-		IsOnline  bool
-		Context   context.Context
-		Cancel    context.CancelFunc
+		ID       string
+		Channel  chan Event
+		LastSeen time.Time
+		IsOnline bool
+		Context  context.Context
+		Cancel   context.CancelFunc
 	}
 
 	// 發布者結構
@@ -565,14 +565,14 @@ func messagePersistence() {
 
 	// 發布者結構（帶消息持久化）
 	type Publisher struct {
-		subscribers   map[string]*SubscriberInfo
-		mu            sync.RWMutex
-		eventChan     chan Event
-		eventHistory  []Event // 消息歷史（持久化）
-		maxHistory    int     // 最大歷史記錄數
-		nextEventID   int     // 下一個事件 ID
-		ctx           context.Context
-		cancel        context.CancelFunc
+		subscribers  map[string]*SubscriberInfo
+		mu           sync.RWMutex
+		eventChan    chan Event
+		eventHistory []Event // 消息歷史（持久化）
+		maxHistory   int     // 最大歷史記錄數
+		nextEventID  int     // 下一個事件 ID
+		ctx          context.Context
+		cancel       context.CancelFunc
 	}
 
 	// 創建發布者

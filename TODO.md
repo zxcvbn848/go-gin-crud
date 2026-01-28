@@ -41,6 +41,8 @@
 
 - [ ] Redis 快取整合
 - [ ] 全文搜尋（Elasticsearch）
+- [ ] Socket io
+- [ ] Streaming
 - [ ] 評論系統
 - [ ] 統計報表 API
 - [ ] CI/CD 整合
