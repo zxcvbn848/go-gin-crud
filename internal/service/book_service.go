@@ -1,8 +1,11 @@
 package service
 
 import (
+	"context"
+	"go-gin-crud/internal/cache"
 	"go-gin-crud/internal/database/models"
 	"go-gin-crud/internal/dto"
+	"go-gin-crud/internal/logger"
 	"go-gin-crud/internal/repository"
 	"math"
 )
@@ -16,12 +19,14 @@ type BookService interface {
 }
 
 type bookService struct {
-	bookRepo repository.BookRepository
+	bookRepo  repository.BookRepository
+	bookCache cache.BookCache
 }
 
-func NewBookService(bookRepo repository.BookRepository) BookService {
+func NewBookService(bookRepo repository.BookRepository, bookCache cache.BookCache) BookService {
 	return &bookService{
-		bookRepo: bookRepo,
+		bookRepo:  bookRepo,
+		bookCache: bookCache,
 	}
 }
 
@@ -35,28 +40,47 @@ func (s *bookService) CreateBook(req dto.CreateBookRequest) (*dto.BookResponse, 
 		return nil, err
 	}
 
-	return &dto.BookResponse{
+	resp := &dto.BookResponse{
 		ID:        book.ID,
 		Title:     book.Title,
 		Author:    book.Author,
 		CreatedAt: book.CreatedAt,
 		UpdatedAt: book.UpdatedAt,
-	}, nil
+	}
+	if s.bookCache != nil {
+		_ = s.bookCache.SetBook(context.Background(), book.ID, resp)
+	}
+	return resp, nil
 }
 
 func (s *bookService) GetBookByID(id uint) (*dto.BookResponse, error) {
+	ctx := context.Background()
+	if s.bookCache != nil {
+		if cached, err := s.bookCache.GetBook(ctx, id); err == nil && cached != nil {
+			logger.Log.WithField("book_id", id).Info("Book 從 Redis 快取取得")
+			return cached, nil
+		}
+	}
+
 	book, err := s.bookRepo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &dto.BookResponse{
+	resp := &dto.BookResponse{
 		ID:        book.ID,
 		Title:     book.Title,
 		Author:    book.Author,
 		CreatedAt: book.CreatedAt,
 		UpdatedAt: book.UpdatedAt,
-	}, nil
+	}
+	if s.bookCache != nil {
+		_ = s.bookCache.SetBook(ctx, id, resp)
+		logger.Log.WithField("book_id", id).Info("Book 從 DB 取得並寫入快取")
+	} else {
+		logger.Log.WithField("book_id", id).Info("Book 從 DB 取得（未啟用快取）")
+	}
+	return resp, nil
 }
 
 func (s *bookService) UpdateBook(id uint, req dto.UpdateBookRequest) (*dto.BookResponse, error) {
@@ -76,17 +100,27 @@ func (s *bookService) UpdateBook(id uint, req dto.UpdateBookRequest) (*dto.BookR
 		return nil, err
 	}
 
-	return &dto.BookResponse{
+	resp := &dto.BookResponse{
 		ID:        book.ID,
 		Title:     book.Title,
 		Author:    book.Author,
 		CreatedAt: book.CreatedAt,
 		UpdatedAt: book.UpdatedAt,
-	}, nil
+	}
+	if s.bookCache != nil {
+		_ = s.bookCache.SetBook(context.Background(), book.ID, resp)
+	}
+	return resp, nil
 }
 
 func (s *bookService) DeleteBook(id uint) error {
-	return s.bookRepo.Delete(id)
+	if err := s.bookRepo.Delete(id); err != nil {
+		return err
+	}
+	if s.bookCache != nil {
+		_ = s.bookCache.DeleteBook(context.Background(), id)
+	}
+	return nil
 }
 
 func (s *bookService) GetBooksWithPagination(req dto.PaginationRequest) (*dto.PaginationResponse, error) {

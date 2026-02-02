@@ -39,7 +39,8 @@
 
 ## 進階功能 🚀
 
-- [ ] Redis 快取整合
+- [] Redis 快取整合
+  - [x] Books APIs
 - [ ] 全文搜尋（Elasticsearch）
 - [ ] Socket io
 - [ ] Streaming
