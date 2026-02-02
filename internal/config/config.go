@@ -11,6 +11,7 @@ import (
 var (
 	AccessSecret  []byte
 	RefreshSecret []byte
+	RedisAddr     string // 例: "localhost:6379"，空字串表示不啟用 Redis
 )
 
 // Load 載入環境變數並初始化配置
@@ -32,6 +33,11 @@ func Load() {
 
 	AccessSecret = []byte(accessSecret)
 	RefreshSecret = []byte(refreshSecret)
+	RedisAddr = getEnv("REDIS_ADDR", "")
+
+	if RedisAddr != "" {
+		logger.Log.Info("Redis 位址已設定，將啟用 Book 快取")
+	}
 
 	logger.Log.Info("JWT 配置載入完成")
 }
@@ -42,4 +48,3 @@ func getEnv(key, defaultValue string) string {
 	}
 	return defaultValue
 }
-
