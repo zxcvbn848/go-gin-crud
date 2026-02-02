@@ -49,6 +49,7 @@ func (s *bookService) CreateBook(req dto.CreateBookRequest) (*dto.BookResponse, 
 	}
 	if s.bookCache != nil {
 		_ = s.bookCache.SetBook(context.Background(), book.ID, resp)
+		logger.Log.WithField("book_id", book.ID).Info("Book 快取已寫入（Create）")
 	}
 	return resp, nil
 }
@@ -109,6 +110,7 @@ func (s *bookService) UpdateBook(id uint, req dto.UpdateBookRequest) (*dto.BookR
 	}
 	if s.bookCache != nil {
 		_ = s.bookCache.SetBook(context.Background(), book.ID, resp)
+		logger.Log.WithField("book_id", book.ID).Info("Book 快取已更新（Update）")
 	}
 	return resp, nil
 }
@@ -119,6 +121,7 @@ func (s *bookService) DeleteBook(id uint) error {
 	}
 	if s.bookCache != nil {
 		_ = s.bookCache.DeleteBook(context.Background(), id)
+		logger.Log.WithField("book_id", id).Info("Book 快取已刪除（Delete）")
 	}
 	return nil
 }
