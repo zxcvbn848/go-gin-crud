@@ -1,9 +1,12 @@
 package service
 
 import (
+	"context"
 	"errors"
+	"go-gin-crud/internal/cache"
 	"go-gin-crud/internal/database/models"
 	"go-gin-crud/internal/dto"
+	"go-gin-crud/internal/logger"
 	"go-gin-crud/internal/repository"
 	"math"
 )
@@ -17,12 +20,14 @@ type PostService interface {
 }
 
 type postService struct {
-	postRepo repository.PostRepository
+	postRepo  repository.PostRepository
+	postCache cache.PostCache
 }
 
-func NewPostService(postRepo repository.PostRepository) PostService {
+func NewPostService(postRepo repository.PostRepository, postCache cache.PostCache) PostService {
 	return &postService{
-		postRepo: postRepo,
+		postRepo:  postRepo,
+		postCache: postCache,
 	}
 }
 
@@ -68,16 +73,36 @@ func (s *postService) CreatePost(authorID uint, req dto.CreatePostRequest) (*dto
 		return nil, err
 	}
 
-	return toPostResponse(postWithAuthor), nil
+	resp := toPostResponse(postWithAuthor)
+	if s.postCache != nil {
+		_ = s.postCache.SetPost(context.Background(), post.ID, resp)
+		logger.Log.WithField("post_id", post.ID).Info("Post 快取已寫入（Create）")
+	}
+	return resp, nil
 }
 
 func (s *postService) GetPostByID(id uint) (*dto.PostResponse, error) {
+	ctx := context.Background()
+	if s.postCache != nil {
+		if cached, err := s.postCache.GetPost(ctx, id); err == nil && cached != nil {
+			logger.Log.WithField("post_id", id).Info("Post 從 Redis 快取取得")
+			return cached, nil
+		}
+	}
+
 	post, err := s.postRepo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return toPostResponse(post), nil
+	resp := toPostResponse(post)
+	if s.postCache != nil {
+		_ = s.postCache.SetPost(ctx, id, resp)
+		logger.Log.WithField("post_id", id).Info("Post 從 DB 取得並寫入快取")
+	} else {
+		logger.Log.WithField("post_id", id).Info("Post 從 DB 取得（未啟用快取）")
+	}
+	return resp, nil
 }
 
 func (s *postService) UpdatePost(id uint, authorID uint, role string, req dto.UpdatePostRequest) (*dto.PostResponse, error) {
@@ -108,7 +133,12 @@ func (s *postService) UpdatePost(id uint, authorID uint, role string, req dto.Up
 		return nil, err
 	}
 
-	return toPostResponse(updatedPost), nil
+	resp := toPostResponse(updatedPost)
+	if s.postCache != nil {
+		_ = s.postCache.SetPost(context.Background(), id, resp)
+		logger.Log.WithField("post_id", id).Info("Post 快取已更新（Update）")
+	}
+	return resp, nil
 }
 
 func (s *postService) DeletePost(id uint, authorID uint, role string) error {
@@ -122,7 +152,14 @@ func (s *postService) DeletePost(id uint, authorID uint, role string) error {
 		return errors.New("無權限刪除此文章")
 	}
 
-	return s.postRepo.Delete(id)
+	if err := s.postRepo.Delete(id); err != nil {
+		return err
+	}
+	if s.postCache != nil {
+		_ = s.postCache.DeletePost(context.Background(), id)
+		logger.Log.WithField("post_id", id).Info("Post 快取已刪除（Delete）")
+	}
+	return nil
 }
 
 func (s *postService) GetPostsWithPagination(req dto.PaginationRequest) (*dto.PaginationResponse, error) {

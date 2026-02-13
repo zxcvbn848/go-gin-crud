@@ -1,18 +1,21 @@
 package routes
 
 import (
+	"go-gin-crud/internal/cache"
 	"go-gin-crud/internal/controller"
 	"go-gin-crud/internal/middleware"
+	"go-gin-crud/internal/redis"
 	"go-gin-crud/internal/repository"
 	"go-gin-crud/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterPostRoutes(r *gin.Engine, authService service.AuthService) {
+func RegisterPostRoutes(r *gin.Engine, authService service.AuthService, redisClient *redis.Client) {
 	// 初始化依賴
 	postRepo := repository.NewPostRepository()
-	postService := service.NewPostService(postRepo)
+	postCache := cache.NewPostCache(redisClient)
+	postService := service.NewPostService(postRepo, postCache)
 	postController := controller.NewPostController(postService)
 
 	// 需要認證的路由組

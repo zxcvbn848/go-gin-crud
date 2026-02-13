@@ -1,9 +1,12 @@
 package service
 
 import (
+	"context"
 	"errors"
+	"go-gin-crud/internal/cache"
 	"go-gin-crud/internal/database/models"
 	"go-gin-crud/internal/dto"
+	"go-gin-crud/internal/logger"
 	"go-gin-crud/internal/repository"
 	"math"
 
@@ -19,12 +22,14 @@ type UserService interface {
 }
 
 type userService struct {
-	userRepo repository.UserRepository
+	userRepo  repository.UserRepository
+	userCache cache.UserCache
 }
 
-func NewUserService(userRepo repository.UserRepository) UserService {
+func NewUserService(userRepo repository.UserRepository, userCache cache.UserCache) UserService {
 	return &userService{
-		userRepo: userRepo,
+		userRepo:  userRepo,
+		userCache: userCache,
 	}
 }
 
@@ -57,28 +62,48 @@ func (s *userService) CreateUser(req dto.CreateUserRequest) (*dto.UserResponse, 
 		return nil, err
 	}
 
-	return &dto.UserResponse{
+	resp := &dto.UserResponse{
 		ID:        user.ID,
 		Email:     user.Email,
 		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
-	}, nil
+	}
+	if s.userCache != nil {
+		_ = s.userCache.SetUser(context.Background(), user.ID, resp)
+		logger.Log.WithField("user_id", user.ID).Info("User 快取已寫入（Create）")
+	}
+	return resp, nil
 }
 
 func (s *userService) GetUserByID(id uint) (*dto.UserResponse, error) {
+	ctx := context.Background()
+	if s.userCache != nil {
+		if cached, err := s.userCache.GetUser(ctx, id); err == nil && cached != nil {
+			logger.Log.WithField("user_id", id).Info("User 從 Redis 快取取得")
+			return cached, nil
+		}
+	}
+
 	user, err := s.userRepo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &dto.UserResponse{
+	resp := &dto.UserResponse{
 		ID:        user.ID,
 		Email:     user.Email,
 		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
-	}, nil
+	}
+	if s.userCache != nil {
+		_ = s.userCache.SetUser(ctx, id, resp)
+		logger.Log.WithField("user_id", id).Info("User 從 DB 取得並寫入快取")
+	} else {
+		logger.Log.WithField("user_id", id).Info("User 從 DB 取得（未啟用快取）")
+	}
+	return resp, nil
 }
 
 func (s *userService) UpdateUser(id uint, req dto.UpdateUserRequest) (*dto.UserResponse, error) {
@@ -109,17 +134,29 @@ func (s *userService) UpdateUser(id uint, req dto.UpdateUserRequest) (*dto.UserR
 		return nil, err
 	}
 
-	return &dto.UserResponse{
+	resp := &dto.UserResponse{
 		ID:        user.ID,
 		Email:     user.Email,
 		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
-	}, nil
+	}
+	if s.userCache != nil {
+		_ = s.userCache.SetUser(context.Background(), user.ID, resp)
+		logger.Log.WithField("user_id", user.ID).Info("User 快取已更新（Update）")
+	}
+	return resp, nil
 }
 
 func (s *userService) DeleteUser(id uint) error {
-	return s.userRepo.Delete(id)
+	if err := s.userRepo.Delete(id); err != nil {
+		return err
+	}
+	if s.userCache != nil {
+		_ = s.userCache.DeleteUser(context.Background(), id)
+		logger.Log.WithField("user_id", id).Info("User 快取已刪除（Delete）")
+	}
+	return nil
 }
 
 func (s *userService) GetUsersWithPagination(req dto.PaginationRequest) (*dto.PaginationResponse, error) {
