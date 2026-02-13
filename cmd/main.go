@@ -5,6 +5,7 @@ import (
 	"go-gin-crud/internal/database"
 	"go-gin-crud/internal/database/models"
 	"go-gin-crud/internal/logger"
+	"go-gin-crud/internal/redis"
 	"go-gin-crud/internal/routes"
 
 	_ "go-gin-crud/docs" // swagger docs
@@ -53,13 +54,23 @@ func main() {
 	}
 	logger.Log.Info("資料庫遷移完成")
 
+	// Redis 連線
+	var redisClient *redis.Client
+	if config.RedisAddr != "" {
+		var err error
+		redisClient, err = redis.NewClient(config.RedisAddr)
+		if err != nil {
+			logger.Log.WithError(err).Warn("Redis 連線失敗，所有快取停用")
+		}
+	}
+
 	// 註冊路由
 	routes.RegisterHealthRoutes(r)
 	authService := routes.RegisterAuthRoutes(r)
-	routes.RegisterBookRoutes(r, authService)
-	routes.RegisterUserRoutes(r, authService)
-	routes.RegisterProductRoutes(r, authService)
-	routes.RegisterPostRoutes(r, authService)
+	routes.RegisterBookRoutes(r, authService, redisClient)
+	routes.RegisterUserRoutes(r, authService, redisClient)
+	routes.RegisterProductRoutes(r, authService, redisClient)
+	routes.RegisterPostRoutes(r, authService, redisClient)
 	routes.RegisterCounterRoutes(r)
 	routes.RegisterAccountRoutes(r)
 	routes.RegisterTaskExecutorRoutes(r)
