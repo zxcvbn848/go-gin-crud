@@ -76,6 +76,7 @@ func main() {
 	routes.RegisterTaskExecutorRoutes(r)
 	routes.RegisterRateLimiterRoutes(r)
 	routes.RegisterWorkerPoolRoutes(r)
+	routes.RegisterSocketRoutes(r)
 
 	r.Run(":8080")
 }
