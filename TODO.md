@@ -25,7 +25,7 @@
 
 ## 中優先級 📋
 
-- [x] Rate Limiting（API 限流）
+- [x] Rate Limiting （API 限流）
 - [ ] 檔案上傳功能（圖片）
 - [x] 軟刪除（Soft Delete）
 - [ ] 操作日誌記錄（Audit Log）
@@ -39,10 +39,13 @@
 
 ## 進階功能 🚀
 
-- [] Redis 快取整合
+- [x] Redis 快取整合
   - [x] Books APIs
+  - [x] Posts APIs
+  - [x] Users APIs
+  - [x] Products APIs
 - [ ] 全文搜尋（Elasticsearch）
-- [ ] Socket io
+- [x] Socket io
 - [ ] Streaming
 - [ ] 評論系統
 - [ ] 統計報表 API
