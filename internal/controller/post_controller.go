@@ -27,9 +27,9 @@ func NewPostController(postService service.PostService) *PostController {
 // @Security BearerAuth
 // @Param request body dto.CreatePostRequest true "文章資訊"
 // @Success 200 {object} dto.PostResponse
-// @Failure 400 {object} gin.H
-// @Failure 401 {object} gin.H
-// @Failure 403 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
 // @Router /posts [post]
 func (ctrl *PostController) CreatePost(c *gin.Context) {
 	// 從 middleware 取得 user_id
@@ -74,7 +74,7 @@ func (ctrl *PostController) CreatePost(c *gin.Context) {
 // @Param page_size query int false "每頁數量" default(10)
 // @Param search query string false "搜尋關鍵字"
 // @Success 200 {object} dto.PaginationResponse
-// @Failure 401 {object} gin.H
+// @Failure 401 {object} map[string]interface{}
 // @Router /posts [get]
 func (ctrl *PostController) GetPosts(c *gin.Context) {
 	var req dto.PaginationRequest
@@ -101,9 +101,9 @@ func (ctrl *PostController) GetPosts(c *gin.Context) {
 // @Security BearerAuth
 // @Param id path int true "文章 ID"
 // @Success 200 {object} dto.PostResponse
-// @Failure 400 {object} gin.H
-// @Failure 401 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /posts/{id} [get]
 func (ctrl *PostController) GetPost(c *gin.Context) {
 	idStr := c.Param("id")
@@ -130,10 +130,10 @@ func (ctrl *PostController) GetPost(c *gin.Context) {
 // @Param id path int true "文章 ID"
 // @Param request body dto.UpdatePostRequest true "更新資訊"
 // @Success 200 {object} dto.PostResponse
-// @Failure 400 {object} gin.H
-// @Failure 401 {object} gin.H
-// @Failure 403 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /posts/{id} [put]
 func (ctrl *PostController) UpdatePost(c *gin.Context) {
 	// 從 middleware 取得 user_id
@@ -198,11 +198,11 @@ func (ctrl *PostController) UpdatePost(c *gin.Context) {
 // @Tags post
 // @Security BearerAuth
 // @Param id path int true "文章 ID"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} gin.H
-// @Failure 401 {object} gin.H
-// @Failure 403 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /posts/{id} [delete]
 func (ctrl *PostController) DeletePost(c *gin.Context) {
 	// 從 middleware 取得 user_id

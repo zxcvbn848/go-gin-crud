@@ -195,7 +195,7 @@ func (ctrl *WorkerPoolController) GetStatus(c *gin.Context) {
 // @Tags worker-pool
 // @Param pool_id query string true "工作池 ID"
 // @Param timeout query int false "超時時間（秒，預設 30 秒）"
-// @Success 200 {object} gin.H
+// @Success 200 {object} map[string]interface{}
 // @Router /api/worker-pool/shutdown [post]
 func (ctrl *WorkerPoolController) Shutdown(c *gin.Context) {
 	poolID := c.Query("pool_id")
@@ -231,7 +231,7 @@ func (ctrl *WorkerPoolController) Shutdown(c *gin.Context) {
 // @Summary 列出所有工作池
 // @Description 列出所有已創建的工作池
 // @Tags worker-pool
-// @Success 200 {object} gin.H
+// @Success 200 {object} map[string]interface{}
 // @Router /api/worker-pool/list [get]
 func (ctrl *WorkerPoolController) ListPools(c *gin.Context) {
 	pools := ctrl.workerPoolService.ListPools()

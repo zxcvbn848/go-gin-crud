@@ -27,8 +27,8 @@ func NewProductController(productService service.ProductService) *ProductControl
 // @Security BearerAuth
 // @Param request body dto.CreateProductRequest true "產品資訊"
 // @Success 200 {object} dto.ProductResponse
-// @Failure 400 {object} gin.H
-// @Failure 403 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
 // @Router /products [post]
 func (ctrl *ProductController) CreateProduct(c *gin.Context) {
 	var req dto.CreateProductRequest
@@ -55,7 +55,7 @@ func (ctrl *ProductController) CreateProduct(c *gin.Context) {
 // @Param page_size query int false "每頁數量" default(10)
 // @Param search query string false "搜尋關鍵字"
 // @Success 200 {object} dto.PaginationResponse
-// @Failure 401 {object} gin.H
+// @Failure 401 {object} map[string]interface{}
 // @Router /products [get]
 func (ctrl *ProductController) GetProducts(c *gin.Context) {
 	var req dto.PaginationRequest
@@ -82,9 +82,9 @@ func (ctrl *ProductController) GetProducts(c *gin.Context) {
 // @Security BearerAuth
 // @Param id path int true "產品 ID"
 // @Success 200 {object} dto.ProductResponse
-// @Failure 400 {object} gin.H
-// @Failure 401 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /products/{id} [get]
 func (ctrl *ProductController) GetProduct(c *gin.Context) {
 	idStr := c.Param("id")
@@ -111,9 +111,9 @@ func (ctrl *ProductController) GetProduct(c *gin.Context) {
 // @Param id path int true "產品 ID"
 // @Param request body dto.UpdateProductRequest true "更新資訊"
 // @Success 200 {object} dto.ProductResponse
-// @Failure 400 {object} gin.H
-// @Failure 403 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /products/{id} [put]
 func (ctrl *ProductController) UpdateProduct(c *gin.Context) {
 	idStr := c.Param("id")
@@ -144,10 +144,10 @@ func (ctrl *ProductController) UpdateProduct(c *gin.Context) {
 // @Tags product
 // @Security BearerAuth
 // @Param id path int true "產品 ID"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} gin.H
-// @Failure 403 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /products/{id} [delete]
 func (ctrl *ProductController) DeleteProduct(c *gin.Context) {
 	idStr := c.Param("id")

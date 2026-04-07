@@ -1,8 +1,5 @@
 basePath: /
 definitions:
-  gin.H:
-    additionalProperties: {}
-    type: object
   go-gin-crud_internal_dto.AccountResponse:
     properties:
       balance:
@@ -803,7 +800,7 @@ paths:
       description: 獲取指定類型計數器的當前值
       parameters:
       - default: mutex
-        description: 計數器類型 (mutex/atomic)
+        description: '計數器類型 (mutex/atomic) '
         in: query
         name: type
         type: string
@@ -967,7 +964,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       summary: 重置限流器
       tags:
       - rate-limiter
@@ -1131,7 +1129,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       summary: 列出所有工作池
       tags:
       - worker-pool
@@ -1174,7 +1173,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       summary: 優雅關閉工作池
       tags:
       - worker-pool
@@ -1227,15 +1227,18 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 修改密碼
@@ -1248,11 +1251,13 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 用戶登出
@@ -1269,7 +1274,8 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 獲取用戶資料
@@ -1301,7 +1307,8 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 獲取書籍列表
@@ -1324,11 +1331,13 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 創建書籍
@@ -1347,19 +1356,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 刪除書籍
@@ -1381,15 +1394,18 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 獲取單一書籍
@@ -1417,15 +1433,18 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 更新書籍
@@ -1438,7 +1457,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       summary: 健康檢查
       tags:
       - health
@@ -1456,11 +1476,13 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       summary: 用戶登入
       tags:
       - auth
@@ -1490,7 +1512,8 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 獲取文章列表
@@ -1513,15 +1536,18 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 創建文章
@@ -1540,23 +1566,28 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 刪除文章
@@ -1578,15 +1609,18 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 獲取單一文章
@@ -1614,19 +1648,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 更新文章
@@ -1658,7 +1696,8 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 獲取產品列表
@@ -1681,11 +1720,13 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 創建產品
@@ -1704,19 +1745,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 刪除產品
@@ -1738,15 +1783,18 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 獲取單一產品
@@ -1774,15 +1822,18 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 更新產品
@@ -1801,11 +1852,13 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       summary: 刷新 Access Token
       tags:
       - auth
@@ -1823,14 +1876,67 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       summary: 用戶註冊
       tags:
       - auth
+  /stream/chunked:
+    get:
+      description: 以 chunked 編碼逐筆回傳 JSON 行（NDJSON），可用 Query count 指定筆數（預設 10）
+      parameters:
+      - default: 10
+        description: 輸出筆數
+        in: query
+        name: count
+        type: integer
+      produces:
+      - application/x-ndjson
+      responses:
+        "200":
+          description: application/x-ndjson
+          schema:
+            type: string
+      summary: Chunked 串流
+      tags:
+      - streaming
+  /stream/progress:
+    get:
+      description: 以 SSE 推送模擬任務進度 0%~100%
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: text/event-stream
+          schema:
+            type: string
+      summary: 進度串流（SSE）
+      tags:
+      - streaming
+  /stream/sse:
+    get:
+      description: Server-Sent Events 串流，每秒推送一筆事件，可用 Query seconds 指定秒數（預設 30）
+      parameters:
+      - default: 30
+        description: 串流持續秒數
+        in: query
+        name: seconds
+        type: integer
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: text/event-stream
+          schema:
+            type: string
+      summary: SSE 串流
+      tags:
+      - streaming
   /users:
     get:
       description: 獲取用戶列表，支援分頁和搜尋（需要管理員權限）
@@ -1857,7 +1963,8 @@ paths:
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 獲取用戶列表
@@ -1880,11 +1987,13 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 創建用戶
@@ -1903,19 +2012,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 刪除用戶
@@ -1937,15 +2050,18 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 獲取單一用戶
@@ -1973,15 +2089,18 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/gin.H'
+            additionalProperties: true
+            type: object
       security:
       - BearerAuth: []
       summary: 更新用戶
