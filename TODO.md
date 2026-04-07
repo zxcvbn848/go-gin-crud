@@ -49,6 +49,7 @@
 - [x] Streaming
   - 相關文件
     - https://blackbing.medium.com/淺談-server-sent-events-9c81ef21ca8e
+- [ ] 影音串流協定 MPEG-DASH / HLS
 - [ ] 評論系統
 - [ ] 統計報表 API
 - [ ] CI/CD 整合
