@@ -27,8 +27,8 @@ func NewUserController(userService service.UserService) *UserController {
 // @Security BearerAuth
 // @Param request body dto.CreateUserRequest true "用戶資訊"
 // @Success 200 {object} dto.UserResponse
-// @Failure 400 {object} gin.H
-// @Failure 403 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
 // @Router /users [post]
 func (ctrl *UserController) CreateUser(c *gin.Context) {
 	var req dto.CreateUserRequest
@@ -59,7 +59,7 @@ func (ctrl *UserController) CreateUser(c *gin.Context) {
 // @Param page_size query int false "每頁數量" default(10)
 // @Param search query string false "搜尋關鍵字"
 // @Success 200 {object} dto.PaginationResponse
-// @Failure 403 {object} gin.H
+// @Failure 403 {object} map[string]interface{}
 // @Router /users [get]
 func (ctrl *UserController) GetUsers(c *gin.Context) {
 	var req dto.PaginationRequest
@@ -86,9 +86,9 @@ func (ctrl *UserController) GetUsers(c *gin.Context) {
 // @Security BearerAuth
 // @Param id path int true "用戶 ID"
 // @Success 200 {object} dto.UserResponse
-// @Failure 400 {object} gin.H
-// @Failure 403 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /users/{id} [get]
 func (ctrl *UserController) GetUser(c *gin.Context) {
 	idStr := c.Param("id")
@@ -115,9 +115,9 @@ func (ctrl *UserController) GetUser(c *gin.Context) {
 // @Param id path int true "用戶 ID"
 // @Param request body dto.UpdateUserRequest true "更新資訊"
 // @Success 200 {object} dto.UserResponse
-// @Failure 400 {object} gin.H
-// @Failure 403 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /users/{id} [put]
 func (ctrl *UserController) UpdateUser(c *gin.Context) {
 	idStr := c.Param("id")
@@ -152,10 +152,10 @@ func (ctrl *UserController) UpdateUser(c *gin.Context) {
 // @Tags user
 // @Security BearerAuth
 // @Param id path int true "用戶 ID"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} gin.H
-// @Failure 403 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /users/{id} [delete]
 func (ctrl *UserController) DeleteUser(c *gin.Context) {
 	idStr := c.Param("id")

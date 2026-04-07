@@ -27,8 +27,8 @@ func NewBookController(bookService service.BookService) *BookController {
 // @Security BearerAuth
 // @Param request body dto.CreateBookRequest true "書籍資訊"
 // @Success 200 {object} dto.BookResponse
-// @Failure 400 {object} gin.H
-// @Failure 403 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
 // @Router /books [post]
 func (ctrl *BookController) CreateBook(c *gin.Context) {
 	var req dto.CreateBookRequest
@@ -55,7 +55,7 @@ func (ctrl *BookController) CreateBook(c *gin.Context) {
 // @Param page_size query int false "每頁數量" default(10)
 // @Param search query string false "搜尋關鍵字"
 // @Success 200 {object} dto.PaginationResponse
-// @Failure 401 {object} gin.H
+// @Failure 401 {object} map[string]interface{}
 // @Router /books [get]
 func (ctrl *BookController) GetBooks(c *gin.Context) {
 	var req dto.PaginationRequest
@@ -82,9 +82,9 @@ func (ctrl *BookController) GetBooks(c *gin.Context) {
 // @Security BearerAuth
 // @Param id path int true "書籍 ID"
 // @Success 200 {object} dto.BookResponse
-// @Failure 400 {object} gin.H
-// @Failure 401 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /books/{id} [get]
 func (ctrl *BookController) GetBook(c *gin.Context) {
 	idStr := c.Param("id")
@@ -111,9 +111,9 @@ func (ctrl *BookController) GetBook(c *gin.Context) {
 // @Param id path int true "書籍 ID"
 // @Param request body dto.UpdateBookRequest true "更新資訊"
 // @Success 200 {object} dto.BookResponse
-// @Failure 400 {object} gin.H
-// @Failure 403 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /books/{id} [put]
 func (ctrl *BookController) UpdateBook(c *gin.Context) {
 	idStr := c.Param("id")
@@ -144,10 +144,10 @@ func (ctrl *BookController) UpdateBook(c *gin.Context) {
 // @Tags book
 // @Security BearerAuth
 // @Param id path int true "書籍 ID"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} gin.H
-// @Failure 403 {object} gin.H
-// @Failure 404 {object} gin.H
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Router /books/{id} [delete]
 func (ctrl *BookController) DeleteBook(c *gin.Context) {
 	idStr := c.Param("id")

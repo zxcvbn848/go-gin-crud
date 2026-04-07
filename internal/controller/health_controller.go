@@ -17,12 +17,10 @@ func NewHealthController() *HealthController {
 // @Summary 健康檢查
 // @Description 檢查服務是否正常運行
 // @Tags health
-// @Success 200 {object} gin.H
+// @Success 200 {object} map[string]interface{}
 // @Router /health [get]
 func (ctrl *HealthController) GetHealth(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status": "ok",
 	})
 }
-
-

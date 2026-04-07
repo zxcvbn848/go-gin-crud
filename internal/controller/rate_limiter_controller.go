@@ -71,7 +71,7 @@ func (ctrl *RateLimiterController) SetConfig(c *gin.Context) {
 // @Description 重置指定 key 的限流器
 // @Tags rate-limiter
 // @Param key query string true "限流鍵"
-// @Success 200 {object} gin.H
+// @Success 200 {object} map[string]interface{}
 // @Router /api/rate-limiter/reset [post]
 func (ctrl *RateLimiterController) Reset(c *gin.Context) {
 	key := c.Query("key")
