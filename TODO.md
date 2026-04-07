@@ -47,9 +47,9 @@
 - [ ] 全文搜尋（Elasticsearch）
 - [x] Socket io
 - [x] Streaming
-  - 相關文件
+  - 技術文件
     - https://blackbing.medium.com/淺談-server-sent-events-9c81ef21ca8e
-- [ ] 影音串流協定 MPEG-DASH / HLS
+- [ ] 影音串流協定 MPEG-DASH / HLS，可用 CMAF 同時處理兩種協定
 - [ ] 評論系統
 - [ ] 統計報表 API
 - [ ] CI/CD 整合
