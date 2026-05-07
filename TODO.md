@@ -33,9 +33,9 @@
 - [x] 瞭解 Goroutine + channel
 - [x] 知道 context.Context 用法
 - [x] 寫一個簡單的併發 demo（面試常考）
-- [] 高併發情境題：文件在 [cmd/concurrency/README.md](./cmd/concurrency/README.md)
-- [] 部署到正式站
-- [] 開發簡易的前端頁面
+- [ ] 高併發情境題：文件在 [cmd/concurrency/README.md](./cmd/concurrency/README.md)
+- [ ] 部署到正式站
+- [ ] 開發簡易的前端頁面
 
 ## 進階功能 🚀
 
@@ -47,8 +47,9 @@
 - [ ] 全文搜尋（Elasticsearch）
 - [x] Socket io
 - [x] Streaming
-  - 相關文件
+  - 技術文件
     - https://blackbing.medium.com/淺談-server-sent-events-9c81ef21ca8e
+- [ ] 影音串流協定 MPEG-DASH / HLS，可用 CMAF 同時處理兩種協定
 - [ ] 評論系統
 - [ ] 統計報表 API
 - [ ] CI/CD 整合
