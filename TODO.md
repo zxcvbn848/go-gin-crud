@@ -33,7 +33,7 @@
 - [x] 瞭解 Goroutine + channel
 - [x] 知道 context.Context 用法
 - [x] 寫一個簡單的併發 demo（面試常考）
-- [ ] 高併發情境題：文件在 [cmd/concurrency/README.md](./cmd/concurrency/README.md)
+- [x] 高併發情境題：文件在 [cmd/concurrency/README.md](./cmd/concurrency/README.md)
 - [ ] 部署到正式站
 - [ ] 開發簡易的前端頁面
 
