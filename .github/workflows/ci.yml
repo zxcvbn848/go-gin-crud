@@ -26,6 +26,15 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
     - name: 檢出代碼
@@ -44,6 +53,7 @@ jobs:
         DB_USER: test_user
         DB_PASSWORD: test_password
         DB_NAME: test_db
+        REDIS_ADDR: 127.0.0.1:6379
         ACCESS_SECRET: test_access_secret_key_for_testing_only
         REFRESH_SECRET: test_refresh_secret_key_for_testing_only
       run: |
@@ -51,7 +61,7 @@ jobs:
         go tool cover -html=coverage.out -o coverage.html
 
     - name: 上傳測試覆蓋率
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       if: always()
       with:
         file: ./coverage.out
@@ -79,7 +89,7 @@ jobs:
         chmod +x main
 
     - name: 上傳構建產物
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: go-gin-crud
         path: main
@@ -99,8 +109,8 @@ jobs:
         go-version: '1.25'
 
     - name: 運行 golangci-lint
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v6
       with:
-        version: latest
+        version: v1.64.8
         args: --timeout=5m
 
