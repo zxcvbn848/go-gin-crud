@@ -2,16 +2,22 @@ package config
 
 import (
 	"os"
+	"strconv"
 
 	"go-gin-crud/internal/logger"
 
 	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 )
+
+// DefaultBcryptCost 為 production 預設的 bcrypt 成本（OWASP 建議範圍，平衡安全與效能）
+const DefaultBcryptCost = 12
 
 var (
 	AccessSecret  []byte
 	RefreshSecret []byte
 	RedisAddr     string // 例: "localhost:6379"，空字串表示不啟用 Redis
+	BcryptCost    int    // bcrypt 雜湊成本，可用 BCRYPT_COST 環境變數覆寫（測試環境建議設低以加速）
 )
 
 // Load 載入環境變數並初始化配置
@@ -37,6 +43,16 @@ func Load() {
 
 	if RedisAddr != "" {
 		logger.Log.Info("Redis 位址已設定，將啟用 Book 快取")
+	}
+
+	// bcrypt 成本：預設 DefaultBcryptCost，可由 BCRYPT_COST 覆寫並限制在合法範圍
+	BcryptCost = DefaultBcryptCost
+	if v := os.Getenv("BCRYPT_COST"); v != "" {
+		if cost, err := strconv.Atoi(v); err == nil && cost >= bcrypt.MinCost && cost <= bcrypt.MaxCost {
+			BcryptCost = cost
+		} else {
+			logger.Log.Warnf("BCRYPT_COST 值無效 (%s)，使用預設值 %d", v, DefaultBcryptCost)
+		}
 	}
 
 	logger.Log.Info("JWT 配置載入完成")

@@ -25,7 +25,7 @@ func TestCreateBook(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	
 	var book map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &book)
+	_ = json.Unmarshal(w.Body.Bytes(), &book)
 	assert.Equal(t, "測試書籍", book["title"])
 	assert.Equal(t, "測試作者", book["author"])
 
@@ -56,7 +56,10 @@ func TestGetBooks(t *testing.T) {
 			"title":  "書籍 " + string(rune(i+48)),
 			"author": "作者 " + string(rune(i+48)),
 		}
-		makeRequest("POST", "/books", req, adminToken)
+		w := makeRequest("POST", "/books", req, adminToken)
+		if w.Code != http.StatusOK {
+			t.Fatalf("創建書籍失敗: %d", w.Code)
+		}
 	}
 
 	// 測試取得列表
@@ -64,7 +67,7 @@ func TestGetBooks(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NotNil(t, response["data"])
 
 	// 測試分頁
@@ -90,8 +93,13 @@ func TestGetBook(t *testing.T) {
 		"author": "單一作者",
 	}
 	w := makeRequest("POST", "/books", createReq, adminToken)
+	assert.Equal(t, http.StatusOK, w.Code, "創建書籍應該成功")
+	
 	var createdBook map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdBook)
+	err := json.Unmarshal(w.Body.Bytes(), &createdBook)
+	assert.NoError(t, err, "應該能解析創建的書籍")
+	assert.NotNil(t, createdBook["id"], "書籍應該有 ID")
+	
 	bookID := int(createdBook["id"].(float64))
 
 	// 測試成功取得
@@ -99,7 +107,7 @@ func TestGetBook(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var book map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &book)
+	_ = json.Unmarshal(w.Body.Bytes(), &book)
 	assert.Equal(t, "單一書籍", book["title"])
 
 	// 測試不存在的 ID
@@ -117,8 +125,13 @@ func TestUpdateBook(t *testing.T) {
 		"author": "原始作者",
 	}
 	w := makeRequest("POST", "/books", createReq, adminToken)
+	assert.Equal(t, http.StatusOK, w.Code, "創建書籍應該成功")
+	
 	var createdBook map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdBook)
+	err := json.Unmarshal(w.Body.Bytes(), &createdBook)
+	assert.NoError(t, err, "應該能解析創建的書籍")
+	assert.NotNil(t, createdBook["id"], "書籍應該有 ID")
+	
 	bookID := int(createdBook["id"].(float64))
 
 	// 測試成功更新
@@ -127,16 +140,17 @@ func TestUpdateBook(t *testing.T) {
 		"author": "更新作者",
 	}
 	w = makeRequest("PUT", "/books/"+fmt.Sprintf("%d", bookID), updateReq, adminToken)
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code, "更新書籍應該成功")
 
 	var book map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &book)
+	err = json.Unmarshal(w.Body.Bytes(), &book)
+	assert.NoError(t, err, "應該能解析更新的書籍")
 	assert.Equal(t, "更新標題", book["title"])
 
 	// 測試非管理員用戶
 	userToken := registerTestUser(t, "updateuser@example.com", "password123")
 	w = makeRequest("PUT", "/books/"+fmt.Sprintf("%d", bookID), updateReq, userToken)
-	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.Equal(t, http.StatusForbidden, w.Code, "非管理員用戶不應該能更新書籍")
 }
 
 // TestDeleteBook 測試刪除書籍
@@ -149,8 +163,13 @@ func TestDeleteBook(t *testing.T) {
 		"author": "待刪除作者",
 	}
 	w := makeRequest("POST", "/books", createReq, adminToken)
+	assert.Equal(t, http.StatusOK, w.Code, "創建書籍應該成功")
+	
 	var createdBook map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdBook)
+	err := json.Unmarshal(w.Body.Bytes(), &createdBook)
+	assert.NoError(t, err, "應該能解析創建的書籍")
+	assert.NotNil(t, createdBook["id"], "書籍應該有 ID")
+	
 	bookID := int(createdBook["id"].(float64))
 
 	// 測試成功刪除
@@ -168,8 +187,13 @@ func TestDeleteBook(t *testing.T) {
 		"author": "另一個作者",
 	}
 	w = makeRequest("POST", "/books", createReq2, adminToken)
+	assert.Equal(t, http.StatusOK, w.Code, "創建書籍應該成功")
+	
 	var createdBook2 map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdBook2)
+	err = json.Unmarshal(w.Body.Bytes(), &createdBook2)
+	assert.NoError(t, err, "應該能解析創建的書籍")
+	assert.NotNil(t, createdBook2["id"], "書籍應該有 ID")
+	
 	bookID2 := int(createdBook2["id"].(float64))
 
 	w = makeRequest("DELETE", "/books/"+fmt.Sprintf("%d", bookID2), nil, userToken)

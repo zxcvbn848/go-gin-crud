@@ -25,7 +25,7 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var user dto.UserResponse
-	json.Unmarshal(w.Body.Bytes(), &user)
+	_ = json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, "newuser@example.com", user.Email)
 	assert.Equal(t, "user", user.Role)
 
@@ -39,7 +39,7 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var adminUser dto.UserResponse
-	json.Unmarshal(w.Body.Bytes(), &adminUser)
+	_ = json.Unmarshal(w.Body.Bytes(), &adminUser)
 	assert.Equal(t, "admin", adminUser.Role)
 
 	// 測試重複 email
@@ -90,7 +90,7 @@ func TestGetUsers(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NotNil(t, response["data"])
 
 	// 測試分頁
@@ -122,7 +122,7 @@ func TestGetUser(t *testing.T) {
 	}
 	w := makeRequest("POST", "/users", createReq, adminToken)
 	var createdUser dto.UserResponse
-	json.Unmarshal(w.Body.Bytes(), &createdUser)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdUser)
 	userID := createdUser.ID
 
 	// 測試成功取得
@@ -130,7 +130,7 @@ func TestGetUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var user dto.UserResponse
-	json.Unmarshal(w.Body.Bytes(), &user)
+	_ = json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, "getuser@example.com", user.Email)
 
 	// 測試不存在的 ID
@@ -156,7 +156,7 @@ func TestUpdateUser(t *testing.T) {
 	}
 	w := makeRequest("POST", "/users", createReq, adminToken)
 	var createdUser dto.UserResponse
-	json.Unmarshal(w.Body.Bytes(), &createdUser)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdUser)
 	userID := createdUser.ID
 
 	// 測試成功更新 email
@@ -167,7 +167,7 @@ func TestUpdateUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var user dto.UserResponse
-	json.Unmarshal(w.Body.Bytes(), &user)
+	_ = json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, "updated@example.com", user.Email)
 
 	// 測試更新密碼
@@ -201,7 +201,7 @@ func TestDeleteUser(t *testing.T) {
 	}
 	w := makeRequest("POST", "/users", createReq, adminToken)
 	var createdUser dto.UserResponse
-	json.Unmarshal(w.Body.Bytes(), &createdUser)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdUser)
 	userID := createdUser.ID
 
 	// 測試成功刪除
@@ -220,7 +220,7 @@ func TestDeleteUser(t *testing.T) {
 	}
 	w = makeRequest("POST", "/users", createReq2, adminToken)
 	var createdUser2 dto.UserResponse
-	json.Unmarshal(w.Body.Bytes(), &createdUser2)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdUser2)
 	userID2 := createdUser2.ID
 
 	w = makeRequest("DELETE", "/users/"+fmt.Sprintf("%d", userID2), nil, userToken)

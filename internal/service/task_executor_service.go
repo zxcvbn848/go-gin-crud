@@ -266,11 +266,12 @@ func (s *taskExecutorService) BatchExecuteTasks(ctx context.Context, tasks []dto
 			case result := <-results:
 				if result != nil {
 					taskResults = append(taskResults, *result)
-					if result.Status == "success" {
+					switch result.Status {
+					case "success":
 						successCount++
-					} else if result.Status == "timeout" {
+					case "timeout":
 						timeoutCount++
-					} else {
+					default:
 						errorCount++
 					}
 				}
@@ -304,11 +305,12 @@ func (s *taskExecutorService) BatchExecuteTasks(ctx context.Context, tasks []dto
 		for result := range results {
 			if result != nil {
 				taskResults = append(taskResults, *result)
-				if result.Status == "success" {
+				switch result.Status {
+				case "success":
 					successCount++
-				} else if result.Status == "timeout" {
+				case "timeout":
 					timeoutCount++
-				} else {
+				default:
 					errorCount++
 				}
 			}

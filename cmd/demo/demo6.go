@@ -256,7 +256,6 @@ func cacheWithTimeout() {
 	type queryState struct {
 		once       *sync.Once
 		resultChan chan queryResult
-		mu         sync.Mutex
 	}
 
 	queryStates := make(map[string]*queryState)

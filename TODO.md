@@ -33,9 +33,22 @@
 - [x] 瞭解 Goroutine + channel
 - [x] 知道 context.Context 用法
 - [x] 寫一個簡單的併發 demo（面試常考）
-- [ ] 高併發情境題：文件在 [cmd/concurrency/README.md](./cmd/concurrency/README.md)
-- [ ] 部署到正式站
+- [x] 高併發情境題：文件在 [cmd/concurrency/README.md](./cmd/concurrency/README.md)
+- [x] 部署到正式站
+  - [x] 事前準備 [.github/workflows/README.md](.github/workflows/README.md)
+  - [] GitHub Actions
+  - [] 架設 EC2
+  - [] 架設 DB
 - [ ] 開發簡易的前端頁面
+
+## Resilience Patterns 🛡️
+
+- [ ] Timeout（請求/任務執行超時控制）
+- [ ] Retry with Backoff（指數退避重試機制）
+- [ ] Circuit Breaker（熔斷器，防止雪崩效應）
+- [ ] Bulkhead（艙壁隔離，限制資源佔用範圍）
+- [ ] Fallback（降級處理，回傳預設值或快取）
+- [ ] Health Check（依賴服務健康偵測）
 
 ## 進階功能 🚀
 

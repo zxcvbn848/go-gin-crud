@@ -29,7 +29,7 @@ func TestExecuteTask(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "task-1", response["task_id"])
 	assert.Equal(t, "success", response["status"])
 	assert.Contains(t, response, "duration")
@@ -49,7 +49,7 @@ func TestExecuteTaskTimeout(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "task-timeout", response["task_id"])
 	assert.Equal(t, "timeout", response["status"])
 	// 檢查消息包含超時相關資訊（可能是中文或英文）
@@ -77,7 +77,7 @@ func TestExecuteTaskWithRetry(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "task-retry", response["task_id"])
 	assert.Contains(t, response, "retry_count")
 }
@@ -96,7 +96,7 @@ func TestBatchExecuteTasks(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, 3, int(response["total_tasks"].(float64)))
 	assert.Contains(t, response, "success_count")
 	assert.Contains(t, response, "timeout_count")
@@ -122,7 +122,7 @@ func TestBatchExecuteTasksTimeout(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, 3, int(response["total_tasks"].(float64)))
 	// 應該有超時或取消的任務
 	assert.GreaterOrEqual(t, response["timeout_count"].(float64)+response["error_count"].(float64), float64(0))

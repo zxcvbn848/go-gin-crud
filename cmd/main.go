@@ -79,5 +79,7 @@ func main() {
 	routes.RegisterSocketRoutes(r)
 	routes.RegisterStreamingRoutes(r)
 
-	r.Run(":8080")
+	if err := r.Run(":8080"); err != nil {
+		logger.Log.Fatalf("HTTP 伺服器啟動失敗: %v", err)
+	}
 }

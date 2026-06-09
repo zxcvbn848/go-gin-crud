@@ -65,12 +65,12 @@ func (ctrl *StreamingController) StreamSSE(c *gin.Context) {
 				"message": fmt.Sprintf("event #%d", i+1),
 			}
 			payload, _ := json.Marshal(event)
-			fmt.Fprintf(w, "data: %s\n\n", payload)
+			_, _ = fmt.Fprintf(w, "data: %s\n\n", payload)
 			flusher.Flush()
 		}
 	}
 	// 結束前送一筆 done 事件
-	fmt.Fprintf(w, "event: done\ndata: {\"message\":\"stream ended\"}\n\n")
+	_, _ = fmt.Fprint(w, "event: done\ndata: {\"message\":\"stream ended\"}\n\n")
 	flusher.Flush()
 }
 
@@ -114,8 +114,8 @@ func (ctrl *StreamingController) StreamChunked(c *gin.Context) {
 				"at":     time.Now().Format(time.RFC3339),
 			}
 			line, _ := json.Marshal(row)
-			w.Write(line)
-			w.Write([]byte("\n"))
+			_, _ = w.Write(line)
+			_, _ = w.Write([]byte("\n"))
 			flusher.Flush()
 			time.Sleep(200 * time.Millisecond) // 模擬逐筆產生
 		}
@@ -151,12 +151,12 @@ func (ctrl *StreamingController) StreamProgress(c *gin.Context) {
 			return
 		default:
 			payload, _ := json.Marshal(map[string]interface{}{"progress": p, "message": fmt.Sprintf("%d%%", p)})
-			fmt.Fprintf(w, "data: %s\n\n", payload)
+			_, _ = fmt.Fprintf(w, "data: %s\n\n", payload)
 			flusher.Flush()
 			time.Sleep(300 * time.Millisecond)
 		}
 	}
-	fmt.Fprintf(w, "event: done\ndata: {\"progress\":100,\"message\":\"complete\"}\n\n")
+	_, _ = fmt.Fprint(w, "event: done\ndata: {\"progress\":100,\"message\":\"complete\"}\n\n")
 	flusher.Flush()
 }
 
