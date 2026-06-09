@@ -32,7 +32,7 @@ func NewServer() *Server {
 						"socket_id": socket.Id,
 						"room":      roomName,
 					}).Info("加入房間")
-					socket.Emit("joined_room", roomName)
+					_ = socket.Emit("joined_room", roomName)
 				}
 			}
 		})
@@ -46,7 +46,7 @@ func NewServer() *Server {
 						"socket_id": socket.Id,
 						"room":      roomName,
 					}).Info("離開房間")
-					socket.Emit("left_room", roomName)
+					_ = socket.Emit("left_room", roomName)
 				}
 			}
 		})
@@ -68,7 +68,7 @@ func NewServer() *Server {
 				room = "lobby"
 			}
 			// 廣播給同房間的其他人（含自己可改為 io.To(room) 後不排除 sender）
-			socket.To(room).Emit("message", socket.Id, text)
+			_ = socket.To(room).Emit("message", socket.Id, text)
 			logger.Log.WithFields(map[string]interface{}{
 				"socket_id": socket.Id,
 				"room":      room,

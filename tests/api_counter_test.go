@@ -15,14 +15,14 @@ func TestGetCounterValue(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]int64
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Contains(t, response, "value")
 
 	// 測試 atomic 計數器
 	w = makeRequest("GET", "/counters?type=atomic", nil, "")
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Contains(t, response, "value")
 }
 
@@ -36,19 +36,19 @@ func TestIncrementCounter(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]int64
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, int64(10), response["value"])
 
 	// 再次增加
 	w = makeRequest("POST", "/counters/increment?type=mutex", req, "")
 	assert.Equal(t, http.StatusOK, w.Code)
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, int64(20), response["value"])
 
 	// 測試 atomic 計數器
 	w = makeRequest("POST", "/counters/increment?type=atomic", req, "")
 	assert.Equal(t, http.StatusOK, w.Code)
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, int64(10), response["value"])
 }
 
@@ -68,7 +68,7 @@ func TestDecrementCounter(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]int64
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, int64(70), response["value"])
 }
 
@@ -81,13 +81,13 @@ func TestSetCounterValue(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]int64
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, int64(50), response["value"])
 
 	// 驗證值已設置
 	w = makeRequest("GET", "/counters?type=mutex", nil, "")
 	assert.Equal(t, http.StatusOK, w.Code)
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, int64(50), response["value"])
 }
 
@@ -104,7 +104,7 @@ func TestResetCounter(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]int64
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, int64(0), response["value"])
 }
 
@@ -114,13 +114,13 @@ func TestGetCounterInfo(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "mutex", response["type"])
 	assert.NotEmpty(t, response["description"])
 
 	w = makeRequest("GET", "/counters/info?type=atomic", nil, "")
 	assert.Equal(t, http.StatusOK, w.Code)
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "atomic", response["type"])
 }
 
@@ -130,7 +130,7 @@ func TestCounterPerformance(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Contains(t, response, "mutex")
 	assert.Contains(t, response, "atomic")
 	assert.Contains(t, response, "winner")

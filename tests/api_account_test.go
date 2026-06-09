@@ -14,7 +14,7 @@ func TestGetAccountBalance(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]int64
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Contains(t, response, "balance")
 	// 初始餘額應該是 100（根據 routes/account.go 中的設置）
 	assert.Equal(t, int64(100), response["balance"])
@@ -29,7 +29,7 @@ func TestDeposit(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "deposit", response["operation"])
 	assert.Equal(t, true, response["success"])
 	assert.Contains(t, response, "before")
@@ -52,14 +52,14 @@ func TestWithdraw(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "withdraw", response["operation"])
 	assert.Equal(t, true, response["success"])
 
 	// 驗證餘額
 	w = makeRequest("GET", "/accounts/balance", nil, "")
 	var balanceResp map[string]int64
-	json.Unmarshal(w.Body.Bytes(), &balanceResp)
+	_ = json.Unmarshal(w.Body.Bytes(), &balanceResp)
 	assert.Equal(t, int64(150), balanceResp["balance"])
 }
 
@@ -79,7 +79,7 @@ func TestWithdrawInsufficientBalance(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code) // 即使失敗也返回 200，但 success 為 false
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "withdraw", response["operation"])
 	assert.Equal(t, false, response["success"])
 	assert.Contains(t, response["message"], "餘額不足")
@@ -94,12 +94,12 @@ func TestSetBalance(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]int64
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, int64(500), response["balance"])
 
 	// 驗證餘額已設置
 	w = makeRequest("GET", "/accounts/balance", nil, "")
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, int64(500), response["balance"])
 }
 
@@ -116,7 +116,7 @@ func TestResetAccount(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]int64
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, int64(0), response["balance"])
 }
 
@@ -136,7 +136,7 @@ func TestBatchTransactions(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	// JSON 解析時數字會變成 float64
 	assert.Equal(t, float64(100), response["initial_balance"])
 	assert.Contains(t, response, "final_balance")
@@ -160,7 +160,7 @@ func TestRandomBatchTransactions(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Contains(t, response, "initial_balance")
 	assert.Contains(t, response, "final_balance")
 	assert.Contains(t, response, "transactions")
@@ -183,7 +183,7 @@ func TestRandomBatchTransactionsWithDelay(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Contains(t, response, "transactions")
 }
 

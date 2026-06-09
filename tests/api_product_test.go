@@ -25,7 +25,7 @@ func TestCreateProduct(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var product map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &product)
+	_ = json.Unmarshal(w.Body.Bytes(), &product)
 	assert.Equal(t, "測試產品", product["name"])
 	assert.Equal(t, 99.99, product["price"])
 	assert.Equal(t, float64(100), product["stock"])
@@ -113,7 +113,7 @@ func TestGetProduct(t *testing.T) {
 	}
 	w := makeRequest("POST", "/products", createReq, adminToken)
 	var createdProduct map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdProduct)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdProduct)
 	productID := int(createdProduct["id"].(float64))
 
 	// 測試成功取得
@@ -121,7 +121,7 @@ func TestGetProduct(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var product map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &product)
+	_ = json.Unmarshal(w.Body.Bytes(), &product)
 	assert.Equal(t, "單一產品", product["name"])
 
 	// 測試不存在的 ID
@@ -147,7 +147,7 @@ func TestUpdateProduct(t *testing.T) {
 	}
 	w := makeRequest("POST", "/products", createReq, adminToken)
 	var createdProduct map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdProduct)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdProduct)
 	productID := int(createdProduct["id"].(float64))
 
 	// 測試成功更新
@@ -161,7 +161,7 @@ func TestUpdateProduct(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var product map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &product)
+	_ = json.Unmarshal(w.Body.Bytes(), &product)
 	assert.Equal(t, "更新產品", product["name"])
 	assert.Equal(t, 150.0, product["price"])
 
@@ -191,7 +191,7 @@ func TestDeleteProduct(t *testing.T) {
 	}
 	w := makeRequest("POST", "/products", createReq, adminToken)
 	var createdProduct map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdProduct)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdProduct)
 	productID := int(createdProduct["id"].(float64))
 
 	// 測試成功刪除
@@ -211,7 +211,7 @@ func TestDeleteProduct(t *testing.T) {
 	}
 	w = makeRequest("POST", "/products", createReq2, adminToken)
 	var createdProduct2 map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdProduct2)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdProduct2)
 	productID2 := int(createdProduct2["id"].(float64))
 
 	w = makeRequest("DELETE", "/products/"+fmt.Sprintf("%d", productID2), nil, userToken)

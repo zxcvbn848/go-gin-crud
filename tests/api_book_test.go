@@ -25,7 +25,7 @@ func TestCreateBook(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	
 	var book map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &book)
+	_ = json.Unmarshal(w.Body.Bytes(), &book)
 	assert.Equal(t, "測試書籍", book["title"])
 	assert.Equal(t, "測試作者", book["author"])
 
@@ -67,7 +67,7 @@ func TestGetBooks(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NotNil(t, response["data"])
 
 	// 測試分頁
@@ -107,7 +107,7 @@ func TestGetBook(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var book map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &book)
+	_ = json.Unmarshal(w.Body.Bytes(), &book)
 	assert.Equal(t, "單一書籍", book["title"])
 
 	// 測試不存在的 ID

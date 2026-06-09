@@ -70,8 +70,8 @@ func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
 	// 設置測試環境變數
-	os.Setenv("ACCESS_SECRET", "test_access_secret_key_for_testing_only")
-	os.Setenv("REFRESH_SECRET", "test_refresh_secret_key_for_testing_only")
+	_ = os.Setenv("ACCESS_SECRET", "test_access_secret_key_for_testing_only")
+	_ = os.Setenv("REFRESH_SECRET", "test_refresh_secret_key_for_testing_only")
 
 	// 載入配置
 	config.Load()
@@ -206,7 +206,7 @@ func TestMain(m *testing.M) {
 		sqlDB, err := testDB.DB()
 		if err == nil && sqlDB != nil {
 			// 關閉所有連接
-			sqlDB.Close()
+			_ = sqlDB.Close()
 		}
 	}
 
@@ -219,7 +219,7 @@ func setupTestDBForTest() {
 	if testDB != nil {
 		sqlDB, err := testDB.DB()
 		if err == nil && sqlDB != nil {
-			sqlDB.Close()
+			_ = sqlDB.Close()
 		}
 	}
 

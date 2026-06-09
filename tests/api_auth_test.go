@@ -21,7 +21,7 @@ func TestRegister(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "註冊成功", response["message"])
 
 	// 測試重複註冊
@@ -64,7 +64,7 @@ func TestLogin(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NotEmpty(t, response["access_token"])
 	assert.NotEmpty(t, response["refresh_token"])
 
@@ -95,7 +95,7 @@ func TestProfile(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response dto.UserResponse
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "profile@example.com", response.Email)
 
 	// 測試無 token
@@ -117,7 +117,7 @@ func TestLogout(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "登出成功", response["message"])
 
 	// 測試登出後無法使用 token

@@ -192,7 +192,7 @@ func withConnectionPool() {
 		// 檢查連接是否健康
 		if !conn.IsHealthy() {
 			fmt.Printf("  [有池] ⚠️  連接 #%d 不健康，關閉並丟棄\n", conn.ID())
-			conn.Close()
+			_ = conn.Close()
 			return
 		}
 
@@ -203,7 +203,7 @@ func withConnectionPool() {
 		default:
 			// 池已滿，關閉連接
 			fmt.Printf("  [有池] ⚠️  池已滿，關閉連接 #%d\n", conn.ID())
-			conn.Close()
+			_ = conn.Close()
 		}
 	}
 
@@ -290,7 +290,6 @@ func connectionPoolWithTimeout() {
 		createdMu sync.Mutex
 		ctx       context.Context
 		cancel    context.CancelFunc
-		wg        sync.WaitGroup
 		closed    bool
 		closedMu  sync.Mutex
 	}
@@ -360,14 +359,14 @@ func connectionPoolWithTimeout() {
 		if pool.closed {
 			pool.closedMu.Unlock()
 			// 連接池已關閉，直接關閉連接
-			conn.Close()
+			_ = conn.Close()
 			return
 		}
 		pool.closedMu.Unlock()
 
 		// 檢查連接是否健康
 		if !conn.IsHealthy() {
-			conn.Close()
+			_ = conn.Close()
 			return
 		}
 
@@ -376,7 +375,7 @@ func connectionPoolWithTimeout() {
 			// 成功歸還
 		default:
 			// 池已滿，關閉連接
-			conn.Close()
+			_ = conn.Close()
 		}
 	}
 
@@ -404,7 +403,7 @@ func connectionPoolWithTimeout() {
 			for {
 				select {
 				case conn := <-pool.pool:
-					conn.Close()
+					_ = conn.Close()
 					closeCount++
 				default:
 					done <- true
