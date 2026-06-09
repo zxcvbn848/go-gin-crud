@@ -32,14 +32,16 @@ func SetupTestDB() *gorm.DB {
 	}
 
 	// 自動遷移
-	TestDB.AutoMigrate(
+	if err := TestDB.AutoMigrate(
 		&models.User{},
 		&models.Book{},
 		&models.Product{},
 		&models.Post{},
 		&models.RefreshToken{},
 		&models.BlacklistToken{},
-	)
+	); err != nil {
+		panic("測試資料庫遷移失敗: " + err.Error())
+	}
 
 	return TestDB
 }
@@ -81,7 +83,7 @@ func CleanupTestDB() {
 	if TestDB != nil {
 		sqlDB, _ := TestDB.DB()
 		if sqlDB != nil {
-			sqlDB.Close()
+			_ = sqlDB.Close()
 		}
 	}
 }
@@ -123,7 +125,7 @@ func RegisterTestUser(email, password string) (string, string, error) {
 	w := MakeRequest("POST", "/login", loginReq, "")
 
 	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 
 	return response["access_token"], response["refresh_token"], nil
 }
@@ -146,13 +148,14 @@ func RegisterTestAdmin(email, password string) (string, string, error) {
 	w := MakeRequest("POST", "/login", loginReq, "")
 
 	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 
 	return response["access_token"], response["refresh_token"], nil
 }
 
 func init() {
 	// 設置測試環境變數
-	os.Setenv("ACCESS_SECRET", "test_access_secret_key_for_testing_only")
-	os.Setenv("REFRESH_SECRET", "test_refresh_secret_key_for_testing_only")
+	_ = os.Setenv("ACCESS_SECRET", "test_access_secret_key_for_testing_only")
+	_ = os.Setenv("REFRESH_SECRET", "test_refresh_secret_key_for_testing_only")
+	_ = os.Setenv("BCRYPT_COST", "4") // 測試用最低成本，避免 -race 下 bcrypt 過慢導致 timeout
 }

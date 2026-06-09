@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"go-gin-crud/internal/cache"
+	"go-gin-crud/internal/config"
 	"go-gin-crud/internal/database/models"
 	"go-gin-crud/internal/dto"
 	"go-gin-crud/internal/logger"
@@ -41,7 +42,7 @@ func (s *userService) CreateUser(req dto.CreateUserRequest) (*dto.UserResponse, 
 	}
 
 	// 加密密碼
-	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), 14)
+	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), config.BcryptCost)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +124,7 @@ func (s *userService) UpdateUser(id uint, req dto.UpdateUserRequest) (*dto.UserR
 
 	// 如果更新密碼，加密新密碼
 	if req.Password != "" {
-		hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), 14)
+		hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), config.BcryptCost)
 		if err != nil {
 			return nil, err
 		}

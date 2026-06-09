@@ -206,8 +206,8 @@ func (ctrl *WorkerPoolController) Shutdown(c *gin.Context) {
 
 	timeout := 30 * time.Second
 	if timeoutStr := c.Query("timeout"); timeoutStr != "" {
-		if timeoutSec, err := time.ParseDuration(timeoutStr + "s"); err == nil {
-			timeout = timeoutSec
+		if parsed, err := time.ParseDuration(timeoutStr + "s"); err == nil {
+			timeout = parsed
 		}
 	}
 

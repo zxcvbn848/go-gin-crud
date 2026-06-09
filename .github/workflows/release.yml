@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: 創建 Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: 檢出代碼
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 設置 Go 環境
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25'
+
+    - name: 構建應用
+      run: |
+        go build -o go-gin-crud ./cmd/main.go
+        chmod +x go-gin-crud
+
+    - name: 創建 Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          go-gin-crud
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

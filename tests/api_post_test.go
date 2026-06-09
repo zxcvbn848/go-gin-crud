@@ -23,7 +23,7 @@ func TestCreatePost(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var post map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &post)
+	_ = json.Unmarshal(w.Body.Bytes(), &post)
 	assert.Equal(t, "測試文章", post["title"])
 	assert.Equal(t, "這是測試文章的內容", post["content"])
 
@@ -62,7 +62,7 @@ func TestGetPosts(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NotNil(t, response["data"])
 
 	// 測試分頁
@@ -94,7 +94,7 @@ func TestGetPost(t *testing.T) {
 	}
 	w := makeRequest("POST", "/posts", createReq, adminToken)
 	var createdPost map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdPost)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdPost)
 	postID := int(createdPost["id"].(float64))
 
 	// 測試成功取得
@@ -102,7 +102,7 @@ func TestGetPost(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var post map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &post)
+	_ = json.Unmarshal(w.Body.Bytes(), &post)
 	assert.Equal(t, "單一文章", post["title"])
 
 	// 測試不存在的 ID
@@ -126,7 +126,7 @@ func TestUpdatePost(t *testing.T) {
 	}
 	w := makeRequest("POST", "/posts", createReq, adminToken)
 	var createdPost map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdPost)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdPost)
 	postID := int(createdPost["id"].(float64))
 
 	// 測試管理員可以更新
@@ -138,7 +138,7 @@ func TestUpdatePost(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var post map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &post)
+	_ = json.Unmarshal(w.Body.Bytes(), &post)
 	assert.Equal(t, "更新文章", post["title"])
 
 	// 測試非管理員用戶無法更新別人的文章
@@ -158,7 +158,7 @@ func TestDeletePost(t *testing.T) {
 	}
 	w := makeRequest("POST", "/posts", createReq, adminToken)
 	var createdPost map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdPost)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdPost)
 	postID := int(createdPost["id"].(float64))
 
 	// 測試管理員可以刪除
@@ -177,7 +177,7 @@ func TestDeletePost(t *testing.T) {
 	}
 	w = makeRequest("POST", "/posts", createReq2, adminToken)
 	var createdPost2 map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &createdPost2)
+	_ = json.Unmarshal(w.Body.Bytes(), &createdPost2)
 	postID2 := int(createdPost2["id"].(float64))
 
 	w = makeRequest("DELETE", "/posts/"+fmt.Sprintf("%d", postID2), nil, userToken)

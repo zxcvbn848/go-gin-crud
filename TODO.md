@@ -34,7 +34,11 @@
 - [x] 知道 context.Context 用法
 - [x] 寫一個簡單的併發 demo（面試常考）
 - [x] 高併發情境題：文件在 [cmd/concurrency/README.md](./cmd/concurrency/README.md)
-- [ ] 部署到正式站
+- [x] 部署到正式站
+  - [x] 事前準備 [.github/workflows/README.md](.github/workflows/README.md)
+  - [] GitHub Actions
+  - [] 架設 EC2
+  - [] 架設 DB
 - [ ] 開發簡易的前端頁面
 
 ## Resilience Patterns 🛡️
