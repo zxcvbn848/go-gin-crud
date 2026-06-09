@@ -46,7 +46,7 @@ require (
 	github.com/goccy/go-yaml v1.19.1 // indirect
 	github.com/gofiber/fiber/v2 v2.52.5 // indirect
 	github.com/gofiber/websocket/v2 v2.2.1 // indirect
-	github.com/google/uuid v1.6.0 // indirect
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/ismhdez/socket.io-golang/v4 v4.0.11
 	github.com/jinzhu/inflection v1.0.0 // indirect

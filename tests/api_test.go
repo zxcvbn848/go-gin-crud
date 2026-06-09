@@ -72,6 +72,7 @@ func setupTestRouter() *gin.Engine {
 	// 設置測試環境變數
 	_ = os.Setenv("ACCESS_SECRET", "test_access_secret_key_for_testing_only")
 	_ = os.Setenv("REFRESH_SECRET", "test_refresh_secret_key_for_testing_only")
+	_ = os.Setenv("BCRYPT_COST", "4") // 測試用最低成本，避免 -race 下 bcrypt 過慢導致 timeout
 
 	// 載入配置
 	config.Load()

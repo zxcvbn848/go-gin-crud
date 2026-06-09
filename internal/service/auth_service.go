@@ -9,6 +9,7 @@ import (
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -44,7 +45,7 @@ func (s *authService) Register(email, password string) error {
 	}
 
 	// 加密密碼
-	hashed, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), config.BcryptCost)
 	if err != nil {
 		return err
 	}
@@ -76,16 +77,18 @@ func (s *authService) Login(req dto.LoginRequest) (string, string, error) {
 		"user_id": user.ID,
 		"role":    user.Role,
 		"exp":     time.Now().Add(15 * time.Minute).Unix(),
+		"jti":     uuid.NewString(),
 	}).SignedString(config.AccessSecret)
 	if err != nil {
 		return "", "", err
 	}
 
-	// Refresh Token: 7 天
+	// Refresh Token: 7 天（jti 確保即使同秒簽發也唯一，避免 token 字串碰撞）
 	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
 		"role":    user.Role,
 		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
+		"jti":     uuid.NewString(),
 	}).SignedString(config.RefreshSecret)
 	if err != nil {
 		return "", "", err
@@ -137,6 +140,7 @@ func (s *authService) Refresh(refreshToken string) (string, error) {
 		"user_id": user.ID,
 		"role":    user.Role,
 		"exp":     time.Now().Add(15 * time.Minute).Unix(),
+		"jti":     uuid.NewString(),
 	}).SignedString(config.AccessSecret)
 	if err != nil {
 		return "", err
@@ -207,7 +211,7 @@ func (s *authService) ChangePassword(userID uint, req dto.ChangePasswordRequest)
 		return ErrInvalidCurrentPassword
 	}
 
-	hashed, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), 14)
+	hashed, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), config.BcryptCost)
 	if err != nil {
 		return err
 	}
