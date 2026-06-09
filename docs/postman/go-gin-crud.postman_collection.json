@@ -1,1545 +1,1826 @@
 {
-	"info": {
-		"_postman_id": "ffd2ca47-9035-4dd5-9975-f9e67bcda10c",
-		"name": "go-gin-crud",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "48932258",
-		"_collection_link": "https://andywang-3db3c534-8190149.postman.co/workspace/andy-wang's-Workspace~b19b2a0d-18a3-4126-8129-ae2de1377879/collection/48932258-ffd2ca47-9035-4dd5-9975-f9e67bcda10c?action=share&source=collection_link&creator=48932258"
-	},
-	"item": [
-		{
-			"name": "Auth",
-			"item": [
-				{
-					"name": "Register",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"test@gmail.com\",\n  \"password\": \"123456\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/register",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"register"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login - Admin",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const json = pm.response.json();",
-									"console.log(json)",
-									"pm.environment.set(\"refresh_token\", json.refresh_token);",
-									"pm.environment.set(\"access_token\", json.access_token);"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"test@gmail.com\",\n  \"password\": \"123456\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/login",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login - User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const json = pm.response.json();",
-									"console.log(json)",
-									"pm.environment.set(\"refresh_token\", json.refresh_token);",
-									"pm.environment.set(\"access_token\", json.access_token);"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"newUser@example.com\",\n  \"password\": \"password12345\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/login",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Auth Profile（需先登入）",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/auth/profile",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"auth",
-								"profile"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Change Password",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const json = pm.response.json();",
-									"console.log(json)",
-									"pm.environment.set(\"refresh_token\", json.refresh_token);",
-									"pm.environment.set(\"access_token\", json.access_token);"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n   \"current_password\": \"password1234\",\n   \"new_password\": \"password12345\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/auth/change-password",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"auth",
-								"change-password"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Logout（需先登入）",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/auth/logout",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"auth",
-								"logout"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Refresh Token（需先登入）",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const json = pm.response.json();",
-									"console.log(json)",
-									"pm.environment.set(\"access_token\", json.access_token);"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "refresh_token",
-									"value": "{{refresh_token}}",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{host}}/refresh",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"refresh"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Books (需先登入)",
-			"item": [
-				{
-					"name": "Create a Book（需為 Admin）",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"Netflix\",\n  \"author\": \"andy wang\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/books",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"books"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Books",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/books?page=1&page_size=10&search=",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"books"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "page_size",
-									"value": "10"
-								},
-								{
-									"key": "search",
-									"value": ""
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get a Book",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/books/1",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"books",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update a Book（需為 Admin）",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"新書名\",\n  \"author\": \"新作者\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/books/1",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"books",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete a Book（需為 Admin）",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"新書名\",\n  \"author\": \"新作者\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/books/8",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"books",
-								"8"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"auth": {
-				"type": "bearer",
-				"bearer": [
-					{
-						"key": "token",
-						"value": "{{access_token}}",
-						"type": "string"
-					}
-				]
-			},
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				}
-			]
-		},
-		{
-			"name": "Users (需先登入)",
-			"item": [
-				{
-					"name": "Create a User（需為 Admin）",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"admin004@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"admin\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/users",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Users（需為 Admin）",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/users?page=1&page_size=10&search=",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"users"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "page_size",
-									"value": "10"
-								},
-								{
-									"key": "search",
-									"value": ""
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get a User（需為 Admin）",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/users/2",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"users",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update a User（需為 Admin）",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"newUser@example.com\",\n  \"password\": \"password1234\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/users/2",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"users",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete a User（需為 Admin）",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/users/1",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"users",
-								"1"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"auth": {
-				"type": "bearer",
-				"bearer": [
-					{
-						"key": "token",
-						"value": "{{access_token}}",
-						"type": "string"
-					}
-				]
-			},
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				}
-			]
-		},
-		{
-			"name": "Products (需先登入)",
-			"item": [
-				{
-					"name": "Create a Product（需為 Admin）",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"iPhone 15 Pro\",\n  \"description\": \"最新款 iPhone，配備 A17 Pro 晶片\",\n  \"price\": 35900.00,\n  \"stock\": 50\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/products",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"products"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Products",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/products?page=1&page_size=10&search=",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"products"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "page_size",
-									"value": "10"
-								},
-								{
-									"key": "search",
-									"value": ""
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get a Product",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/products/1",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"products",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update a Product（需為 Admin）",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"iPhone 15 Pro Max\",\n  \"price\": 39900.00,\n  \"stock\": 45\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/products/1",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"products",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete a Product（需為 Admin）",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/products/1",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"products",
-								"1"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"auth": {
-				"type": "bearer",
-				"bearer": [
-					{
-						"key": "token",
-						"value": "{{access_token}}",
-						"type": "string"
-					}
-				]
-			},
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				}
-			]
-		},
-		{
-			"name": "Posts (需先登入)",
-			"item": [
-				{
-					"name": "Create a Post（需為 Admin）",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"Go 語言學習心得\",\n  \"content\": \"這是我學習 Go 語言的一些心得和經驗分享...\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/posts",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"posts"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Posts",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/posts?page=1&page_size=10&search=",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"posts"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "page_size",
-									"value": "10"
-								},
-								{
-									"key": "search",
-									"value": ""
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get a Post",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/posts/1",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"posts",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update a Post（需為 Admin）",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"Go 語言學習心得（更新版）\",\n  \"content\": \"更新後的內容...\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/posts/1",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"posts",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete a Post（需為 Admin）",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/posts/1",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"posts",
-								"1"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"auth": {
-				"type": "bearer",
-				"bearer": [
-					{
-						"key": "token",
-						"value": "{{access_token}}",
-						"type": "string"
-					}
-				]
-			},
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				}
-			]
-		},
-		{
-			"name": "Counters",
-			"item": [
-				{
-					"name": "Get Counter Value",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/counters",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"counters"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Increment Counter Value",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"amount\": 100\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/counters/increment",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"counters",
-								"increment"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Decrement Counter Value",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"amount\": 10\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/counters/decrement",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"counters",
-								"decrement"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Set Counter Value",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"value\": 10\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/counters/set",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"counters",
-								"set"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Reset Counter Value",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/counters/reset",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"counters",
-								"reset"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Counter Info",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/counters/info?type=mutex",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"counters",
-								"info"
-							],
-							"query": [
-								{
-									"key": "type",
-									"value": "mutex",
-									"description": "mutex,atomic"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Compare Counter Performance",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/counters/performance?iterations=100000000",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"counters",
-								"performance"
-							],
-							"query": [
-								{
-									"key": "iterations",
-									"value": "100000000"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"auth": {
-				"type": "bearer",
-				"bearer": [
-					{
-						"key": "token",
-						"value": "{{access_token}}",
-						"type": "string"
-					}
-				]
-			},
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				}
-			]
-		},
-		{
-			"name": "Account Balance",
-			"item": [
-				{
-					"name": "Get Account Balance",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/accounts/balance",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"accounts",
-								"balance"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Deposit Account Balance",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"amount\": 100\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/accounts/deposit",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"accounts",
-								"deposit"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Withdraw Account Balance",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"amount\": 10\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/accounts/withdraw",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"accounts",
-								"withdraw"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Set Account Balance",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"balance\": 1000\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/accounts/balance",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"accounts",
-								"balance"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Reset Account Balance",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/accounts/reset",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"accounts",
-								"reset"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Batch Transactions",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"operations\": [\n        1,\n        -1,\n        0,\n        2,\n        -1,\n        0\n    ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/accounts/batch?count=10",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"accounts",
-								"batch"
-							],
-							"query": [
-								{
-									"key": "count",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Random Batch Transactions",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/accounts/batch/random?count=10&delay=true",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"accounts",
-								"batch",
-								"random"
-							],
-							"query": [
-								{
-									"key": "count",
-									"value": "10"
-								},
-								{
-									"key": "delay",
-									"value": "true"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"auth": {
-				"type": "bearer",
-				"bearer": [
-					{
-						"key": "token",
-						"value": "{{access_token}}",
-						"type": "string"
-					}
-				]
-			},
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				}
-			]
-		},
-		{
-			"name": "Tasks",
-			"item": [
-				{
-					"name": "Execute a Task",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"task\": {\n      \"id\": \"task-1\",\n      \"duration\": 2500,\n      \"description\": \"测试任务\"\n    },\n    \"timeout\": 3\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/tasks/execute",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"tasks",
-								"execute"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Execute And Retry a Task",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"task\": {\n      \"id\": \"task-2\",\n      \"duration\": 2500,\n      \"description\": \"带重试的任务\"\n    },\n    \"timeout\": 2,\n    \"max_retry\": 3,\n    \"retry_delay\": 500\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/tasks/execute/retry",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"tasks",
-								"execute",
-								"retry"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Execute Batch Tasks",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"tasks\": [\n      {\"id\": \"task-1\", \"duration\": 1000},\n      {\"id\": \"task-2\", \"duration\": 2000},\n      {\"id\": \"task-3\", \"duration\": 5500}\n    ],\n    \"timeout\": 5\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/tasks/batch",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"tasks",
-								"batch"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"auth": {
-				"type": "bearer",
-				"bearer": [
-					{
-						"key": "token",
-						"value": "{{access_token}}",
-						"type": "string"
-					}
-				]
-			},
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {},
-						"exec": [
-							""
-						]
-					}
-				}
-			]
-		},
-		{
-			"name": "Health Check",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{host}}/health",
-					"host": [
-						"{{host}}"
-					],
-					"path": [
-						"health"
-					]
-				}
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "ffd2ca47-9035-4dd5-9975-f9e67bcda10c",
+    "name": "go-gin-crud",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52361418",
+    "_collection_link": "https://go.postman.co/collection/48932258-ffd2ca47-9035-4dd5-9975-f9e67bcda10c?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@gmail.com\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/register",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "console.log(json)",
+                  "pm.environment.set(\"refresh_token\", json.refresh_token);",
+                  "pm.environment.set(\"access_token\", json.access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@gmail.com\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/login",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "console.log(json)",
+                  "pm.environment.set(\"refresh_token\", json.refresh_token);",
+                  "pm.environment.set(\"access_token\", json.access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newUser@example.com\",\n  \"password\": \"password12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/login",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Auth Profile（需先登入）",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/auth/profile",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "console.log(json)",
+                  "pm.environment.set(\"refresh_token\", json.refresh_token);",
+                  "pm.environment.set(\"access_token\", json.access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n   \"current_password\": \"password1234\",\n   \"new_password\": \"password12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/auth/change-password",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout（需先登入）",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/auth/logout",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token（需先登入）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "console.log(json)",
+                  "pm.environment.set(\"access_token\", json.access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "refresh_token",
+                  "value": "{{refresh_token}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{host}}/refresh",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "refresh"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Books (需先登入)",
+      "item": [
+        {
+          "name": "Create a Book（需為 Admin）",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Netflix\",\n  \"author\": \"andy wang\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/books",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "books"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Books",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/books?page=1&page_size=10&search=",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "books"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get a Book",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/books/1",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "books",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update a Book（需為 Admin）",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"新書名 redis\",\n  \"author\": \"新作者\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/books/1",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "books",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a Book（需為 Admin）",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"新書名\",\n  \"author\": \"新作者\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/books/8",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "books",
+                "8"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users (需先登入)",
+      "item": [
+        {
+          "name": "Create a User（需為 Admin）",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin004@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/users",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Users（需為 Admin）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/users?page=1&page_size=10&search=",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get a User（需為 Admin）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/users/2",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "users",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update a User（需為 Admin）",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newUser@example.com\",\n  \"password\": \"password1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/users/2",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "users",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a User（需為 Admin）",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/users/1",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "users",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products (需先登入)",
+      "item": [
+        {
+          "name": "Create a Product（需為 Admin）",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iPhone 15 Pro\",\n  \"description\": \"最新款 iPhone，配備 A17 Pro 晶片\",\n  \"price\": 35900.00,\n  \"stock\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/products",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/products?page=1&page_size=10&search=",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get a Product",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/products/1",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "products",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update a Product（需為 Admin）",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iPhone 15 Pro Max\",\n  \"price\": 39900.00,\n  \"stock\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/products/1",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "products",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a Product（需為 Admin）",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/products/1",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "products",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Posts (需先登入)",
+      "item": [
+        {
+          "name": "Create a Post（需為 Admin）",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Go 語言學習心得\",\n  \"content\": \"這是我學習 Go 語言的一些心得和經驗分享...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/posts",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "posts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/posts?page=1&page_size=10&search=",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get a Post",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/posts/1",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "posts",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update a Post（需為 Admin）",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Go 語言學習心得（更新版）\",\n  \"content\": \"更新後的內容...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/posts/1",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "posts",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a Post（需為 Admin）",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/posts/1",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "posts",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Counters",
+      "item": [
+        {
+          "name": "Get Counter Value",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/counters",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "counters"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Increment Counter Value",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"amount\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/counters/increment",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "counters",
+                "increment"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Decrement Counter Value",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"amount\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/counters/decrement",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "counters",
+                "decrement"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set Counter Value",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"value\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/counters/set",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "counters",
+                "set"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Counter Value",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/counters/reset",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "counters",
+                "reset"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Counter Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/counters/info?type=mutex",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "counters",
+                "info"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "mutex",
+                  "description": "mutex,atomic"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Compare Counter Performance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/counters/performance?iterations=100000000",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "counters",
+                "performance"
+              ],
+              "query": [
+                {
+                  "key": "iterations",
+                  "value": "100000000"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Account Balance",
+      "item": [
+        {
+          "name": "Get Account Balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/accounts/balance",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "accounts",
+                "balance"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deposit Account Balance",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"amount\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/accounts/deposit",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "accounts",
+                "deposit"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Withdraw Account Balance",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"amount\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/accounts/withdraw",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "accounts",
+                "withdraw"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set Account Balance",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"balance\": 1000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/accounts/balance",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "accounts",
+                "balance"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Account Balance",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/accounts/reset",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "accounts",
+                "reset"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Batch Transactions",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"operations\": [\n        1,\n        -1,\n        0,\n        2,\n        -1,\n        0\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/accounts/batch?count=10",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "accounts",
+                "batch"
+              ],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Random Batch Transactions",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/accounts/batch/random?count=10&delay=true",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "accounts",
+                "batch",
+                "random"
+              ],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "10"
+                },
+                {
+                  "key": "delay",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Execute a Task",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"task\": {\n      \"id\": \"task-1\",\n      \"duration\": 2500,\n      \"description\": \"测试任务\"\n    },\n    \"timeout\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/tasks/execute",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "tasks",
+                "execute"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Execute And Retry a Task",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"task\": {\n      \"id\": \"task-2\",\n      \"duration\": 2500,\n      \"description\": \"带重试的任务\"\n    },\n    \"timeout\": 2,\n    \"max_retry\": 3,\n    \"retry_delay\": 500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/tasks/execute/retry",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "tasks",
+                "execute",
+                "retry"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Execute Batch Tasks",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tasks\": [\n      {\"id\": \"task-1\", \"duration\": 1000},\n      {\"id\": \"task-2\", \"duration\": 2000},\n      {\"id\": \"task-3\", \"duration\": 5100}\n    ],\n    \"timeout\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/tasks/batch",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "tasks",
+                "batch"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{access_token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rate Limiter",
+      "item": [
+        {
+          "name": "Test",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"key\": \"test-key\",\n    \"limit\": 10,\n    \"window\": \"10s\",\n    \"requests\": 10,\n    \"concurrent\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/api/rate-limiter/test",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "api",
+                "rate-limiter",
+                "test"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Worker Pool",
+      "item": [
+        {
+          "name": "Create Worker Pool",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"pool_id\": \"my-pool\",\n    \"worker_count\": 5,\n    \"queue_size\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/api/worker-pool/create",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "api",
+                "worker-pool",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Task",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"pool_id\": \"my-pool\",\n    \"task_id\": \"task-1\",\n    \"type\": \"process_data\",\n    \"data\": {\n        \"key\": \"value\"\n    },\n    \"timeout\": 30,\n    \"priority\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/api/worker-pool/submit",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "api",
+                "worker-pool",
+                "submit"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Task Result",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/api/worker-pool/result?pool_id=my-pool&task_id=task-1",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "api",
+                "worker-pool",
+                "result"
+              ],
+              "query": [
+                {
+                  "key": "pool_id",
+                  "value": "my-pool"
+                },
+                {
+                  "key": "task_id",
+                  "value": "task-1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Worker Pool Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/api/worker-pool/status?pool_id=my-pool",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "api",
+                "worker-pool",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "pool_id",
+                  "value": "my-pool"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Batch Submit Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"pool_id\": \"my-pool\",\n    \"tasks\": [\n        {\n            \"task_id\": \"task-1\",\n            \"type\": \"process\",\n            \"data\": {\n                \"id\": 1\n            }\n        },\n        {\n            \"task_id\": \"task-2\",\n            \"type\": \"process\",\n            \"data\": {\n                \"id\": 2\n            }\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{host}}/api/worker-pool/batch-submit",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "api",
+                "worker-pool",
+                "batch-submit"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Shutdown Worker Pool",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/api/worker-pool/shutdown?pool_id=my-pool&timeout=30",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "api",
+                "worker-pool",
+                "shutdown"
+              ],
+              "query": [
+                {
+                  "key": "pool_id",
+                  "value": "my-pool"
+                },
+                {
+                  "key": "timeout",
+                  "value": "30"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Streaming",
+      "item": [
+        {
+          "name": "SSE（每秒一筆事件）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/stream/sse?seconds=5",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "stream",
+                "sse"
+              ],
+              "query": [
+                {
+                  "key": "seconds",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chunked NDJSON（每行一筆 JSON）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/stream/chunked?count=5",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "stream",
+                "chunked"
+              ],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "進度 SSE（0% → 100%）",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{host}}/stream/progress",
+              "host": [
+                "{{host}}"
+              ],
+              "path": [
+                "stream",
+                "progress"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{host}}/health",
+          "host": [
+            "{{host}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
 }

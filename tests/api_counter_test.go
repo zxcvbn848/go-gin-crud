@@ -108,7 +108,7 @@ func TestResetCounter(t *testing.T) {
 	assert.Equal(t, int64(0), response["value"])
 }
 
-// TestGetCounterInfo 測試獲取計數器信息
+// TestGetCounterInfo 測試獲取計數器資訊
 func TestGetCounterInfo(t *testing.T) {
 	w := makeRequest("GET", "/counters/info?type=mutex", nil, "")
 	assert.Equal(t, http.StatusOK, w.Code)

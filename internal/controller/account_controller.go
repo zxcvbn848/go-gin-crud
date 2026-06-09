@@ -77,7 +77,7 @@ func (ctrl *AccountController) Withdraw(c *gin.Context) {
 
 	resp, err := ctrl.accountService.Withdraw(req.Amount)
 	if err != nil {
-		// 即使餘額不足，也返回交易響應（包含錯誤信息）
+		// 即使餘額不足，也返回交易響應（包含錯誤資訊）
 		if resp != nil {
 			c.JSON(http.StatusOK, resp)
 			return

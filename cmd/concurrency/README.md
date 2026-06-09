@@ -1,5 +1,9 @@
 # 高併發情境題
 
+## 實用的學習文章
+
+- [Go 語言搶票煉金術](https://ithelp.ithome.com.tw/m/articles/10383619)
+
 ## 實務上常見的高併發場景
 
 ### 1. **限流控制（Rate Limiting）**

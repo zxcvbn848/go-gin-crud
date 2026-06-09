@@ -52,13 +52,13 @@ func TestExecuteTaskTimeout(t *testing.T) {
 	json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "task-timeout", response["task_id"])
 	assert.Equal(t, "timeout", response["status"])
-	// 檢查消息包含超時相關信息（可能是中文或英文）
+	// 檢查消息包含超時相關資訊（可能是中文或英文）
 	message := response["message"].(string)
 	assert.True(t, 
 		contains(message, "超時") || 
 		contains(message, "timeout") || 
 		contains(message, "deadline exceeded"),
-		"消息應該包含超時相關信息: %s", message)
+		"消息應該包含超時相關資訊: %s", message)
 }
 
 // TestExecuteTaskWithRetry 測試帶重試的任務執行

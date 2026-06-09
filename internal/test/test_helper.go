@@ -61,10 +61,10 @@ func SetupTestRouter() *gin.Engine {
 
 	// 註冊路由
 	TestAuth = routes.RegisterAuthRoutes(r)
-	routes.RegisterBookRoutes(r, TestAuth)
-	routes.RegisterUserRoutes(r, TestAuth)
-	routes.RegisterProductRoutes(r, TestAuth)
-	routes.RegisterPostRoutes(r, TestAuth)
+	routes.RegisterBookRoutes(r, TestAuth, nil)
+	routes.RegisterUserRoutes(r, TestAuth, nil)
+	routes.RegisterProductRoutes(r, TestAuth, nil)
+	routes.RegisterPostRoutes(r, TestAuth, nil)
 
 	TestRouter = r
 

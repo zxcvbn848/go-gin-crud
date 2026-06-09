@@ -20,6 +20,16 @@ func NewBookController(bookService service.BookService) *BookController {
 	}
 }
 
+// CreateBook 創建書籍
+// @Summary 創建書籍
+// @Description 創建一本新書籍（需要管理員權限）
+// @Tags book
+// @Security BearerAuth
+// @Param request body dto.CreateBookRequest true "書籍資訊"
+// @Success 200 {object} dto.BookResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Router /books [post]
 func (ctrl *BookController) CreateBook(c *gin.Context) {
 	var req dto.CreateBookRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -36,6 +46,17 @@ func (ctrl *BookController) CreateBook(c *gin.Context) {
 	c.JSON(http.StatusOK, book)
 }
 
+// GetBooks 獲取書籍列表
+// @Summary 獲取書籍列表
+// @Description 獲取書籍列表，支援分頁和搜尋（需要認證）
+// @Tags book
+// @Security BearerAuth
+// @Param page query int false "頁碼" default(1)
+// @Param page_size query int false "每頁數量" default(10)
+// @Param search query string false "搜尋關鍵字"
+// @Success 200 {object} dto.PaginationResponse
+// @Failure 401 {object} map[string]interface{}
+// @Router /books [get]
 func (ctrl *BookController) GetBooks(c *gin.Context) {
 	var req dto.PaginationRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -54,6 +75,17 @@ func (ctrl *BookController) GetBooks(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// GetBook 獲取單一書籍
+// @Summary 獲取單一書籍
+// @Description 根據 ID 獲取書籍詳細資訊（需要認證）
+// @Tags book
+// @Security BearerAuth
+// @Param id path int true "書籍 ID"
+// @Success 200 {object} dto.BookResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /books/{id} [get]
 func (ctrl *BookController) GetBook(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -71,6 +103,18 @@ func (ctrl *BookController) GetBook(c *gin.Context) {
 	c.JSON(http.StatusOK, book)
 }
 
+// UpdateBook 更新書籍
+// @Summary 更新書籍
+// @Description 更新指定書籍的資訊（需要管理員權限）
+// @Tags book
+// @Security BearerAuth
+// @Param id path int true "書籍 ID"
+// @Param request body dto.UpdateBookRequest true "更新資訊"
+// @Success 200 {object} dto.BookResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /books/{id} [put]
 func (ctrl *BookController) UpdateBook(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -94,6 +138,17 @@ func (ctrl *BookController) UpdateBook(c *gin.Context) {
 	c.JSON(http.StatusOK, book)
 }
 
+// DeleteBook 刪除書籍
+// @Summary 刪除書籍
+// @Description 刪除指定書籍（需要管理員權限）
+// @Tags book
+// @Security BearerAuth
+// @Param id path int true "書籍 ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /books/{id} [delete]
 func (ctrl *BookController) DeleteBook(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)

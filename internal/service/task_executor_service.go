@@ -15,7 +15,7 @@ var (
 	ErrTaskFailed    = errors.New("任務執行失敗")
 )
 
-// TaskExecutorService 任務執行器服務接口
+// TaskExecutorService 任務執行器服務介面
 type TaskExecutorService interface {
 	// ExecuteTask 執行單個任務（帶超時）
 	ExecuteTask(ctx context.Context, task dto.TaskRequest, timeout time.Duration) (*dto.TaskResponse, error)

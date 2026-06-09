@@ -9,18 +9,37 @@
 - **Demo 3**: Worker Pool 模式（結合 Goroutine + Channel + Context）
 - **Demo 4**: 使用 Context 傳遞值
 - **Demo 5**: 優雅關閉（Graceful Shutdown）
+- **Demo 6**: 避免緩存擊穿（Cache Penetration）
+- **Demo 7**: 連接池管理（Connection Pool）
+- **Demo 8**: 批量處理（Batch Processing）
+- **Demo 9**: 並行查詢聚合（Parallel Query Aggregation）
 
 ## 運行方式
 
+**重要：** 必須運行整個包，不能只運行 `main.go` 文件！
+
 ```bash
-# 運行所有 demo
-go run cmd/demo/main.go
+# 運行所有 demo（推薦方式）
+go run ./cmd/demo
+
+# 或者使用通配符運行所有文件
+go run cmd/demo/*.go
 
 # 運行指定的 demo
-go run cmd/demo/main.go 1        # 只運行 demo1
-go run cmd/demo/main.go 1 2 3    # 運行 demo1, demo2, demo3
-go run cmd/demo/main.go 1-3      # 運行 demo1 到 demo3
+go run ./cmd/demo 1        # 只運行 demo1
+go run ./cmd/demo 1 2 3    # 運行 demo1, demo2, demo3
+go run ./cmd/demo 1-3      # 運行 demo1 到 demo3
+go run ./cmd/demo 6        # 只運行 demo6
+
+# ❌ 錯誤方式（會出現 undefined 錯誤）
+# go run cmd/demo/main.go 6
 ```
+
+**為什麼？**
+- 使用 `go run cmd/demo/main.go` 時，Go 只編譯 `main.go` 文件
+- 不會自動包含同目錄下的其他文件（demo1.go, demo2.go 等）
+- 因此會出現 `undefined: demo1` 等錯誤
+- 使用 `go run ./cmd/demo` 會編譯整個包的所有文件
 
 ## Demo 4: 使用 Context 傳遞值
 
@@ -81,9 +100,9 @@ ctx := context.WithValue(context.Background(), userIDKey, "12345")
    requestID := ctx.Value(requestIDKey).(string)
    ```
 
-2. **用戶身份信息**
+2. **用戶身份資訊**
    ```go
-   // 認證後設置用戶信息
+   // 認證後設置用戶資訊
    ctx := context.WithValue(ctx, userIDKey, user.ID)
    
    // 在業務邏輯中直接使用，不需要每層都傳 userID
@@ -107,7 +126,7 @@ ctx := context.WithValue(context.Background(), userIDKey, "12345")
 - 數據應該是不可變的（immutable）
 
 **最佳實踐：**
-- ✅ 存儲：用戶 ID、請求 ID、追蹤 ID、認證信息
+- ✅ 存儲：用戶 ID、請求 ID、追蹤 ID、認證資訊
 - ❌ 不要存儲：大量數據、可變對象、業務邏輯狀態
 
 **類型斷言安全：**
@@ -204,6 +223,334 @@ cancel()
 
 // 5. 等待所有 goroutine 完成
 wg.Wait()
+```
+
+---
+
+## Demo 6: 避免緩存擊穿（Cache Penetration）
+
+### 什麼是緩存擊穿？
+
+緩存擊穿是指當熱點數據的緩存過期時，大量併發請求同時穿透緩存直接查詢數據庫，導致數據庫壓力過大。
+
+### 問題場景
+
+**無保護的情況：**
+- 緩存過期
+- 10 個併發請求同時發現緩存未命中
+- 10 個請求同時查詢數據庫
+- 數據庫壓力暴增
+
+### 解決方案
+
+使用 `sync.Once` 確保只有第一個請求去查詢數據庫，其他請求等待第一個查詢結果。
+
+**核心技術：**
+1. **`sync.Once`**: 確保查詢操作只執行一次
+2. **Channel**: 用於傳遞查詢結果給等待的 goroutine
+3. **Context**: 控制查詢超時
+4. **錯誤處理**: 處理查詢失敗的情況
+
+### 實現要點
+
+```go
+// 1. 使用 sync.Once 確保只查詢一次
+once := &sync.Once{}
+resultChan := make(chan queryResult, 1)
+
+once.Do(func() {
+    // 只有第一個 goroutine 會執行這裡
+    value, err := queryDB(key)
+    resultChan <- queryResult{value: value, err: err}
+})
+
+// 2. 所有 goroutine 等待結果
+result := <-resultChan
+```
+
+### Demo 6 包含三個場景
+
+1. **場景 1**: 緩存擊穿問題演示（無保護）
+   - 展示問題：10 個請求同時查詢數據庫
+   - 結果：數據庫被查詢 10 次，壓力暴增
+
+2. **場景 2**: 使用 `sync.Once` 解決方案
+   - 展示解決：只有 1 個請求查詢數據庫，其他等待結果
+   - 結果：數據庫只被查詢 1 次，壓力減少 90%
+
+3. **場景 3**: 帶超時和錯誤處理
+   - 正常查詢
+   - 查詢失敗處理
+   - 超時處理
+
+### 為什麼兩個場景的耗時差不多？
+
+**重要理解：** 避免緩存擊穿的主要目的不是減少總耗時，而是**減少數據庫壓力**！
+
+#### 場景 1（無保護）：
+- 10 個 goroutine **併發**執行
+- 每個都查詢數據庫（500ms）
+- 總耗時：約 500ms（因為併發，取最慢的那個）
+- 數據庫壓力：**10 次查詢**
+
+#### 場景 2（有保護）：
+- 10 個 goroutine **併發**執行
+- 只有第一個查詢數據庫（500ms）
+- 其他 9 個等待第一個的結果
+- 總耗時：約 500ms（等待第一個查詢完成）
+- 數據庫壓力：**1 次查詢**
+
+#### 關鍵差異：
+
+| 指標 | 場景 1（無保護） | 場景 2（有保護） | 差異 |
+|------|-----------------|----------------|------|
+| 總耗時 | ~500ms | ~500ms | 相同 |
+| 數據庫查詢次數 | 10 次 | 1 次 | **減少 90%** |
+| 數據庫 CPU 使用 | 10 倍 | 1 倍 | **減少 90%** |
+| 數據庫連接數 | 10 個 | 1 個 | **減少 90%** |
+| 數據庫內存使用 | 10 倍 | 1 倍 | **減少 90%** |
+
+**結論：** 雖然總耗時差不多，但在高併發場景下，避免緩存擊穿可以：
+- ✅ 保護數據庫不被壓垮
+- ✅ 減少數據庫資源消耗
+- ✅ 提高系統穩定性
+- ✅ 避免數據庫連接池耗盡
+
+### 運行 Demo 6
+
+```bash
+# 只運行 demo6
+go run ./cmd/demo 6
+```
+
+---
+
+## Demo 7: 連接池管理（Connection Pool）
+
+### 什麼是連接池？
+
+連接池是一種資源管理技術，用於複用昂貴的資源（如數據庫連接、HTTP 連接等），避免頻繁建立和關閉連接，從而提高系統性能。
+
+### 問題場景
+
+**無連接池的情況：**
+- 每個請求都需要建立新連接
+- 請求結束後立即關閉連接
+- 頻繁建立/關閉連接導致性能下降
+
+### 解決方案
+
+使用 Channel 作為連接池，複用連接資源。
+
+**核心技術：**
+1. **Channel**: 作為連接池存儲連接
+2. **Context**: 控制連接獲取超時
+3. **WaitGroup**: 等待連接歸還
+4. **優雅關閉**: 確保所有連接正確關閉
+
+### 實現要點
+
+```go
+// 1. 使用 Channel 作為連接池
+pool := make(chan Connection, maxSize)
+
+// 2. 獲取連接（帶超時）
+select {
+case conn := <-pool:
+    // 從池中獲取連接
+case <-ctx.Done():
+    // 超時，創建新連接
+}
+
+// 3. 歸還連接
+select {
+case pool <- conn:
+    // 成功歸還
+default:
+    // 池已滿，關閉連接
+}
+```
+
+### Demo 7 包含三個場景
+
+1. **場景 1**: 無連接池問題演示
+   - 展示問題：頻繁建立/關閉連接
+
+2. **場景 2**: 使用連接池
+   - 展示解決：連接複用，性能提升
+
+3. **場景 3**: 連接池超時和優雅關閉
+   - 正常使用
+   - 超時處理
+   - 優雅關閉
+   - 關閉後處理
+
+### 運行 Demo 7
+
+```bash
+# 只運行 demo7
+go run ./cmd/demo 7
+```
+
+---
+
+## Demo 8: 批量處理（Batch Processing）
+
+### 什麼是批量處理？
+
+批量處理是一種優化技術，將多個小任務累積起來，達到一定數量或時間後再一次性處理，從而減少處理開銷，提高系統效率。
+
+### 問題場景
+
+**無批量處理的情況：**
+- 每個任務都立即處理
+- 頻繁的處理開銷（如數據庫連接、網絡請求）
+- 系統資源浪費
+
+### 解決方案
+
+使用 Channel 累積任務，通過數量或時間觸發批量處理。
+
+**核心技術：**
+1. **Channel**: 累積任務
+2. **time.Ticker**: 定時觸發批量處理
+3. **Context**: 控制關閉
+4. **Mutex**: 保護共享狀態
+
+### 實現要點
+
+```go
+// 1. 基於數量的批量處理
+if len(batch) >= batchSize {
+    processBatch()
+}
+
+// 2. 基於時間的批量處理
+ticker := time.NewTicker(interval)
+case <-ticker.C:
+    processBatch()
+
+// 3. 混合觸發（數量 + 時間）
+if len(batch) >= batchSize || <-ticker.C {
+    processBatch()
+}
+```
+
+### Demo 8 包含四個場景
+
+1. **場景 1**: 無批量處理問題演示
+   - 展示問題：逐個處理，效率低
+
+2. **場景 2**: 基於數量的批量處理
+   - 達到指定數量後觸發處理
+   - 適合高頻任務場景
+
+3. **場景 3**: 基於時間的批量處理
+   - 定時觸發批量處理
+   - 適合低頻但需要及時處理的場景
+
+4. **場景 4**: 混合觸發（數量 + 時間）
+   - 達到數量或時間任一條件即觸發
+   - 兼顧效率和及時性
+
+### 運行 Demo 8
+
+```bash
+# 只運行 demo8
+go run ./cmd/demo 8
+```
+
+---
+
+## Demo 9: 並行查詢聚合（Parallel Query Aggregation）
+
+### 什麼是並行查詢聚合？
+
+並行查詢聚合是一種優化技術，當需要從多個數據源獲取數據時，使用多個 goroutine 並行查詢，然後將結果聚合在一起，從而大幅縮短總查詢時間。
+
+### 問題場景
+
+**串行查詢的問題：**
+- 從多個 API 獲取數據
+- 每個查詢都要等待前一個完成
+- 總耗時 = 所有查詢時間的總和
+- 效率低，用戶等待時間長
+
+### 解決方案
+
+使用多個 goroutine 並行查詢，然後聚合結果。
+
+**核心技術：**
+1. **Goroutine**: 並行執行查詢
+2. **Channel**: 收集查詢結果
+3. **Context**: 統一超時控制
+4. **WaitGroup**: 等待所有查詢完成
+5. **錯誤處理**: 處理部分失敗的情況
+
+### 實現要點
+
+```go
+// 1. 使用 Channel 收集結果
+resultChan := make(chan QueryResult, len(dataSources))
+var wg sync.WaitGroup
+
+// 2. 啟動多個 goroutine 並行查詢
+for _, source := range dataSources {
+    wg.Add(1)
+    go func(src string) {
+        defer wg.Done()
+        data, err := queryDataSource(src)
+        resultChan <- QueryResult{Source: src, Data: data, Error: err}
+    }(source)
+}
+
+// 3. 等待所有查詢完成
+go func() {
+    wg.Wait()
+    close(resultChan)
+}()
+
+// 4. 收集並聚合結果
+for result := range resultChan {
+    if result.Error == nil {
+        results[result.Source] = result.Data
+    }
+}
+```
+
+### Demo 9 包含四個場景
+
+1. **場景 1**: 串行查詢問題演示
+   - 展示問題：逐個查詢，耗時長
+   - 總耗時 = 所有查詢時間的總和
+
+2. **場景 2**: 並行查詢基本實現
+   - 展示解決：並行查詢，大幅縮短總耗時
+   - 總耗時 ≈ 最慢的查詢時間
+
+3. **場景 3**: 並行查詢 + 超時控制
+   - 使用 Context 設置超時
+   - 處理慢響應的數據源
+   - 確保查詢不會無限等待
+
+4. **場景 4**: 並行查詢 + 部分失敗處理
+   - 處理部分數據源失敗的情況
+   - 聚合可用數據
+   - 返回成功和失敗的統計信息
+
+### 性能對比
+
+| 指標 | 串行查詢 | 並行查詢 | 提升 |
+|------|---------|---------|------|
+| 總耗時 | 5 × 200ms = 1000ms | ~200ms | **5 倍** |
+| 用戶體驗 | 等待時間長 | 快速響應 | ✅ |
+| 資源利用 | 低 | 高 | ✅ |
+
+### 運行 Demo 9
+
+```bash
+# 只運行 demo9
+go run ./cmd/demo 9
 ```
 
 ---

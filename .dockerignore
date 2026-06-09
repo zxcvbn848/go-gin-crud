@@ -6,6 +6,8 @@
 # Documentation
 *.md
 docs/
+README.md
+TODO.md
 
 # Tests
 tests/

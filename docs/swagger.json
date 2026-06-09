@@ -1,0 +1,3165 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "這是一個使用 Gin 框架構建的 CRUD API 服務，包含用戶管理、書籍管理、產品管理、文章管理、認證、限流器、工作池等功能。",
+        "title": "Go Gin CRUD API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.example.com/support",
+            "email": "support@example.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/api/accounts/balance": {
+            "get": {
+                "description": "獲取當前帳戶餘額",
+                "tags": [
+                    "account"
+                ],
+                "summary": "獲取帳戶餘額",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.AccountResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "設置帳戶初始餘額",
+                "tags": [
+                    "account"
+                ],
+                "summary": "設置餘額",
+                "parameters": [
+                    {
+                        "description": "餘額",
+                        "name": "balance",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "balance": {
+                                    "type": "integer",
+                                    "format": "int64"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.AccountResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/batch": {
+            "post": {
+                "description": "並發執行多筆交易（存款、取款、查詢）",
+                "tags": [
+                    "account"
+                ],
+                "summary": "批量執行交易",
+                "parameters": [
+                    {
+                        "description": "交易操作列表",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.BatchTransactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.BatchTransactionResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/batch/random": {
+            "post": {
+                "description": "生成隨機交易操作並執行（用於演示併發）",
+                "tags": [
+                    "account"
+                ],
+                "summary": "執行隨機批量交易",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "交易數量",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "是否添加延遲（用於演示）",
+                        "name": "delay",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.BatchTransactionResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/deposit": {
+            "post": {
+                "description": "向帳戶存款",
+                "tags": [
+                    "account"
+                ],
+                "summary": "存款",
+                "parameters": [
+                    {
+                        "description": "存款金額",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.DepositRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.TransactionResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/reset": {
+            "post": {
+                "description": "重置帳戶餘額為 0",
+                "tags": [
+                    "account"
+                ],
+                "summary": "重置帳戶",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.AccountResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/withdraw": {
+            "post": {
+                "description": "從帳戶取款",
+                "tags": [
+                    "account"
+                ],
+                "summary": "取款",
+                "parameters": [
+                    {
+                        "description": "取款金額",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.WithdrawRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.TransactionResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/counter": {
+            "get": {
+                "description": "獲取指定類型計數器的當前值",
+                "tags": [
+                    "counter"
+                ],
+                "summary": "獲取計數值",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "mutex",
+                        "description": "計數器類型 (mutex/atomic) ",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CounterResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/counter/decrement": {
+            "post": {
+                "description": "減少指定類型計數器的值",
+                "tags": [
+                    "counter"
+                ],
+                "summary": "減少計數",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "mutex",
+                        "description": "計數器類型 (mutex/atomic)",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "description": "減少數量",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CounterDecrementRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CounterResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/counter/increment": {
+            "post": {
+                "description": "增加指定類型計數器的值",
+                "tags": [
+                    "counter"
+                ],
+                "summary": "增加計數",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "mutex",
+                        "description": "計數器類型 (mutex/atomic)",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "description": "增加數量",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CounterIncrementRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CounterResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/counter/info": {
+            "get": {
+                "description": "獲取計數器服務的類型和描述",
+                "tags": [
+                    "counter"
+                ],
+                "summary": "獲取計數器服務資訊",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "mutex",
+                        "description": "計數器類型 (mutex/atomic)",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CounterServiceInfo"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/counter/performance": {
+            "get": {
+                "description": "比較 Mutex 和 Atomic 實現的性能",
+                "tags": [
+                    "counter"
+                ],
+                "summary": "性能比較",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1000,
+                        "description": "迭代次數",
+                        "name": "iterations",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/counter/reset": {
+            "post": {
+                "description": "重置指定類型計數器的值為 0",
+                "tags": [
+                    "counter"
+                ],
+                "summary": "重置計數器",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "mutex",
+                        "description": "計數器類型 (mutex/atomic)",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CounterResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/counter/set": {
+            "post": {
+                "description": "設置指定類型計數器的值",
+                "tags": [
+                    "counter"
+                ],
+                "summary": "設置計數值",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "mutex",
+                        "description": "計數器類型 (mutex/atomic)",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "description": "計數值",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CounterSetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CounterResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/rate-limiter/config": {
+            "post": {
+                "description": "為指定 key 設置限流器配置",
+                "tags": [
+                    "rate-limiter"
+                ],
+                "summary": "設置限流器配置",
+                "parameters": [
+                    {
+                        "description": "限流器配置",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.RateLimiterConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.RateLimiterStatus"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/rate-limiter/reset": {
+            "post": {
+                "description": "重置指定 key 的限流器",
+                "tags": [
+                    "rate-limiter"
+                ],
+                "summary": "重置限流器",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "限流鍵",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/rate-limiter/stats": {
+            "get": {
+                "description": "獲取限流器的全域統計資訊",
+                "tags": [
+                    "rate-limiter"
+                ],
+                "summary": "獲取統計資訊",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.RateLimiterStats"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/rate-limiter/status": {
+            "get": {
+                "description": "獲取指定 key 的限流器狀態",
+                "tags": [
+                    "rate-limiter"
+                ],
+                "summary": "獲取限流器狀態",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "限流鍵（如：IP、用戶ID等）",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.RateLimiterStatus"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/rate-limiter/test": {
+            "post": {
+                "description": "併發測試限流器的功能",
+                "tags": [
+                    "rate-limiter"
+                ],
+                "summary": "測試限流器",
+                "parameters": [
+                    {
+                        "description": "測試請求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.RateLimiterTestRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.RateLimiterTestResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/rate-limiter/test/allow": {
+            "get": {
+                "description": "測試指定 key 的單個請求是否允許",
+                "tags": [
+                    "rate-limiter"
+                ],
+                "summary": "測試單個請求",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "限流鍵",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.RateLimiterStatus"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/batch": {
+            "post": {
+                "description": "並發執行多個任務，支援整體超時控制",
+                "tags": [
+                    "task-executor"
+                ],
+                "summary": "批量執行任務（並發）",
+                "parameters": [
+                    {
+                        "description": "批量任務請求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.BatchExecuteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.BatchExecuteResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/execute": {
+            "post": {
+                "description": "執行一個任務，支援超時控制和資源清理",
+                "tags": [
+                    "task-executor"
+                ],
+                "summary": "執行單個任務（帶超時）",
+                "parameters": [
+                    {
+                        "description": "任務請求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.ExecuteTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.ExecuteTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/execute/retry": {
+            "post": {
+                "description": "執行任務，支援超時、重試和資源清理",
+                "tags": [
+                    "task-executor"
+                ],
+                "summary": "執行任務（帶重試機制）",
+                "parameters": [
+                    {
+                        "description": "任務請求（包含重試參數）",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.ExecuteTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.ExecuteTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worker-pool/batch-submit": {
+            "post": {
+                "description": "向工作池批量提交多個任務",
+                "tags": [
+                    "worker-pool"
+                ],
+                "summary": "批量提交任務",
+                "parameters": [
+                    {
+                        "description": "批量提交任務請求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.BatchSubmitTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.BatchSubmitTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worker-pool/create": {
+            "post": {
+                "description": "創建一個新的工作池，用於處理任務",
+                "tags": [
+                    "worker-pool"
+                ],
+                "summary": "創建工作池",
+                "parameters": [
+                    {
+                        "description": "創建工作池請求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CreateWorkerPoolRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.WorkerPoolStatus"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worker-pool/list": {
+            "get": {
+                "description": "列出所有已創建的工作池",
+                "tags": [
+                    "worker-pool"
+                ],
+                "summary": "列出所有工作池",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worker-pool/result": {
+            "get": {
+                "description": "獲取指定任務的執行結果",
+                "tags": [
+                    "worker-pool"
+                ],
+                "summary": "獲取任務結果",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "工作池 ID",
+                        "name": "pool_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "任務 ID",
+                        "name": "task_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.WorkerPoolResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worker-pool/shutdown": {
+            "post": {
+                "description": "優雅關閉指定工作池，等待所有任務完成",
+                "tags": [
+                    "worker-pool"
+                ],
+                "summary": "優雅關閉工作池",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "工作池 ID",
+                        "name": "pool_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "超時時間（秒，預設 30 秒）",
+                        "name": "timeout",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worker-pool/status": {
+            "get": {
+                "description": "獲取指定工作池的狀態資訊",
+                "tags": [
+                    "worker-pool"
+                ],
+                "summary": "獲取工作池狀態",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "工作池 ID",
+                        "name": "pool_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.WorkerPoolStatus"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/worker-pool/submit": {
+            "post": {
+                "description": "向工作池提交一個任務",
+                "tags": [
+                    "worker-pool"
+                ],
+                "summary": "提交任務",
+                "parameters": [
+                    {
+                        "description": "提交任務請求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.SubmitTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.SubmitTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "修改當前登入用戶的密碼",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "修改密碼",
+                "parameters": [
+                    {
+                        "description": "密碼修改資訊",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.ChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "將 access token 加入黑名單，使其失效",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "用戶登出",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/profile": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "獲取當前登入用戶的詳細資訊",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "獲取用戶資料",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.UserResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/books": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "獲取書籍列表，支援分頁和搜尋（需要認證）",
+                "tags": [
+                    "book"
+                ],
+                "summary": "獲取書籍列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "頁碼",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每頁數量",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜尋關鍵字",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.PaginationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "創建一本新書籍（需要管理員權限）",
+                "tags": [
+                    "book"
+                ],
+                "summary": "創建書籍",
+                "parameters": [
+                    {
+                        "description": "書籍資訊",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CreateBookRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.BookResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/books/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根據 ID 獲取書籍詳細資訊（需要認證）",
+                "tags": [
+                    "book"
+                ],
+                "summary": "獲取單一書籍",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "書籍 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.BookResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新指定書籍的資訊（需要管理員權限）",
+                "tags": [
+                    "book"
+                ],
+                "summary": "更新書籍",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "書籍 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新資訊",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.UpdateBookRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.BookResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "刪除指定書籍（需要管理員權限）",
+                "tags": [
+                    "book"
+                ],
+                "summary": "刪除書籍",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "書籍 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "檢查服務是否正常運行",
+                "tags": [
+                    "health"
+                ],
+                "summary": "健康檢查",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "使用 email 和密碼登入，獲取 access token 和 refresh token",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "用戶登入",
+                "parameters": [
+                    {
+                        "description": "登入資訊",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/posts": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "獲取文章列表，支援分頁和搜尋（需要認證）",
+                "tags": [
+                    "post"
+                ],
+                "summary": "獲取文章列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "頁碼",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每頁數量",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜尋關鍵字",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.PaginationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "創建一篇新文章（需要管理員權限）",
+                "tags": [
+                    "post"
+                ],
+                "summary": "創建文章",
+                "parameters": [
+                    {
+                        "description": "文章資訊",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CreatePostRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.PostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/posts/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根據 ID 獲取文章詳細資訊（需要認證）",
+                "tags": [
+                    "post"
+                ],
+                "summary": "獲取單一文章",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "文章 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.PostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新指定文章的資訊（管理員可更新任何文章，一般用戶只能更新自己的文章）",
+                "tags": [
+                    "post"
+                ],
+                "summary": "更新文章",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "文章 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新資訊",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.UpdatePostRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.PostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "刪除指定文章（管理員可刪除任何文章，一般用戶只能刪除自己的文章）",
+                "tags": [
+                    "post"
+                ],
+                "summary": "刪除文章",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "文章 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/products": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "獲取產品列表，支援分頁和搜尋（需要認證）",
+                "tags": [
+                    "product"
+                ],
+                "summary": "獲取產品列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "頁碼",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每頁數量",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜尋關鍵字",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.PaginationResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "創建一個新產品（需要管理員權限）",
+                "tags": [
+                    "product"
+                ],
+                "summary": "創建產品",
+                "parameters": [
+                    {
+                        "description": "產品資訊",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CreateProductRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.ProductResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根據 ID 獲取產品詳細資訊（需要認證）",
+                "tags": [
+                    "product"
+                ],
+                "summary": "獲取單一產品",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "產品 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.ProductResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新指定產品的資訊（需要管理員權限）",
+                "tags": [
+                    "product"
+                ],
+                "summary": "更新產品",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "產品 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新資訊",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.UpdateProductRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.ProductResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "刪除指定產品（需要管理員權限）",
+                "tags": [
+                    "product"
+                ],
+                "summary": "刪除產品",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "產品 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/refresh": {
+            "post": {
+                "description": "使用 refresh token 獲取新的 access token",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "刷新 Access Token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Refresh Token",
+                        "name": "refresh_token",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "註冊一個新用戶帳號",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "用戶註冊",
+                "parameters": [
+                    {
+                        "description": "註冊資訊",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/stream/chunked": {
+            "get": {
+                "description": "以 chunked 編碼逐筆回傳 JSON 行（NDJSON），可用 Query count 指定筆數（預設 10）",
+                "produces": [
+                    "application/x-ndjson"
+                ],
+                "tags": [
+                    "streaming"
+                ],
+                "summary": "Chunked 串流",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "輸出筆數",
+                        "name": "count",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "application/x-ndjson",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/stream/progress": {
+            "get": {
+                "description": "以 SSE 推送模擬任務進度 0%~100%",
+                "produces": [
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "streaming"
+                ],
+                "summary": "進度串流（SSE）",
+                "responses": {
+                    "200": {
+                        "description": "text/event-stream",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/stream/sse": {
+            "get": {
+                "description": "Server-Sent Events 串流，每秒推送一筆事件，可用 Query seconds 指定秒數（預設 30）",
+                "produces": [
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "streaming"
+                ],
+                "summary": "SSE 串流",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 30,
+                        "description": "串流持續秒數",
+                        "name": "seconds",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "text/event-stream",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "獲取用戶列表，支援分頁和搜尋（需要管理員權限）",
+                "tags": [
+                    "user"
+                ],
+                "summary": "獲取用戶列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "頁碼",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每頁數量",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "搜尋關鍵字",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.PaginationResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "創建一個新用戶（需要管理員權限）",
+                "tags": [
+                    "user"
+                ],
+                "summary": "創建用戶",
+                "parameters": [
+                    {
+                        "description": "用戶資訊",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根據 ID 獲取用戶詳細資訊（需要管理員權限）",
+                "tags": [
+                    "user"
+                ],
+                "summary": "獲取單一用戶",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用戶 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新指定用戶的資訊（需要管理員權限）",
+                "tags": [
+                    "user"
+                ],
+                "summary": "更新用戶",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用戶 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新資訊",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-gin-crud_internal_dto.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "刪除指定用戶（需要管理員權限）",
+                "tags": [
+                    "user"
+                ],
+                "summary": "刪除用戶",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用戶 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "go-gin-crud_internal_dto.AccountResponse": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "integer"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.BatchExecuteRequest": {
+            "type": "object",
+            "required": [
+                "tasks",
+                "timeout"
+            ],
+            "properties": {
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/go-gin-crud_internal_dto.TaskRequest"
+                    }
+                },
+                "timeout": {
+                    "description": "整體超時時間（秒）",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.BatchExecuteResponse": {
+            "type": "object",
+            "properties": {
+                "error_count": {
+                    "type": "integer"
+                },
+                "success_count": {
+                    "type": "integer"
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/go-gin-crud_internal_dto.TaskResponse"
+                    }
+                },
+                "timeout_count": {
+                    "type": "integer"
+                },
+                "total_duration": {
+                    "description": "總執行時間（毫秒）",
+                    "type": "integer"
+                },
+                "total_tasks": {
+                    "type": "integer"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.BatchSubmitTaskRequest": {
+            "type": "object",
+            "required": [
+                "pool_id",
+                "tasks"
+            ],
+            "properties": {
+                "pool_id": {
+                    "description": "工作池 ID",
+                    "type": "string"
+                },
+                "tasks": {
+                    "description": "任務列表",
+                    "type": "array",
+                    "maxItems": 100,
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/go-gin-crud_internal_dto.SubmitTaskRequest"
+                    }
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.BatchSubmitTaskResponse": {
+            "type": "object",
+            "properties": {
+                "pool_id": {
+                    "type": "string"
+                },
+                "rejected": {
+                    "description": "被拒絕的任務數",
+                    "type": "integer"
+                },
+                "results": {
+                    "description": "每個任務的提交結果",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/go-gin-crud_internal_dto.SubmitTaskResponse"
+                    }
+                },
+                "submitted": {
+                    "description": "成功提交的任務數",
+                    "type": "integer"
+                },
+                "submitted_at": {
+                    "type": "string"
+                },
+                "total_tasks": {
+                    "type": "integer"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.BatchTransactionRequest": {
+            "type": "object",
+            "required": [
+                "operations"
+            ],
+            "properties": {
+                "operations": {
+                    "description": "-1: 取款, 0: 查詢, 1+: 存款",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.BatchTransactionResponse": {
+            "type": "object",
+            "properties": {
+                "final_balance": {
+                    "type": "integer"
+                },
+                "initial_balance": {
+                    "type": "integer"
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/go-gin-crud_internal_dto.TransactionResponse"
+                    }
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.BookResponse": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.ChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "current_password",
+                "new_password"
+            ],
+            "properties": {
+                "current_password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "new_password": {
+                    "type": "string",
+                    "minLength": 6
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.CounterDecrementRequest": {
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.CounterIncrementRequest": {
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.CounterResponse": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "integer"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.CounterServiceInfo": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.CounterSetRequest": {
+            "type": "object",
+            "required": [
+                "value"
+            ],
+            "properties": {
+                "value": {
+                    "type": "integer"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.CreateBookRequest": {
+            "type": "object",
+            "required": [
+                "author",
+                "title"
+            ],
+            "properties": {
+                "author": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.CreatePostRequest": {
+            "type": "object",
+            "required": [
+                "content",
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.CreateProductRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "price"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                },
+                "price": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "stock": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 6
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "user",
+                        "admin"
+                    ]
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.CreateWorkerPoolRequest": {
+            "type": "object",
+            "required": [
+                "pool_id",
+                "worker_count"
+            ],
+            "properties": {
+                "pool_id": {
+                    "description": "工作池 ID",
+                    "type": "string"
+                },
+                "queue_size": {
+                    "description": "任務佇列大小（可選，預設無限制）",
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "worker_count": {
+                    "description": "Worker 數量",
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.DepositRequest": {
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.ExecuteTaskRequest": {
+            "type": "object",
+            "required": [
+                "task",
+                "timeout"
+            ],
+            "properties": {
+                "max_retry": {
+                    "description": "最大重試次數",
+                    "type": "integer"
+                },
+                "retry_delay": {
+                    "description": "重試延遲（毫秒）",
+                    "type": "integer"
+                },
+                "task": {
+                    "$ref": "#/definitions/go-gin-crud_internal_dto.TaskRequest"
+                },
+                "timeout": {
+                    "description": "超時時間（秒）",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.ExecuteTaskResponse": {
+            "type": "object",
+            "properties": {
+                "completed_at": {
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "執行時間（毫秒）",
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "retry_count": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.LoginRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.PaginationResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.PostResponse": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/go-gin-crud_internal_dto.UserResponse"
+                },
+                "author_id": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.ProductResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.RateLimiterConfig": {
+            "type": "object",
+            "properties": {
+                "algorithm": {
+                    "description": "演算法類型：sliding_window, fixed_window",
+                    "type": "string"
+                },
+                "key": {
+                    "description": "限流鍵（如：IP、用戶ID等）",
+                    "type": "string"
+                },
+                "limit": {
+                    "description": "限制數量",
+                    "type": "integer"
+                },
+                "window": {
+                    "description": "時間窗口（如：1s, 1m）",
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.RateLimiterStats": {
+            "type": "object",
+            "properties": {
+                "active_keys": {
+                    "description": "活躍的限流鍵數量",
+                    "type": "integer"
+                },
+                "allowed_requests": {
+                    "description": "允許的請求數",
+                    "type": "integer"
+                },
+                "blocked_requests": {
+                    "description": "被阻止的請求數",
+                    "type": "integer"
+                },
+                "last_reset_time": {
+                    "description": "最後重置時間",
+                    "type": "string"
+                },
+                "total_requests": {
+                    "description": "總請求數",
+                    "type": "integer"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.RateLimiterStatus": {
+            "type": "object",
+            "properties": {
+                "algorithm": {
+                    "description": "演算法類型",
+                    "type": "string"
+                },
+                "current_count": {
+                    "description": "當前窗口內的請求數",
+                    "type": "integer"
+                },
+                "is_allowed": {
+                    "description": "是否允許請求",
+                    "type": "boolean"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "remaining": {
+                    "description": "剩餘可用請求數",
+                    "type": "integer"
+                },
+                "reset_time": {
+                    "description": "重置時間",
+                    "type": "string"
+                },
+                "window": {
+                    "description": "時間窗口字串表示",
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.RateLimiterTestRequest": {
+            "type": "object",
+            "required": [
+                "key",
+                "limit",
+                "requests",
+                "window"
+            ],
+            "properties": {
+                "concurrent": {
+                    "description": "併發數（可選）",
+                    "type": "integer"
+                },
+                "key": {
+                    "description": "限流鍵",
+                    "type": "string"
+                },
+                "limit": {
+                    "description": "限制數量",
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "requests": {
+                    "description": "測試請求數量",
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "window": {
+                    "description": "時間窗口（如：1s, 1m）",
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.RateLimiterTestResponse": {
+            "type": "object",
+            "properties": {
+                "allowed_requests": {
+                    "type": "integer"
+                },
+                "blocked_requests": {
+                    "type": "integer"
+                },
+                "details": {
+                    "description": "詳細結果",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/go-gin-crud_internal_dto.RateLimiterStatus"
+                    }
+                },
+                "duration": {
+                    "description": "測試耗時",
+                    "type": "string"
+                },
+                "success_rate": {
+                    "description": "成功率",
+                    "type": "number"
+                },
+                "total_requests": {
+                    "type": "integer"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.SubmitTaskRequest": {
+            "type": "object",
+            "required": [
+                "pool_id",
+                "task_id",
+                "type"
+            ],
+            "properties": {
+                "data": {
+                    "description": "任務數據",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "pool_id": {
+                    "description": "工作池 ID",
+                    "type": "string"
+                },
+                "priority": {
+                    "description": "優先級（預設 0）",
+                    "type": "integer"
+                },
+                "task_id": {
+                    "description": "任務 ID",
+                    "type": "string"
+                },
+                "timeout": {
+                    "description": "超時時間（秒，預設 30 秒）",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "任務類型",
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.SubmitTaskResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "pool_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "submitted, rejected",
+                    "type": "string"
+                },
+                "submitted_at": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.TaskRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "任務執行時間（毫秒）",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.TaskResponse": {
+            "type": "object",
+            "properties": {
+                "completed_at": {
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "實際執行時間（毫秒）",
+                    "type": "integer"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "\"success\", \"timeout\", \"cancelled\", \"error\"",
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.TransactionResponse": {
+            "type": "object",
+            "properties": {
+                "after": {
+                    "type": "integer"
+                },
+                "amount": {
+                    "type": "integer"
+                },
+                "before": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "operation": {
+                    "description": "\"deposit\", \"withdraw\", \"balance\"",
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.UpdateBookRequest": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.UpdatePostRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.UpdateProductRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                },
+                "price": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "stock": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.UpdateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 6
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.UserResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.WithdrawRequest": {
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.WorkerPoolResult": {
+            "type": "object",
+            "properties": {
+                "completed_at": {
+                    "description": "完成時間",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "執行時間（毫秒）",
+                    "type": "integer"
+                },
+                "error": {
+                    "description": "錯誤訊息",
+                    "type": "string"
+                },
+                "result": {
+                    "description": "執行結果",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "status": {
+                    "description": "狀態：success, failed, timeout, cancelled",
+                    "type": "string"
+                },
+                "task_id": {
+                    "description": "任務 ID",
+                    "type": "string"
+                },
+                "worker_id": {
+                    "description": "處理該任務的 Worker ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "go-gin-crud_internal_dto.WorkerPoolStatus": {
+            "type": "object",
+            "properties": {
+                "active_workers": {
+                    "description": "活躍的 Worker 數量",
+                    "type": "integer"
+                },
+                "completed_tasks": {
+                    "description": "已完成任務數",
+                    "type": "integer"
+                },
+                "created_at": {
+                    "description": "創建時間",
+                    "type": "string"
+                },
+                "failed_tasks": {
+                    "description": "失敗任務數",
+                    "type": "integer"
+                },
+                "is_running": {
+                    "description": "是否運行中",
+                    "type": "boolean"
+                },
+                "pool_id": {
+                    "description": "工作池 ID",
+                    "type": "string"
+                },
+                "queue_capacity": {
+                    "description": "佇列容量（-1 表示無限制）",
+                    "type": "integer"
+                },
+                "queue_size": {
+                    "description": "當前佇列大小",
+                    "type": "integer"
+                },
+                "total_tasks": {
+                    "description": "總任務數",
+                    "type": "integer"
+                },
+                "worker_count": {
+                    "description": "Worker 數量",
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_controller.RegisterRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 6
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "請在值前加上 \"Bearer \" 前綴，例如：Bearer {token}",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

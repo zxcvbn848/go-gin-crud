@@ -25,7 +25,7 @@
 
 ## 中優先級 📋
 
-- [ ] Rate Limiting（API 限流）
+- [x] Rate Limiting （API 限流）
 - [ ] 檔案上傳功能（圖片）
 - [x] 軟刪除（Soft Delete）
 - [ ] 操作日誌記錄（Audit Log）
@@ -33,18 +33,36 @@
 - [x] 瞭解 Goroutine + channel
 - [x] 知道 context.Context 用法
 - [x] 寫一個簡單的併發 demo（面試常考）
-- [] 高併發情境題：文件在 [cmd/concurrency/README.md](./cmd/concurrency/README.md)
+- [x] 高併發情境題：文件在 [cmd/concurrency/README.md](./cmd/concurrency/README.md)
 - [x] 部署到正式站
   - [x] 事前準備 [.github/workflows/README.md](.github/workflows/README.md)
   - [] GitHub Actions
   - [] 架設 EC2
   - [] 架設 DB
-- [] 開發簡易的前端頁面
+- [ ] 開發簡易的前端頁面
+
+## Resilience Patterns 🛡️
+
+- [ ] Timeout（請求/任務執行超時控制）
+- [ ] Retry with Backoff（指數退避重試機制）
+- [ ] Circuit Breaker（熔斷器，防止雪崩效應）
+- [ ] Bulkhead（艙壁隔離，限制資源佔用範圍）
+- [ ] Fallback（降級處理，回傳預設值或快取）
+- [ ] Health Check（依賴服務健康偵測）
 
 ## 進階功能 🚀
 
-- [ ] Redis 快取整合
+- [x] Redis 快取整合
+  - [x] Books APIs
+  - [x] Posts APIs
+  - [x] Users APIs
+  - [x] Products APIs
 - [ ] 全文搜尋（Elasticsearch）
+- [x] Socket io
+- [x] Streaming
+  - 技術文件
+    - https://blackbing.medium.com/淺談-server-sent-events-9c81ef21ca8e
+- [ ] 影音串流協定 MPEG-DASH / HLS，可用 CMAF 同時處理兩種協定
 - [ ] 評論系統
 - [ ] 統計報表 API
 - [ ] CI/CD 整合
