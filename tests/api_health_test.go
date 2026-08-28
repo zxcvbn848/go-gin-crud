@@ -18,5 +18,3 @@ func TestHealthEndpoint(t *testing.T) {
 	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Equal(t, "ok", response["status"])
 }
-
-

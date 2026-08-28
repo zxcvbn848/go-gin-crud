@@ -192,4 +192,3 @@ func (s *postService) GetPostsWithPagination(req dto.PaginationRequest) (*dto.Pa
 		TotalPages: totalPages,
 	}, nil
 }
-

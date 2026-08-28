@@ -21,9 +21,9 @@ func TestCreateBook(t *testing.T) {
 		"author": "測試作者",
 	}
 	w := makeRequest("POST", "/books", req, adminToken)
-	
+
 	assert.Equal(t, http.StatusOK, w.Code)
-	
+
 	var book map[string]interface{}
 	_ = json.Unmarshal(w.Body.Bytes(), &book)
 	assert.Equal(t, "測試書籍", book["title"])
@@ -94,12 +94,12 @@ func TestGetBook(t *testing.T) {
 	}
 	w := makeRequest("POST", "/books", createReq, adminToken)
 	assert.Equal(t, http.StatusOK, w.Code, "創建書籍應該成功")
-	
+
 	var createdBook map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &createdBook)
 	assert.NoError(t, err, "應該能解析創建的書籍")
 	assert.NotNil(t, createdBook["id"], "書籍應該有 ID")
-	
+
 	bookID := int(createdBook["id"].(float64))
 
 	// 測試成功取得
@@ -126,12 +126,12 @@ func TestUpdateBook(t *testing.T) {
 	}
 	w := makeRequest("POST", "/books", createReq, adminToken)
 	assert.Equal(t, http.StatusOK, w.Code, "創建書籍應該成功")
-	
+
 	var createdBook map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &createdBook)
 	assert.NoError(t, err, "應該能解析創建的書籍")
 	assert.NotNil(t, createdBook["id"], "書籍應該有 ID")
-	
+
 	bookID := int(createdBook["id"].(float64))
 
 	// 測試成功更新
@@ -164,12 +164,12 @@ func TestDeleteBook(t *testing.T) {
 	}
 	w := makeRequest("POST", "/books", createReq, adminToken)
 	assert.Equal(t, http.StatusOK, w.Code, "創建書籍應該成功")
-	
+
 	var createdBook map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &createdBook)
 	assert.NoError(t, err, "應該能解析創建的書籍")
 	assert.NotNil(t, createdBook["id"], "書籍應該有 ID")
-	
+
 	bookID := int(createdBook["id"].(float64))
 
 	// 測試成功刪除
@@ -188,15 +188,14 @@ func TestDeleteBook(t *testing.T) {
 	}
 	w = makeRequest("POST", "/books", createReq2, adminToken)
 	assert.Equal(t, http.StatusOK, w.Code, "創建書籍應該成功")
-	
+
 	var createdBook2 map[string]interface{}
 	err = json.Unmarshal(w.Body.Bytes(), &createdBook2)
 	assert.NoError(t, err, "應該能解析創建的書籍")
 	assert.NotNil(t, createdBook2["id"], "書籍應該有 ID")
-	
+
 	bookID2 := int(createdBook2["id"].(float64))
 
 	w = makeRequest("DELETE", "/books/"+fmt.Sprintf("%d", bookID2), nil, userToken)
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
-

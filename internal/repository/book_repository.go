@@ -68,4 +68,3 @@ func (r *bookRepository) FindAllWithPagination(page, pageSize int, search string
 
 	return books, total, nil
 }
-

@@ -142,4 +142,3 @@ func (ctrl *TaskExecutorController) BatchExecuteTasks(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
-

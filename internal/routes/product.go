@@ -32,4 +32,3 @@ func RegisterProductRoutes(r *gin.Engine, authService service.AuthService, redis
 	adminProducts.PUT("/:id", productController.UpdateProduct)
 	adminProducts.DELETE("/:id", productController.DeleteProduct)
 }
-

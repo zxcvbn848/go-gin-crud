@@ -32,4 +32,3 @@ func RegisterPostRoutes(r *gin.Engine, authService service.AuthService, redisCli
 	adminPosts.PUT("/:id", postController.UpdatePost)
 	adminPosts.DELETE("/:id", postController.DeletePost)
 }
-

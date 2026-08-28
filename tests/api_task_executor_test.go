@@ -54,10 +54,10 @@ func TestExecuteTaskTimeout(t *testing.T) {
 	assert.Equal(t, "timeout", response["status"])
 	// 檢查消息包含超時相關資訊（可能是中文或英文）
 	message := response["message"].(string)
-	assert.True(t, 
-		contains(message, "超時") || 
-		contains(message, "timeout") || 
-		contains(message, "deadline exceeded"),
+	assert.True(t,
+		contains(message, "超時") ||
+			contains(message, "timeout") ||
+			contains(message, "deadline exceeded"),
 		"消息應該包含超時相關資訊: %s", message)
 }
 
@@ -69,8 +69,8 @@ func TestExecuteTaskWithRetry(t *testing.T) {
 			"duration":    500, // 0.5 秒
 			"description": "帶重試的任務",
 		},
-		"timeout":    2,
-		"max_retry":  2,
+		"timeout":     2,
+		"max_retry":   2,
 		"retry_delay": 100, // 100 毫秒
 	}
 	w := makeRequest("POST", "/tasks/execute/retry", req, "")
@@ -153,7 +153,7 @@ func TestExecuteTaskInvalidRequest(t *testing.T) {
 func TestExecuteTaskConcurrent(t *testing.T) {
 	// 同時執行多個任務
 	done := make(chan bool, 3)
-	
+
 	go func() {
 		req := map[string]interface{}{
 			"task": map[string]interface{}{
@@ -203,4 +203,3 @@ func TestExecuteTaskConcurrent(t *testing.T) {
 		}
 	}
 }
-

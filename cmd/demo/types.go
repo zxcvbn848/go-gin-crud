@@ -15,4 +15,3 @@ type Result struct {
 	Duration time.Duration
 	Error    error
 }
-

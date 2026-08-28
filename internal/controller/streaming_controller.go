@@ -60,8 +60,8 @@ func (ctrl *StreamingController) StreamSSE(c *gin.Context) {
 			return
 		case <-ticker.C:
 			event := map[string]interface{}{
-				"seq":    i + 1,
-				"time":   time.Now().Format(time.RFC3339),
+				"seq":     i + 1,
+				"time":    time.Now().Format(time.RFC3339),
 				"message": fmt.Sprintf("event #%d", i+1),
 			}
 			payload, _ := json.Marshal(event)
@@ -109,9 +109,9 @@ func (ctrl *StreamingController) StreamChunked(c *gin.Context) {
 			return
 		default:
 			row := map[string]interface{}{
-				"index":   i + 1,
-				"value":  fmt.Sprintf("item-%d", i+1),
-				"at":     time.Now().Format(time.RFC3339),
+				"index": i + 1,
+				"value": fmt.Sprintf("item-%d", i+1),
+				"at":    time.Now().Format(time.RFC3339),
 			}
 			line, _ := json.Marshal(row)
 			_, _ = w.Write(line)
