@@ -45,9 +45,9 @@
 
 - [ ] Timeout（請求/任務執行超時控制）
 - [x] Retry with Backoff（指數退避重試機制）
-- [ ] Circuit Breaker（熔斷器，防止雪崩效應）
+- [x] Circuit Breaker（熔斷器，防止雪崩效應）
 - [ ] Bulkhead（艙壁隔離，限制資源佔用範圍）
-- [ ] Fallback（降級處理，回傳預設值或快取）
+- [x] Fallback（降級處理，回傳預設值或快取）
 - [ ] Health Check（依賴服務健康偵測）
 
 ## 進階功能 🚀
