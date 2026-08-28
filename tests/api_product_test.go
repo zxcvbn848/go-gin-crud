@@ -217,4 +217,3 @@ func TestDeleteProduct(t *testing.T) {
 	w = makeRequest("DELETE", "/products/"+fmt.Sprintf("%d", productID2), nil, userToken)
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
-

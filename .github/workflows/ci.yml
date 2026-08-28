@@ -10,31 +10,8 @@ jobs:
   test:
     name: 運行測試
     runs-on: ubuntu-latest
-    
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: test_password
-          MYSQL_DATABASE: test_db
-          MYSQL_USER: test_user
-          MYSQL_PASSWORD: test_password
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+    # 測試曾因並發邏輯 bug 卡死，燒掉整個 runner 額度；寧可 10 分鐘紅燈
+    timeout-minutes: 10
 
     steps:
     - name: 檢出代碼
@@ -44,35 +21,20 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.25'
-        cache-dependencies: true
 
+    # 測試使用 SQLite in-memory（tests/api_test.go），不需要 MySQL / Redis service
     - name: 運行測試
       env:
-        DB_HOST: 127.0.0.1
-        DB_PORT: 3306
-        DB_USER: test_user
-        DB_PASSWORD: test_password
-        DB_NAME: test_db
-        REDIS_ADDR: 127.0.0.1:6379
         ACCESS_SECRET: test_access_secret_key_for_testing_only
         REFRESH_SECRET: test_refresh_secret_key_for_testing_only
-      run: |
-        go test -v -race -coverprofile=coverage.out ./tests/...
-        go tool cover -html=coverage.out -o coverage.html
-
-    - name: 上傳測試覆蓋率
-      uses: codecov/codecov-action@v4
-      if: always()
-      with:
-        file: ./coverage.out
-        flags: unittests
-        name: codecov-umbrella
+      run: go test -v -race -timeout 5m -coverprofile=coverage.out ./tests/...
 
   build:
     name: 構建應用
     runs-on: ubuntu-latest
     needs: test
-    
+    timeout-minutes: 10
+
     steps:
     - name: 檢出代碼
       uses: actions/checkout@v4
@@ -81,7 +43,6 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.25'
-        cache-dependencies: true
 
     - name: 構建應用
       run: |
@@ -98,7 +59,8 @@ jobs:
   lint:
     name: 代碼檢查
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 10
+
     steps:
     - name: 檢出代碼
       uses: actions/checkout@v4
@@ -111,5 +73,4 @@ jobs:
     - name: 運行 golangci-lint
       uses: golangci/golangci-lint-action@v7
       with:
-        version: latest
-
+        version: v2.12.2

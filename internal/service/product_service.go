@@ -178,4 +178,3 @@ func (s *productService) GetProductsWithPagination(req dto.PaginationRequest) (*
 		TotalPages: totalPages,
 	}, nil
 }
-

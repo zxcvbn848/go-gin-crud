@@ -68,4 +68,3 @@ func (r *productRepository) FindAllWithPagination(page, pageSize int, search str
 
 	return products, total, nil
 }
-

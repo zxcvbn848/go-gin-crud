@@ -135,4 +135,3 @@ func TestCounterPerformance(t *testing.T) {
 	assert.Contains(t, response, "atomic")
 	assert.Contains(t, response, "winner")
 }
-

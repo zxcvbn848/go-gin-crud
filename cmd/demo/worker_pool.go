@@ -104,4 +104,3 @@ func (wp *WorkerPool) Wait() {
 	wp.wg.Wait()
 	close(wp.resultChan)
 }
-

@@ -26,7 +26,7 @@
 ## 中優先級 📋
 
 - [x] Rate Limiting （API 限流）
-- [ ] 檔案上傳功能（圖片）
+- [x] 檔案上傳功能（圖片）
 - [x] 軟刪除（Soft Delete）
 - [ ] 操作日誌記錄（Audit Log）
 - [ ] Email 驗證（註冊確認信）
@@ -36,9 +36,9 @@
 - [x] 高併發情境題：文件在 [cmd/concurrency/README.md](./cmd/concurrency/README.md)
 - [x] 部署到正式站
   - [x] 事前準備 [.github/workflows/README.md](.github/workflows/README.md)
-  - [] GitHub Actions
-  - [] 架設 EC2
-  - [] 架設 DB
+  - [ ] GitHub Actions
+  - [ ] 架設 EC2
+  - [ ] 架設 DB
 - [ ] 開發簡易的前端頁面
 
 ## Resilience Patterns 🛡️

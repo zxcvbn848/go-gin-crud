@@ -58,7 +58,7 @@ type workerPool struct {
 	createdAt      time.Time
 
 	// 結果存儲
-	results map[string]*dto.WorkerPoolResult
+	results   map[string]*dto.WorkerPoolResult
 	resultsMu sync.RWMutex
 }
 
@@ -412,4 +412,3 @@ func (m *workerPoolManager) BatchSubmitTasks(poolID string, tasks []dto.WorkerPo
 
 	return submitted, rejected, results
 }
-

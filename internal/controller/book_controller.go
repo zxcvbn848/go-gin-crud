@@ -164,4 +164,3 @@ func (ctrl *BookController) DeleteBook(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "刪除成功"})
 }
-

@@ -186,4 +186,3 @@ func TestRandomBatchTransactionsWithDelay(t *testing.T) {
 	_ = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.Contains(t, response, "transactions")
 }
-
