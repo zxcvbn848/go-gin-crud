@@ -4,3 +4,10 @@ version: "2"
 
 run:
   timeout: 5m
+
+# v2 把格式檢查從 linters 移到獨立區段，沒設定就不會執行。
+# 設定後 golangci-lint run 會把格式差異當成 issue 報出來，CI 直接紅燈。
+# 要自動修：golangci-lint fmt
+formatters:
+  enable:
+    - gofmt
