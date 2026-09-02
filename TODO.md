@@ -45,8 +45,11 @@
 
 > 流程圖與邊界守衛說明見 [`docs/RESILIENCE_PATTERNS.md`](docs/RESILIENCE_PATTERNS.md)
 
-- [ ] Timeout（請求/任務執行超時控制）
-  - 任務層已完成（`ExecuteTask` 用 `context.WithTimeout`），缺 HTTP 請求層的 timeout middleware
+- [x] Timeout（請求/任務執行超時控制）
+  - 任務層：`ExecuteTask` 用 `context.WithTimeout`
+  - 請求層：`internal/middleware/timeout.go`，把帶 deadline 的 ctx 換進 `c.Request`，
+    讓 GORM / go-redis 提早失敗；`/stream/`、`/socket.io/`、`/tasks/` 豁免
+  - 逾時長度由 `REQUEST_TIMEOUT` 環境變數控制，預設 10s
 - [x] Retry with Backoff（指數退避重試機制）
 - [x] Circuit Breaker（熔斷器，防止雪崩效應）
   - 包在 Redis 快取讀取上，見 `internal/redis/breaker.go`（用 go-redis Hook，快取層未改動）

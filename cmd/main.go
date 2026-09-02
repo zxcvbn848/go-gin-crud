@@ -5,6 +5,7 @@ import (
 	"go-gin-crud/internal/database"
 	"go-gin-crud/internal/database/models"
 	"go-gin-crud/internal/logger"
+	"go-gin-crud/internal/middleware"
 	"go-gin-crud/internal/redis"
 	"go-gin-crud/internal/routes"
 
@@ -37,6 +38,9 @@ func main() {
 
 	// 載入配置（包含 JWT Secrets）
 	config.Load()
+
+	// 請求層逾時（需在 config.Load 之後，才讀得到 REQUEST_TIMEOUT）
+	r.Use(middleware.TimeoutMiddleware(config.RequestTimeout))
 
 	// 連線 DB
 	database.Connect()

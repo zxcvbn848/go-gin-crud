@@ -6,6 +6,7 @@
 |---|---|
 | Circuit Breaker（滑動視窗失敗率） | `internal/redis/breaker.go` |
 | Retry with Backoff + Jitter | `internal/service/task_executor_service.go` |
+| Timeout（請求層） | `internal/middleware/timeout.go` |
 
 不熟悉這兩個模式的目的與原理，先看 [`RESILIENCE_PATTERNS_101.md`](RESILIENCE_PATTERNS_101.md)（從問題出發的教學版）。
 
@@ -20,9 +21,10 @@
 | 3. record — 統計與熔斷判斷 | 五、怎麼判定「它掛了」（整段）；六、走一遍程式碼 — `record` 三段 |
 | 4. 重試主迴圈 | 二、第一直覺：重試；七之 5 — `select` 而不是 `time.Sleep` |
 | 5. backoffDelay | 二 — 坑一（退避）、坑二（jitter）；七之 6 — 位移溢位 |
-| 6. 兩者的分工 | 三、但重試解不了那場事故；十、一頁總結 |
+| 6. 請求層逾時 | 九、還需要第三道：請求層逾時 |
+| 7. 三者的分工 | 三、但重試解不了那場事故；十一、一頁總結 |
 | 邊界守衛 | 七、那些守衛在防什麼 |
-| 已知限制 | 九、目前的限制 |
+| 已知限制 | 十、目前的限制 |
 
 ---
 
@@ -219,16 +221,48 @@ flowchart TD
 
 ---
 
-## 6. 兩者的分工
+## 6. 請求層逾時
+
+> 為什麼熔斷器之外還需要這道、為什麼不硬性中斷 handler：教學版〈九〉
+
+`TimeoutMiddleware` 把帶 deadline 的 context 換進 `c.Request`。GORM 與 go-redis 都會 respect 傳入的 ctx，所以真正耗時的 I/O 會提早失敗，請求不會一直佔著 goroutine 與連線。
+
+```mermaid
+flowchart TD
+    A["請求進來"] --> B{"路徑在豁免清單 ?"}
+    B -->|"是 — /stream/ /socket.io/ /tasks/"| C["直接 c.Next()<br/>不換 ctx"]
+    B -->|否| D["ctx, cancel = WithTimeout(req.Context(), d)<br/>c.Request = req.WithContext(ctx)"]
+
+    D --> E["c.Next() — 執行 handler"]
+    E --> F{"ctx.Err() 是 DeadlineExceeded ?"}
+    F -->|否| G["照 handler 的回應"]
+    F -->|是| H{"c.Writer.Written() ?"}
+    H -->|"是 — handler 已寫過"| I["不覆寫<br/>避免 superfluous WriteHeader"]
+    H -->|否| J["504 Gateway Timeout"]
+
+    style J fill:#4a2020,stroke:#a04040,color:#e8d0d0
+    style G fill:#204a2a,stroke:#40a060,color:#d0e8d8
+```
+
+豁免清單的理由：`/stream/` 是 SSE 與 chunked 長連線、`/socket.io/` 是 WebSocket，套逾時會直接切斷；`/tasks/` 的重試鏈總長由請求參數決定（`maxRetry` × backoff），且任務層已自行控制逾時。
+
+逾時長度由 `REQUEST_TIMEOUT` 環境變數控制（`time.ParseDuration` 格式），預設 10 秒。
+
+---
+
+## 7. 三者的分工
 
 > 為什麼重試單獨用是危險的：教學版〈三〉
 
 | | 處理的故障 | 時間尺度 | 行為 |
 |---|---|---|---|
 | Retry + backoff + jitter | 網路抖動、GC 暫停、瞬間過載 | 秒 | 撐過去 |
-| Circuit Breaker | 服務掛了、部署炸了 | 分鐘 | fail fast + 降級 |
+| Circuit Breaker | 已知的依賴掛了 | 分鐘 | fail fast + 降級 |
+| 請求層 Timeout | **沒有熔斷器保護的任何慢** | 秒 | 給整個請求一個上限 |
 
-兩者必須成對。**單獨用 retry 是危險的** —— 重試會放大負載，下游掛掉時一個失敗請求變成四個失敗請求。熔斷器就是那個放大的上限。
+Retry 與 Circuit Breaker 必須成對：**單獨用 retry 是危險的** —— 重試會放大負載，下游掛掉時一個失敗請求變成四個。熔斷器就是那個放大的上限。
+
+請求層逾時是最後一道網。熔斷器只保護有裝的依賴（這裡是 Redis），逾時保護的是**所有沒被涵蓋的慢**。
 
 ---
 
@@ -250,7 +284,7 @@ flowchart TD
 
 ## 已知限制
 
-> 這兩個限制的來由：教學版〈九、目前的限制〉
+> 這兩個限制的來由：教學版〈十、目前的限制〉
 
 環形緩衝以桶為單位（每桶 5 秒），所以視窗邊界是**階梯式**而非平滑滑動 —— 最舊的桶會整桶掉出，誤差最多一個桶。要更精確得記錄每筆呼叫的時間戳，記憶體隨流量成長，不值得。
 
