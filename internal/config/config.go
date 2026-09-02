@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"time"
 
 	"go-gin-crud/internal/logger"
 
@@ -13,11 +14,17 @@ import (
 // DefaultBcryptCost 為 production 預設的 bcrypt 成本（OWASP 建議範圍，平衡安全與效能）
 const DefaultBcryptCost = 12
 
+// DefaultRequestTimeout 請求層逾時預設值
+const DefaultRequestTimeout = 10 * time.Second
+
 var (
 	AccessSecret  []byte
 	RefreshSecret []byte
 	RedisAddr     string // 例: "localhost:6379"，空字串表示不啟用 Redis
 	BcryptCost    int    // bcrypt 雜湊成本，可用 BCRYPT_COST 環境變數覆寫（測試環境建議設低以加速）
+
+	// RequestTimeout 請求層逾時，可用 REQUEST_TIMEOUT 覆寫（time.ParseDuration 格式）
+	RequestTimeout time.Duration
 )
 
 // Load 載入環境變數並初始化配置
@@ -52,6 +59,16 @@ func Load() {
 			BcryptCost = cost
 		} else {
 			logger.Log.Warnf("BCRYPT_COST 值無效 (%s)，使用預設值 %d", v, DefaultBcryptCost)
+		}
+	}
+
+	// 請求逾時：預設 DefaultRequestTimeout，可由 REQUEST_TIMEOUT 覆寫（例 "5s"、"1m"）
+	RequestTimeout = DefaultRequestTimeout
+	if v := os.Getenv("REQUEST_TIMEOUT"); v != "" {
+		if d, err := time.ParseDuration(v); err == nil && d > 0 {
+			RequestTimeout = d
+		} else {
+			logger.Log.Warnf("REQUEST_TIMEOUT 值無效 (%s)，使用預設值 %s", v, DefaultRequestTimeout)
 		}
 	}
 
