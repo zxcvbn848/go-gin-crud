@@ -37,6 +37,30 @@ const (
 // bucketDuration 每個桶涵蓋的時間長度
 const bucketDuration = breakerWindow / breakerBuckets
 
+// state 熔斷器的三個狀態。
+//
+// 刻意不存成欄位 —— open → half-open 是「時間走到了」自然發生的轉換，
+// 沒有任何程式碼在執行。存起來就需要背景 timer 去改，或是變成第二個
+// 真相來源、與 openedAt 有機會不一致。這裡一律由 currentState 推導。
+type state int
+
+const (
+	stateClosed state = iota
+	stateOpen
+	stateHalfOpen
+)
+
+func (s state) String() string {
+	switch s {
+	case stateClosed:
+		return "closed"
+	case stateOpen:
+		return "open"
+	default:
+		return "half-open"
+	}
+}
+
 // bucket 一個時間格內的統計。
 //
 // idx 是這個桶代表的絕對時間格編號，用來判定桶是否過期 —— 過期就地歸零，
@@ -48,6 +72,8 @@ type bucket struct {
 }
 
 // breaker 三態熔斷器：closed → open → half-open → (closed | open)
+//
+// 狀態由 openedAt 與 probing 推導，見 currentState。
 //
 // 存在的理由不是保護 Redis，而是保護延遲：Redis 掛掉時 ReadTimeout 是 3 秒，
 // 每個請求都要先付這 3 秒才會降級去查 DB。熔斷後直接跳過，延遲回到正常。
@@ -97,23 +123,37 @@ func (b *breaker) resetWindow() {
 	b.buckets = [breakerBuckets]bucket{}
 }
 
+// currentState 由 openedAt 與 probing 推導出當下的狀態。
+//
+// 呼叫方必須已持有 b.mu。
+func (b *breaker) currentState(now time.Time) state {
+	switch {
+	case b.openedAt.IsZero():
+		return stateClosed
+	case now.Sub(b.openedAt) < breakerCooldown:
+		return stateOpen
+	default:
+		return stateHalfOpen
+	}
+}
+
 // allow 回報這次呼叫是否放行。now 由呼叫方傳入，測試才不必真的等 cooldown。
 func (b *breaker) allow(now time.Time) bool {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	if b.openedAt.IsZero() {
-		return true // closed
+	switch b.currentState(now) {
+	case stateClosed:
+		return true
+	case stateOpen:
+		return false
+	default: // stateHalfOpen：只放行一個探測
+		if b.probing {
+			return false
+		}
+		b.probing = true
+		return true
 	}
-	if now.Sub(b.openedAt) < breakerCooldown {
-		return false // open
-	}
-	if b.probing {
-		return false // half-open，已經有人在探測了
-	}
-
-	b.probing = true
-	return true
 }
 
 // record 回報這次呼叫的結果，推進狀態機
@@ -141,7 +181,7 @@ func (b *breaker) record(now time.Time, failed bool) {
 	}
 
 	// 已經熔斷中（allow 與 record 之間的競態才會走到這裡），不重複判斷
-	if !b.openedAt.IsZero() {
+	if b.currentState(now) != stateClosed {
 		return
 	}
 

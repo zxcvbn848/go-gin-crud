@@ -155,6 +155,34 @@ func TestBucketReuse(t *testing.T) {
 	assert.Zero(t, reused.failures)
 }
 
+// TestCurrentStateTransitions 直接斷言狀態，而不是從 allow() 的行為反推。
+//
+// 狀態機的測試斷在狀態上比斷在行為上精準 —— 行為相同的兩個狀態
+// （例如 open 與「已有探測在飛的 half-open」都回 false）才分得開。
+func TestCurrentStateTransitions(t *testing.T) {
+	b := &breaker{}
+	assert.Equal(t, stateClosed, b.currentState(t0))
+
+	trip(b, t0)
+	assert.Equal(t, stateOpen, b.currentState(t0))
+	assert.Equal(t, stateOpen, b.currentState(t0.Add(breakerCooldown-time.Nanosecond)))
+	assert.Equal(t, stateHalfOpen, b.currentState(t0.Add(breakerCooldown)), "cooldown 屆滿即進入 half-open，不需要任何程式碼去改狀態")
+
+	after := t0.Add(breakerCooldown)
+	assert.True(t, b.allow(after))
+	assert.Equal(t, stateHalfOpen, b.currentState(after), "探測在飛時仍是 half-open")
+
+	b.record(after, false)
+	assert.Equal(t, stateClosed, b.currentState(after), "探測成功應回到 closed")
+}
+
+// TestStateString 狀態名稱，日誌與 metrics 會用到
+func TestStateString(t *testing.T) {
+	assert.Equal(t, "closed", stateClosed.String())
+	assert.Equal(t, "open", stateOpen.String())
+	assert.Equal(t, "half-open", stateHalfOpen.String())
+}
+
 // TestIsBreakerFailure 什麼該算 Redis 的失敗
 func TestIsBreakerFailure(t *testing.T) {
 	ctx := context.Background()

@@ -330,18 +330,48 @@ for _, bk := range b.buckets {
 
 ### `allow(now) bool` — 這次要不要放行
 
+狀態先由 `currentState` 推導出來，再照狀態決定放不放行：
+
 ```go
-if b.openedAt.IsZero() { return true }                      // closed，全放
-if now.Sub(b.openedAt) < breakerCooldown { return false }   // open，全擋
-if b.probing { return false }                               // half-open 但已有人在探測
-b.probing = true; return true                               // half-open，這一個去探測
+func (b *breaker) currentState(now time.Time) state {
+    switch {
+    case b.openedAt.IsZero():
+        return stateClosed
+    case now.Sub(b.openedAt) < breakerCooldown:
+        return stateOpen
+    default:
+        return stateHalfOpen
+    }
+}
+
+func (b *breaker) allow(now time.Time) bool {
+    switch b.currentState(now) {
+    case stateClosed:
+        return true
+    case stateOpen:
+        return false
+    default: // half-open：只放行一個探測
+        if b.probing {
+            return false
+        }
+        b.probing = true
+        return true
+    }
+}
 ```
 
-注意狀態沒有用 enum 存，是靠兩個欄位推導出來的：
+### 為什麼狀態是推導的，不是存起來的
 
-- `openedAt` 是零值 → closed
-- `openedAt` 非零且未滿 cooldown → open
-- `openedAt` 非零且已過 cooldown → half-open
+這是這份實作最容易被質疑的設計 —— 為什麼不乾脆存一個 `state` 欄位？
+
+因為 **`open → half-open` 這個轉換沒有任何程式碼在執行**。它是時間走到了就發生的。
+
+如果 `state` 是存起來的欄位，就沒有人會去把它從 `stateOpen` 改成 `stateHalfOpen`，除非你：
+
+- 開一個背景 timer 去改 —— 多一個 goroutine 和它的生命週期問題
+- 或在存取時才惰性計算 —— 那你還是需要 `openedAt`，於是同時有 `state` 和 `openedAt` **兩個真相來源**，每次改動都要記得同步，它們有機會不一致
+
+所以真相來源只有 `openedAt` 和 `probing`，`state` 是它們的函數。enum 的價值在**命名**和**可斷言**，不在儲存。
 
 ### `record(now, failed)` — 記結果、推進狀態
 

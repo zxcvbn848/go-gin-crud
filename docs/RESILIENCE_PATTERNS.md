@@ -30,7 +30,7 @@
 
 > 為什麼要三個狀態、half-open 存在的理由：教學版〈四、熔斷器：學會放棄〉
 
-三個狀態沒有用 enum，靠 `openedAt` 與 `probing` 兩個欄位隱含表達。
+狀態由 `openedAt` 與 `probing` 推導，集中在 `currentState(now)` 一處。**刻意不存成欄位** —— `open → half-open` 是時間走到了自然發生的轉換，沒有任何程式碼在執行；存起來就需要背景 timer，或變成第二個真相來源而有機會與 `openedAt` 不一致。
 
 ```mermaid
 stateDiagram-v2
