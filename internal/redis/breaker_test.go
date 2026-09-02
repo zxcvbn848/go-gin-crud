@@ -13,11 +13,16 @@ import (
 // t0 固定起點。now 由參數傳入，所以整份測試不需要真的等 cooldown。
 var t0 = time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 
-// fail 連續回報 n 次失敗
-func fail(b *breaker, now time.Time, n int) {
+// recordN 回報 n 次同樣的結果
+func recordN(b *breaker, now time.Time, n int, failed bool) {
 	for i := 0; i < n; i++ {
-		b.record(now, true)
+		b.record(now, failed)
 	}
+}
+
+// trip 用最少的樣本讓熔斷器開啟：剛好 minRequests 次全失敗
+func trip(b *breaker, now time.Time) {
+	recordN(b, now, breakerMinRequests, true)
 }
 
 // TestBreakerClosedAllows 初始狀態放行
@@ -26,31 +31,71 @@ func TestBreakerClosedAllows(t *testing.T) {
 	assert.True(t, b.allow(t0))
 }
 
-// TestBreakerSuccessResetsFailures 失敗未達門檻時，一次成功就歸零
-func TestBreakerSuccessResetsFailures(t *testing.T) {
+// TestBreakerBelowMinRequests 樣本不足時不判斷，即使失敗率 100%
+//
+// 沒有這道門檻，視窗內第一個請求失敗就是 100% 失敗率，會立刻熔斷。
+func TestBreakerBelowMinRequests(t *testing.T) {
 	b := &breaker{}
+	recordN(b, t0, breakerMinRequests-1, true)
+	assert.True(t, b.allow(t0), "失敗率 100% 但樣本不足，不該熔斷")
 
-	fail(b, t0, breakerThreshold-1)
-	assert.True(t, b.allow(t0), "未達門檻不該熔斷")
-
-	b.record(t0, false) // 成功
-	fail(b, t0, breakerThreshold-1)
-	assert.True(t, b.allow(t0), "計數應已被成功歸零，不該累加後熔斷")
+	b.record(t0, true) // 補到門檻
+	assert.False(t, b.allow(t0), "達到 minRequests 後應熔斷")
 }
 
-// TestBreakerOpensAtThreshold 連續失敗達門檻即熔斷，cooldown 內一律擋
-func TestBreakerOpensAtThreshold(t *testing.T) {
+// TestBreakerBelowFailureRate 樣本夠但失敗率未達門檻
+func TestBreakerBelowFailureRate(t *testing.T) {
 	b := &breaker{}
-	fail(b, t0, breakerThreshold)
+	// 25% 失敗率，遠低於 50%
+	recordN(b, t0, 5, true)
+	recordN(b, t0, 15, false)
 
-	assert.False(t, b.allow(t0), "達門檻應熔斷")
+	assert.True(t, b.allow(t0), "失敗率 25% 不該熔斷")
+}
+
+// TestBreakerMixedTrafficTrips 混合流量：大量成功穿插失敗，達到失敗率就該熔斷
+//
+// 這是換掉「連續失敗計數」的理由。舊實作在這個情境下永遠不會熔斷，
+// 因為每次成功都會把連續計數歸零。
+func TestBreakerMixedTrafficTrips(t *testing.T) {
+	b := &breaker{}
+
+	// 成功失敗交錯，剛好 50%
+	for i := 0; i < breakerMinRequests/2; i++ {
+		b.record(t0, false)
+		b.record(t0, true)
+	}
+
+	assert.False(t, b.allow(t0), "失敗率達 50% 應熔斷，不論失敗是否連續")
+}
+
+// TestBreakerWindowExpiry 舊的失敗掉出視窗後不再計入
+func TestBreakerWindowExpiry(t *testing.T) {
+	b := &breaker{}
+
+	// 先累積到差一筆就熔斷
+	recordN(b, t0, breakerMinRequests-1, true)
+	assert.True(t, b.allow(t0))
+
+	// 整個視窗過去之後，那些失敗應該全部掉出
+	later := t0.Add(breakerWindow + bucketDuration)
+	recordN(b, later, breakerMinRequests-1, true)
+	assert.True(t, b.allow(later), "舊失敗已掉出視窗，樣本數應重新計算")
+}
+
+// TestBreakerOpenBlocksDuringCooldown cooldown 內一律擋
+func TestBreakerOpenBlocksDuringCooldown(t *testing.T) {
+	b := &breaker{}
+	trip(b, t0)
+
+	assert.False(t, b.allow(t0))
 	assert.False(t, b.allow(t0.Add(breakerCooldown-time.Nanosecond)), "cooldown 內應持續擋")
 }
 
 // TestBreakerHalfOpenAllowsOneProbe cooldown 過後只放行一個探測請求
 func TestBreakerHalfOpenAllowsOneProbe(t *testing.T) {
 	b := &breaker{}
-	fail(b, t0, breakerThreshold)
+	trip(b, t0)
 
 	after := t0.Add(breakerCooldown)
 	assert.True(t, b.allow(after), "cooldown 過後應放行探測")
@@ -58,10 +103,10 @@ func TestBreakerHalfOpenAllowsOneProbe(t *testing.T) {
 	assert.False(t, b.allow(after), "後續仍應擋住")
 }
 
-// TestBreakerProbeSuccessCloses 探測成功 → 完全復原
+// TestBreakerProbeSuccessCloses 探測成功 → 完全復原，且視窗已清空
 func TestBreakerProbeSuccessCloses(t *testing.T) {
 	b := &breaker{}
-	fail(b, t0, breakerThreshold)
+	trip(b, t0)
 
 	after := t0.Add(breakerCooldown)
 	assert.True(t, b.allow(after))
@@ -69,15 +114,19 @@ func TestBreakerProbeSuccessCloses(t *testing.T) {
 	b.record(after, false) // 探測成功
 	assert.True(t, b.allow(after), "應回到 closed")
 	assert.True(t, b.allow(after), "closed 不該有探測名額限制")
+
+	// 視窗若沒清空，恢復後少數幾次失敗就會把失敗率再次推過門檻
+	recordN(b, after, breakerMinRequests-1, true)
+	assert.True(t, b.allow(after), "視窗應已清空，樣本數需重新累積")
 }
 
 // TestBreakerProbeFailureReopens 探測失敗 → 立刻回到 open 並重新計時
 //
-// 這是最容易寫錯的一格：若只看 failures >= threshold，探測失敗時 failures
-// 已被歸零過或未達門檻，就會誤放行，變成每次 cooldown 都放一個請求進去慢慢等。
+// 探測是單一樣本，不進統計視窗；若誤把它丟進失敗率計算，一筆結果會被
+// 稀釋掉而無法立即反應。
 func TestBreakerProbeFailureReopens(t *testing.T) {
 	b := &breaker{}
-	fail(b, t0, breakerThreshold)
+	trip(b, t0)
 
 	after := t0.Add(breakerCooldown)
 	assert.True(t, b.allow(after))
@@ -86,6 +135,24 @@ func TestBreakerProbeFailureReopens(t *testing.T) {
 	assert.False(t, b.allow(after), "探測失敗應立刻回到 open")
 	assert.False(t, b.allow(after.Add(breakerCooldown-time.Nanosecond)), "cooldown 應從探測失敗當下重新計時")
 	assert.True(t, b.allow(after.Add(breakerCooldown)), "新的 cooldown 過後才再放行")
+}
+
+// TestBucketReuse 環形緩衝：桶過期後就地歸零重用，不會累加到舊統計上
+func TestBucketReuse(t *testing.T) {
+	b := &breaker{}
+
+	idx := bucketIndex(t0)
+	bk := b.currentBucket(idx)
+	bk.total = 99
+	bk.failures = 99
+
+	// 剛好繞一圈回到同一個槽位，但桶號不同
+	nextRound := idx + breakerBuckets
+	reused := b.currentBucket(nextRound)
+
+	assert.Equal(t, nextRound, reused.idx, "應該是新的桶號")
+	assert.Zero(t, reused.total, "過期桶必須歸零，否則舊統計會被算進新視窗")
+	assert.Zero(t, reused.failures)
 }
 
 // TestIsBreakerFailure 什麼該算 Redis 的失敗

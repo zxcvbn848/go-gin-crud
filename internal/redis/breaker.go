@@ -16,25 +16,85 @@ import (
 var ErrBreakerOpen = errors.New("redis 熔斷中，跳過本次呼叫")
 
 const (
-	// breakerThreshold 連續失敗幾次後熔斷
-	breakerThreshold = 5
+	// breakerWindow 統計視窗長度
+	breakerWindow = 30 * time.Second
+	// breakerBuckets 視窗切成幾個桶（環形緩衝的大小）
+	breakerBuckets = 6
+	// breakerFailureRate 視窗內失敗率達此比例即熔斷
+	breakerFailureRate = 0.5
+	// breakerMinRequests 視窗內樣本數不足時不做判斷。
+	//
+	// 沒有這道門檻，視窗內第一個請求失敗就是 100% 失敗率，會立刻熔斷。
+	// 這是低流量下最容易誤觸的來源。
+	//
+	// ponytail: 這是主要的校準旋鈕。20 筆 / 30 秒約等於 0.67 QPS 才有判斷力，
+	// 流量更低的環境要往下調，否則熔斷器實質上永遠不會作用。
+	breakerMinRequests = 20
 	// breakerCooldown 熔斷後多久放行一個探測請求
 	breakerCooldown = 10 * time.Second
 )
+
+// bucketDuration 每個桶涵蓋的時間長度
+const bucketDuration = breakerWindow / breakerBuckets
+
+// bucket 一個時間格內的統計。
+//
+// idx 是這個桶代表的絕對時間格編號，用來判定桶是否過期 —— 過期就地歸零，
+// 因此不需要背景 goroutine 做清理。
+type bucket struct {
+	idx      int64
+	total    int
+	failures int
+}
 
 // breaker 三態熔斷器：closed → open → half-open → (closed | open)
 //
 // 存在的理由不是保護 Redis，而是保護延遲：Redis 掛掉時 ReadTimeout 是 3 秒，
 // 每個請求都要先付這 3 秒才會降級去查 DB。熔斷後直接跳過，延遲回到正常。
 //
-// ponytail: 以「連續失敗次數」判斷，不是滑動視窗錯誤率。低流量下夠用，
-// 但混合流量（大量成功穿插少量失敗）永遠不會熔斷；真要那樣得換成
-// 時間視窗內的失敗比例。
+// 判斷條件是「視窗內失敗率」而非「連續失敗次數」。後者在混合流量下有漏洞：
+// 大量成功穿插少量失敗時，計數永遠被成功歸零，錯誤率再高也不會熔斷。
+//
+// ponytail: 環形緩衝以桶為單位，所以視窗邊界是階梯式而非平滑滑動 ——
+// 最舊的桶會整桶掉出，誤差最多一個桶（5 秒）。要更精確得記錄每筆時間戳，
+// 記憶體會隨流量成長，不值得。
 type breaker struct {
 	mu       sync.Mutex
-	failures int
+	buckets  [breakerBuckets]bucket
 	openedAt time.Time // 零值代表未熔斷（closed）
 	probing  bool      // half-open：已放行一個探測，其餘照擋
+}
+
+// bucketIndex 把時間換算成絕對桶號
+func bucketIndex(now time.Time) int64 {
+	return now.UnixNano() / int64(bucketDuration)
+}
+
+// currentBucket 取得 idx 所屬的桶。若該槽位存的是過期的桶，就地歸零後重用。
+func (b *breaker) currentBucket(idx int64) *bucket {
+	slot := &b.buckets[idx%breakerBuckets]
+	if slot.idx != idx {
+		*slot = bucket{idx: idx}
+	}
+	return slot
+}
+
+// window 統計視窗內（含 idx 這一桶往前 breakerBuckets 桶）的總數與失敗數
+func (b *breaker) window(idx int64) (total, failures int) {
+	oldest := idx - breakerBuckets + 1
+	for _, bk := range b.buckets {
+		if bk.idx >= oldest && bk.idx <= idx {
+			total += bk.total
+			failures += bk.failures
+		}
+	}
+	return total, failures
+}
+
+// resetWindow 清空統計。熔斷與探測成功時都要清 —— 否則恢復後舊的失敗還留在
+// 視窗裡，下一兩次失敗就會把失敗率再次推過門檻。
+func (b *breaker) resetWindow() {
+	b.buckets = [breakerBuckets]bucket{}
 }
 
 // allow 回報這次呼叫是否放行。now 由呼叫方傳入，測試才不必真的等 cooldown。
@@ -61,21 +121,37 @@ func (b *breaker) record(now time.Time, failed bool) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	if !failed {
-		// 成功即完全復原（含 half-open 探測成功）
-		b.failures = 0
-		b.openedAt = time.Time{}
+	// half-open 的探測用單一樣本決定去留，不進統計視窗 ——
+	// 一筆結果不該被稀釋在失敗率裡。
+	if b.probing {
 		b.probing = false
+		if failed {
+			b.openedAt = now // 回到 open，cooldown 重新計時
+		} else {
+			b.openedAt = time.Time{} // 完全復原
+			b.resetWindow()
+		}
 		return
 	}
 
-	b.failures++
-	// half-open 的探測失敗 → 立刻回到 open，重新計時
-	if b.probing || b.failures >= breakerThreshold {
+	bk := b.currentBucket(bucketIndex(now))
+	bk.total++
+	if failed {
+		bk.failures++
+	}
+
+	// 已經熔斷中（allow 與 record 之間的競態才會走到這裡），不重複判斷
+	if !b.openedAt.IsZero() {
+		return
+	}
+
+	total, failures := b.window(bucketIndex(now))
+	if total < breakerMinRequests {
+		return // 樣本不足，失敗率沒有意義
+	}
+	if float64(failures)/float64(total) >= breakerFailureRate {
 		b.openedAt = now
-		b.probing = false
-		// 計數歸零，否則它永遠 >= threshold，上面的 b.probing 條件會變成死碼
-		b.failures = 0
+		b.resetWindow()
 	}
 }
 

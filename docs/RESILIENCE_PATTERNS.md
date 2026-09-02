@@ -4,8 +4,10 @@
 
 | 模式 | 位置 |
 |---|---|
-| Circuit Breaker | `internal/redis/breaker.go` |
+| Circuit Breaker（滑動視窗失敗率） | `internal/redis/breaker.go` |
 | Retry with Backoff + Jitter | `internal/service/task_executor_service.go` |
+
+不熟悉這兩個模式的目的與原理，先看 [`RESILIENCE_PATTERNS_101.md`](RESILIENCE_PATTERNS_101.md)（從問題出發的教學版）。
 
 進度與 Bulkhead 的延後理由見 [`TODO.md`](../TODO.md) 的 Resilience Patterns 段落。
 
@@ -19,13 +21,13 @@
 stateDiagram-v2
     [*] --> Closed
 
-    Closed --> Closed: 成功<br/>failures 歸零
-    Closed --> Open: 連續失敗達 5 次<br/>openedAt = now
+    Closed --> Closed: 記入統計視窗<br/>樣本不足或失敗率未達門檻
+    Closed --> Open: 視窗失敗率 >= 50%<br/>且樣本 >= 20<br/>openedAt = now，視窗清空
 
     Open --> Open: cooldown 未滿<br/>全部擋掉
     Open --> HalfOpen: cooldown 10s 屆滿
 
-    HalfOpen --> Closed: 探測成功<br/>全部歸零
+    HalfOpen --> Closed: 探測成功<br/>openedAt 歸零，視窗清空
     HalfOpen --> Open: 探測失敗<br/>openedAt = now 重新計時
 
     note right of Closed
@@ -42,7 +44,15 @@ stateDiagram-v2
     end note
 ```
 
-常數定義於 `breaker.go`：`breakerThreshold = 5`、`breakerCooldown = 10 * time.Second`。
+常數定義於 `breaker.go`：
+
+| 常數 | 值 | 作用 |
+|---|---|---|
+| `breakerWindow` | 30s | 統計視窗長度 |
+| `breakerBuckets` | 6 | 視窗分桶數，每桶 5 秒 |
+| `breakerFailureRate` | 0.5 | 失敗率門檻 |
+| `breakerMinRequests` | 20 | 樣本數不足不判斷 |
+| `breakerCooldown` | 10s | 熔斷後多久放行探測 |
 
 ---
 
@@ -88,7 +98,44 @@ sequenceDiagram
 
 ---
 
-## 3. 重試主迴圈
+## 3. record — 統計與熔斷判斷
+
+環形緩衝的桶以絕對桶號（`idx`）標記，過期就地歸零，因此不需要背景 goroutine 清理。
+
+```mermaid
+flowchart TD
+    A["record(now, failed)"] --> B{"probing ?"}
+
+    B -->|"是 — half-open 探測"| C{"failed ?"}
+    C -->|是| D["openedAt = now<br/>回到 open"]
+    C -->|否| E["openedAt 歸零<br/>視窗清空 → closed"]
+
+    B -->|否| F["idx = now / 5s<br/>slot = idx % 6"]
+    F --> G{"buckets[slot].idx == idx ?"}
+    G -->|否| H["過期桶，就地歸零重用"]
+    G -->|是| I["total++<br/>failed 則 failures++"]
+    H --> I
+
+    I --> J{"已熔斷中 ?"}
+    J -->|"是 — allow/record 競態"| K["不重複判斷"]
+    J -->|否| L["加總視窗內 6 桶"]
+
+    L --> M{"total >= 20 ?"}
+    M -->|"否 — 樣本不足"| N["不判斷"]
+    M -->|是| O{"failures / total >= 50% ?"}
+    O -->|否| N
+    O -->|是| P["openedAt = now<br/>視窗清空 → open"]
+
+    style D fill:#4a2020,stroke:#a04040,color:#e8d0d0
+    style P fill:#4a2020,stroke:#a04040,color:#e8d0d0
+    style E fill:#204a2a,stroke:#40a060,color:#d0e8d8
+```
+
+探測結果走獨立分支，**不進統計視窗** —— 單一樣本不該被稀釋在失敗率裡。
+
+---
+
+## 4. 重試主迴圈
 
 `ExecuteTaskWithRetry`
 
@@ -125,7 +172,7 @@ flowchart TD
 
 ---
 
-## 4. backoffDelay — 指數退避 + equal jitter
+## 5. backoffDelay — 指數退避 + equal jitter
 
 ```mermaid
 flowchart TD
@@ -148,7 +195,7 @@ flowchart TD
 
 ---
 
-## 5. 兩者的分工
+## 6. 兩者的分工
 
 | | 處理的故障 | 時間尺度 | 行為 |
 |---|---|---|---|
@@ -161,15 +208,20 @@ flowchart TD
 
 ## 邊界守衛
 
-實作中四個非顯而易見的守衛，移除任一個都會出問題：
+實作中七個非顯而易見的守衛，移除任一個都會出問題：
 
 | 守衛 | 位置 | 移除後的後果 |
 |---|---|---|
+| `breakerMinRequests` 樣本門檻 | `breaker.record` | 視窗內第一個失敗就是 100% 失敗率，立刻誤觸熔斷 |
+| 熔斷與探測成功時 `resetWindow` | `breaker.record` | 恢復後舊失敗仍在視窗內，一兩次失敗又把失敗率推過門檻 |
+| 過期桶就地歸零 | `breaker.currentBucket` | 環形緩衝繞一圈後，舊統計被算進新視窗 |
+| 探測結果不進統計視窗 | `breaker.record` | 單一樣本被失敗率稀釋，探測失敗無法立即反應 |
 | 等待期用 `select` 監聽 `ctx.Done()` | `task_executor_service.go` | 取消請求被無視，白等完整段 backoff |
-| 位移溢位守衛 `d <= 0` | `backoffDelay` | attempt 大時 `base << attempt` 溢位成負數，出現負延遲 |
-| 熔斷時 `failures = 0` 歸零 | `breaker.record` | failures 永遠 >= threshold，`b.probing` 分支變死碼，half-open 探測失敗處理不到 |
+| 位移溢位守衛 `d <= 0` | `backoffDelay` | attempt 大時 `base << attempt` 溢位成負數，退避失效變成瘋狂重試 |
 | `maxRetry < 0` 修正為 0 | `ExecuteTaskWithRetry` | 迴圈不執行，`lastResponse` 為 nil，回傳時 nil pointer dereference |
 
 ## 已知限制
 
-熔斷判斷用「連續失敗次數」而非滑動視窗錯誤率（見 `breaker.go` 的 `ponytail:` 註解）。低流量下夠用，但混合流量（大量成功穿插少量失敗）永遠不會熔斷。要處理那個情境得換成時間視窗內的失敗比例。
+環形緩衝以桶為單位（每桶 5 秒），所以視窗邊界是**階梯式**而非平滑滑動 —— 最舊的桶會整桶掉出，誤差最多一個桶。要更精確得記錄每筆呼叫的時間戳，記憶體隨流量成長，不值得。
+
+`breakerMinRequests = 20` 是主要的校準旋鈕：20 筆 / 30 秒約等於 0.67 QPS 才有判斷力。流量更低的環境要往下調，否則熔斷器實質上永遠不會作用。
