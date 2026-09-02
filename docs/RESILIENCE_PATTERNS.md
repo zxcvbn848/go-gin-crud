@@ -11,9 +11,24 @@
 
 進度與 Bulkhead 的延後理由見 [`TODO.md`](../TODO.md) 的 Resilience Patterns 段落。
 
+## 與教學版的對應
+
+| 本文段落 | 教學版 `RESILIENCE_PATTERNS_101.md` 對應段落 |
+|---|---|
+| 1. 熔斷器狀態機 | 四、熔斷器：學會放棄 — 為什麼需要三個狀態 |
+| 2. 請求路徑 | 六、走一遍程式碼 — 怎麼接進去、`isBreakerFailure`；八、為什麼裝在 Redis 而不是 MySQL |
+| 3. record — 統計與熔斷判斷 | 五、怎麼判定「它掛了」（整段）；六、走一遍程式碼 — `record` 三段 |
+| 4. 重試主迴圈 | 二、第一直覺：重試；七之 5 — `select` 而不是 `time.Sleep` |
+| 5. backoffDelay | 二 — 坑一（退避）、坑二（jitter）；七之 6 — 位移溢位 |
+| 6. 兩者的分工 | 三、但重試解不了那場事故；十、一頁總結 |
+| 邊界守衛 | 七、那些守衛在防什麼 |
+| 已知限制 | 九、目前的限制 |
+
 ---
 
 ## 1. 熔斷器狀態機
+
+> 為什麼要三個狀態、half-open 存在的理由：教學版〈四、熔斷器：學會放棄〉
 
 三個狀態沒有用 enum，靠 `openedAt` 與 `probing` 兩個欄位隱含表達。
 
@@ -58,6 +73,9 @@ stateDiagram-v2
 
 ## 2. 請求路徑
 
+> Hook 為什麼讓上層不用改、什麼不算失敗：教學版〈六、走一遍程式碼〉
+> 為什麼裝在 Redis 而不是 MySQL：教學版〈八〉
+
 `breakerHook` 實作 go-redis 的 `Hook` 介面攔截 `ProcessHook`，因此快取層與 service 層不需改動，降級行為自動成立。
 
 ```mermaid
@@ -100,6 +118,8 @@ sequenceDiagram
 
 ## 3. record — 統計與熔斷判斷
 
+> 為什麼從連續計數換成視窗失敗率、minRequests 與環形分桶的原理：教學版〈五、怎麼判定「它掛了」〉
+
 環形緩衝的桶以絕對桶號（`idx`）標記，過期就地歸零，因此不需要背景 goroutine 清理。
 
 ```mermaid
@@ -136,6 +156,8 @@ flowchart TD
 ---
 
 ## 4. 重試主迴圈
+
+> 為什麼要重試、為什麼等待要用 `select`：教學版〈二〉與〈七之 5〉
 
 `ExecuteTaskWithRetry`
 
@@ -174,6 +196,8 @@ flowchart TD
 
 ## 5. backoffDelay — 指數退避 + equal jitter
 
+> 退避與 jitter 分別在解什麼問題（thundering herd）：教學版〈二 — 坑一、坑二〉
+
 ```mermaid
 flowchart TD
     A["backoffDelay(base, attempt)"] --> B{"base <= 0 ?"}
@@ -197,6 +221,8 @@ flowchart TD
 
 ## 6. 兩者的分工
 
+> 為什麼重試單獨用是危險的：教學版〈三〉
+
 | | 處理的故障 | 時間尺度 | 行為 |
 |---|---|---|---|
 | Retry + backoff + jitter | 網路抖動、GC 暫停、瞬間過載 | 秒 | 撐過去 |
@@ -207,6 +233,8 @@ flowchart TD
 ---
 
 ## 邊界守衛
+
+> 每個守衛的完整說明與程式碼：教學版〈七、那些守衛在防什麼〉
 
 實作中七個非顯而易見的守衛，移除任一個都會出問題：
 
@@ -221,6 +249,8 @@ flowchart TD
 | `maxRetry < 0` 修正為 0 | `ExecuteTaskWithRetry` | 迴圈不執行，`lastResponse` 為 nil，回傳時 nil pointer dereference |
 
 ## 已知限制
+
+> 這兩個限制的來由：教學版〈九、目前的限制〉
 
 環形緩衝以桶為單位（每桶 5 秒），所以視窗邊界是**階梯式**而非平滑滑動 —— 最舊的桶會整桶掉出，誤差最多一個桶。要更精確得記錄每筆呼叫的時間戳，記憶體隨流量成長，不值得。
 
