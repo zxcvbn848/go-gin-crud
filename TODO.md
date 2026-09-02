@@ -44,7 +44,7 @@
 ## Resilience Patterns 🛡️
 
 - [ ] Timeout（請求/任務執行超時控制）
-- [ ] Retry with Backoff（指數退避重試機制）
+- [x] Retry with Backoff（指數退避重試機制）
 - [ ] Circuit Breaker（熔斷器，防止雪崩效應）
 - [ ] Bulkhead（艙壁隔離，限制資源佔用範圍）
 - [ ] Fallback（降級處理，回傳預設值或快取）

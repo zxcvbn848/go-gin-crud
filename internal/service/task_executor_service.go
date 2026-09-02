@@ -5,9 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"go-gin-crud/internal/dto"
+	"math/rand/v2"
 	"sync"
 	"time"
 )
+
+// maxBackoff 退避延遲上限，避免重試次數大時等到天荒地老
+const maxBackoff = 30 * time.Second
 
 var (
 	ErrTaskTimeout   = errors.New("任務超時")
@@ -88,6 +92,28 @@ func (s *taskExecutorService) ExecuteTask(ctx context.Context, task dto.TaskRequ
 	}
 }
 
+// backoffDelay 計算第 attempt 次重試前的等待時間：指數退避 + equal jitter。
+//
+// 純指數（base << attempt）的問題是多個 client 同時失敗會一起重試、一起再打爆
+// 下游（thundering herd），所以一半固定、一半隨機打散，結果落在 [d/2, d)。
+func backoffDelay(base time.Duration, attempt int) time.Duration {
+	if base <= 0 {
+		return 0
+	}
+
+	d := base << attempt
+	// d <= 0 代表位移已溢位（attempt 過大）
+	if d > maxBackoff || d <= 0 {
+		d = maxBackoff
+	}
+	// d/2 為 0 時 rand.N 會 panic
+	if d < 2 {
+		return d
+	}
+
+	return d/2 + rand.N(d/2)
+}
+
 // ExecuteTaskWithRetry 執行任務（帶重試機制）
 func (s *taskExecutorService) ExecuteTaskWithRetry(ctx context.Context, task dto.TaskRequest, timeout time.Duration, maxRetry int, retryDelay time.Duration) (*dto.TaskResponse, error) {
 	var lastErr error
@@ -131,7 +157,7 @@ func (s *taskExecutorService) ExecuteTaskWithRetry(ctx context.Context, task dto
 					Message: "任務在重試等待過程中被取消",
 					Error:   ctx.Err().Error(),
 				}, ErrTaskCancelled
-			case <-time.After(retryDelay):
+			case <-time.After(backoffDelay(retryDelay, attempt)):
 				// 繼續重試
 			}
 		}
