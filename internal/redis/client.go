@@ -26,6 +26,8 @@ func NewClient(addr string) (*Client, error) {
 		WriteTimeout: 3 * time.Second,
 	})
 
+	cli.AddHook(breakerHook{b: &breaker{}})
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
