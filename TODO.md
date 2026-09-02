@@ -43,6 +43,8 @@
 
 ## Resilience Patterns 🛡️
 
+> 流程圖與邊界守衛說明見 [`docs/RESILIENCE_PATTERNS.md`](docs/RESILIENCE_PATTERNS.md)
+
 - [ ] Timeout（請求/任務執行超時控制）
   - 任務層已完成（`ExecuteTask` 用 `context.WithTimeout`），缺 HTTP 請求層的 timeout middleware
 - [x] Retry with Backoff（指數退避重試機制）
