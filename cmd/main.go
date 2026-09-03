@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"go-gin-crud/internal/config"
 	"go-gin-crud/internal/database"
 	"go-gin-crud/internal/database/models"
@@ -75,6 +77,7 @@ func main() {
 	routes.RegisterUserRoutes(r, authService, redisClient)
 	routes.RegisterProductRoutes(r, authService, redisClient)
 	routes.RegisterPostRoutes(r, authService, redisClient)
+	routes.RegisterReportRoutes(r, authService, redisClient)
 	routes.RegisterCounterRoutes(r)
 	routes.RegisterAccountRoutes(r)
 	routes.RegisterTaskExecutorRoutes(r)
@@ -83,7 +86,12 @@ func main() {
 	routes.RegisterSocketRoutes(r)
 	routes.RegisterStreamingRoutes(r)
 
-	if err := r.Run(":8080"); err != nil {
+	// 監聽埠可用 APP_PORT 覆寫，方便在容器已佔用 8080 時於本機另起一份
+	addr := ":8080"
+	if p := os.Getenv("APP_PORT"); p != "" {
+		addr = ":" + p
+	}
+	if err := r.Run(addr); err != nil {
 		logger.Log.Fatalf("HTTP 伺服器啟動失敗: %v", err)
 	}
 }
