@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"context"
+
 	"go-gin-crud/internal/database"
 	"go-gin-crud/internal/database/models"
 
@@ -13,6 +15,9 @@ type BookRepository interface {
 	Update(book *models.Book) error
 	Delete(id uint) error
 	FindAllWithPagination(page, pageSize int, search string) ([]models.Book, int64, error)
+
+	// 報表用
+	CountAll(ctx context.Context) (int64, error)
 }
 
 type bookRepository struct {
@@ -67,4 +72,11 @@ func (r *bookRepository) FindAllWithPagination(page, pageSize int, search string
 	}
 
 	return books, total, nil
+}
+
+// CountAll 未刪除的書籍總數
+func (r *bookRepository) CountAll(ctx context.Context) (int64, error) {
+	var n int64
+	err := r.db.WithContext(ctx).Model(&models.Book{}).Count(&n).Error
+	return n, err
 }

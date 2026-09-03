@@ -110,6 +110,34 @@ u      eq_ref   PRIMARY                1        Using index
 （`SetMaxOpenConns(100)`，見 `internal/database/database.go`）好幾百毫秒，
 而登入等一般 API 也在搶同一池連線。
 
+## API 層基準
+
+端點實作完成後的量測，同一個 bench schema、**Redis 停用**（`REDIS_ADDR=` 空值），
+所以是未快取的路徑：
+
+```bash
+DB_NAME=goGinCRUD_bench APP_PORT=8090 REDIS_ADDR= go run ./cmd
+```
+
+| 端點 | API 耗時 | 對應 SQL 基準 |
+|---|---|---|
+| `GET /reports/overview` | 51 ms | 59 ms |
+| `GET /reports/daily` | 190 ms | 260 ms |
+| `GET /reports/authors` | **798 ms** | 535 ms |
+
+`authors` 的 API 比手寫 SQL 慢了約 260 ms，原因不是 HTTP 或 JSON —— 而是
+**`GROUP BY` 多了一個 varchar 欄位**：
+
+```sql
+-- 手寫基準：只 group by 主鍵
+GROUP BY u.id
+
+-- 實際實作：因為 SELECT 了 users.email，ONLY_FULL_GROUP_BY 要求它也進 GROUP BY
+GROUP BY posts.author_id, users.email
+```
+
+在 varchar 上分組比在整數主鍵上貴。這是實作揭露出來的成本，手寫 SQL 時看不到。
+
 ## 待驗證的優化方向
 
 尚未實作，這裡只記方向，實作後回填實測數字：
@@ -118,8 +146,11 @@ u      eq_ref   PRIMARY                1        Using index
    要比較單欄與複合的差異，以及 `deleted_at` 放前面是否真的有幫助（區分度極低）
 2. **`GROUP BY DATE(created_at)` 改寫** —— 函數包欄位用不到索引。可能的方向是產生欄
    （generated column）加索引，或改由應用層分組
-3. **`posts (author_id)` 已存在** —— 查詢 3 的 `GROUP BY u.id` 是否能改走 `author_id` 索引
+3. **`posts (author_id)` 已存在** —— 查詢 3 的 `GROUP BY` 是否能改走 `author_id` 索引
    避開暫存表，需要實測
-4. **Redis 快取** —— 三支都適合，overview 的 TTL 可以最長
+4. **`authors` 拆成兩段查詢** —— 先只 `GROUP BY posts.author_id`（整數主鍵，不含
+   varchar）取出前 N 名，再用 `WHERE id IN (...)` 一次撈那 N 個 email。
+   多一次往返，但省掉在 varchar 上分組的成本。這是 API 層量測才發現的方向
+5. **Redis 快取** —— 三支都適合，overview 的 TTL 可以最長
 
 每一項都要回來量，沒量到差異的就不要留在程式碼裡。
