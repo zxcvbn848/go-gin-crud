@@ -1,6 +1,6 @@
 module go-gin-crud
 
-go 1.25
+go 1.26.10
 
 require (
 	github.com/gin-gonic/gin v1.11.0

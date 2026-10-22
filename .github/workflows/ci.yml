@@ -20,7 +20,7 @@ jobs:
     - name: 設置 Go 環境
       uses: actions/setup-go@v5
       with:
-        go-version: '1.25'
+        go-version: '1.26.10'
 
     # 測試使用 SQLite in-memory（tests/api_test.go），不需要 MySQL / Redis service
     - name: 運行測試
@@ -42,7 +42,7 @@ jobs:
     - name: 設置 Go 環境
       uses: actions/setup-go@v5
       with:
-        go-version: '1.25'
+        go-version: '1.26.10'
 
     - name: 構建應用
       run: |
@@ -68,7 +68,7 @@ jobs:
     - name: 設置 Go 環境
       uses: actions/setup-go@v5
       with:
-        go-version: '1.25'
+        go-version: '1.26.10'
 
     - name: 運行 golangci-lint
       uses: golangci/golangci-lint-action@v7
