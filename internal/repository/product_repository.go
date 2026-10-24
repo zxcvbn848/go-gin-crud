@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"context"
+	"time"
+
 	"go-gin-crud/internal/database"
 	"go-gin-crud/internal/database/models"
 
@@ -13,6 +16,11 @@ type ProductRepository interface {
 	Update(product *models.Product) error
 	Delete(id uint) error
 	FindAllWithPagination(page, pageSize int, search string) ([]models.Product, int64, error)
+
+	// 報表用
+	CountAll(ctx context.Context) (int64, error)
+	CountDailyCreated(ctx context.Context, from, to time.Time) ([]DailyCount, error)
+	SumStockValue(ctx context.Context) (float64, error)
 }
 
 type productRepository struct {
@@ -67,4 +75,34 @@ func (r *productRepository) FindAllWithPagination(page, pageSize int, search str
 	}
 
 	return products, total, nil
+}
+
+// CountAll 未刪除的商品總數
+func (r *productRepository) CountAll(ctx context.Context) (int64, error) {
+	var n int64
+	err := r.db.WithContext(ctx).Model(&models.Product{}).Count(&n).Error
+	return n, err
+}
+
+// CountDailyCreated 區間內每日新增的商品數
+func (r *productRepository) CountDailyCreated(ctx context.Context, from, to time.Time) ([]DailyCount, error) {
+	var rows []DailyCount
+	err := r.db.WithContext(ctx).Model(&models.Product{}).
+		Select("DATE(created_at) AS date, COUNT(*) AS count").
+		Where("created_at >= ? AND created_at < ?", from, to).
+		Group("DATE(created_at)").
+		Order("date").
+		Scan(&rows).Error
+	return rows, err
+}
+
+// SumStockValue 庫存總值（price × stock）。
+//
+// COALESCE 是必要的：表為空時 SUM 回傳 NULL，掃進 float64 會失敗。
+func (r *productRepository) SumStockValue(ctx context.Context) (float64, error) {
+	var v float64
+	err := r.db.WithContext(ctx).Model(&models.Product{}).
+		Select("COALESCE(SUM(price * stock), 0)").
+		Scan(&v).Error
+	return v, err
 }
