@@ -67,8 +67,12 @@ func NewServer() *Server {
 			if room == "" {
 				room = "lobby"
 			}
-			// 廣播給同房間的其他人（含自己可改為 io.To(room) 後不排除 sender）
-			_ = socket.To(room).Emit("message", socket.Id, text)
+			// 套件的 Socket.To 不會自動排除發送者。
+			for _, peer := range socket.To(room).Sockets() {
+				if peer.Id != socket.Id {
+					_ = peer.Emit("message", socket.Id, text)
+				}
+			}
 			logger.Log.WithFields(map[string]interface{}{
 				"socket_id": socket.Id,
 				"room":      room,
